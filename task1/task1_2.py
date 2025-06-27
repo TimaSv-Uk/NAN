@@ -3,7 +3,7 @@ from itertools import product, batched
 
 def generate_matrix(mod=2, num_of_x=3):
     # product(range(mod), repeat=num_of_x) generates all possible tuples of length num_of_x,
-    # where each element is from 0 to mod - 1.
+    # where each element is from 0 to mod  -  1.
     return [list(p) for p in product(range(mod), repeat=num_of_x)]
 
 
