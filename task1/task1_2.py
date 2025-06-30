@@ -1,15 +1,15 @@
 from itertools import product
 
 
-def generate_matrix(mod=2, num_of_x=3):
+def generate_matrix(mod=5, num_of_x=3):
     return [list(p) for p in product(range(mod), repeat=num_of_x)]
 
 
-def build_adjacency_matrix(mod=2):
+def build_adjacency_matrix(mod=5):
     matrix_X = generate_matrix(mod)
     matrix_Y = generate_matrix(mod)
     A = []
-
+    print(matrix_Y)
     for x in matrix_X:
         row = []
         for y in matrix_Y:
@@ -67,7 +67,7 @@ def print_labeled_matrix(matrix, filename=None):
 
 
 def main():
-    mod = 2
+    mod = 128
     A = build_adjacency_matrix(mod)
     full_matrix = build_full_matrix(A)
 

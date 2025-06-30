@@ -22,7 +22,7 @@ def main():
 
     text = f.read().split(",")
 
-    decoded_text = [chr(int(element)) for element in text]
+    decoded_text = [chr(int(element) % 256) for element in text]
     print("".join(decoded_text))
 
     f.close()
