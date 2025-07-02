@@ -23,34 +23,43 @@ def build_adjacency_matrix(mod=5):
     return A
 
 
-def build_adjacency_matrix_optimized(mod: int, num_of_x: int):
-    # ... (irrelevant comments) ...
-    # operator of the neighbor of the point
+def build_adjacency_matrix_optymyze(mod=5, num_of_x=3):
+    # Приклад
+    # (x1 x2 x3) [x1 + a,*,*]
+    # a can be 0,1 if mod 2
+    #
+    # N_a (x1 x2 x3) = [x1 + a,*,*]
+    # M_a [y1 y2 y3] = [y1 + a,*,*]
+    # Взяття сусіда по кольору
+    # Нехай сусід (x1, x2, x3) він є [x1+a,z2,z3]
+    #
+    # first *
+    # z2 = (x1 * (x1+a)) - x2
+    #
+    # second *
+    # z3 = ( x1 * z2 = x1 * z2[first *])-x3
+    # оператор сусіда точки
     #
     # M_a [y1,y2,y3] = (y1+a,z2,z3)
     #
-    # z2 = (y1 * (y1+a)) - y2    <-- Note 1: This uses y1, not x1 for z2 calculation
-    # z3  = ((y1+a) * y2 )-  y3   <-- Note 2: This uses y2, not z2 for z3 calculation
-    matrix = generate_matrix(mod, num_of_x)
-    index_map = {tuple(v): i for i, v in enumerate(matrix)}
-    adjacency = {i: set() for i in range(len(matrix))}
-    a_values = range(mod)
+    # z2 = (y1 * (y1+a)) - y2
+    # z3  = ((y1+a) * y2 )-  y3
+    matrix_X = generate_matrix(mod)
+    matrix_Y = generate_matrix(mod)
+    A = [[0 for col in range(mod**3)] for row in range(mod**3)]
+    a = [i for i in range(mod)]
+    for i, x in enumerate(matrix_X):
+        for a_i in a:
+            # N_a (x1 x2 x3) = [x1 + a,*,*]
+            x1 = (x[0] + a_i) % mod
+            z2 = (x[0] * (x[0] + a_i) - x[1]) % mod
+            z3 = ((x[0] * z2) - x[2]) % mod
 
-    for x_coords, i in index_map.items():
-        for a in a_values:
-            x1 = (x_coords[0] + a) % mod
-            z2 = (
-                x_coords[0] * (x_coords[0] + a) - x_coords[1]
-            ) % mod  # Here it uses x_coords[0]
-            z3 = (
-                (x_coords[0] * z2) - x_coords[2]
-            ) % mod  # Here it uses x_coords[0] and z2
-            neighbor = (x1, z2, z3)
-            j = index_map.get(neighbor)
-            if j is not None:
-                adjacency[i].add(j)
+            A[i][matrix_Y.index([x1, z2, z3])] = 1
+            # print(i, x, matrix_Y.index([x1, z2, z3]), [x1, z2, z3])
 
-    return adjacency, len(matrix)
+    print(A)
+    return A
 
 
 def build_full_matrix(A):
@@ -98,14 +107,15 @@ def print_labeled_matrix(matrix, filename=None):
 def main():
     mod = 2
     num_of_x = 3
-    adjacency_matrix, size = build_adjacency_matrix_optimized(mod, num_of_x)
-    print(adjacency_matrix)
-    # full_matrix = build_full_matrix(A)
-    #
-    # print_labeled_matrix(full_matrix, "solution_task1_2.txt")
-    #
-    # print("\n--- FULL 16x16 ADJACENCY MATRIX ---\n")
-    # print_labeled_matrix(full_matrix)
+    A = build_adjacency_matrix(mod)
+    full_matrix = build_full_matrix(A)
+
+    print_labeled_matrix(full_matrix, "solution_task1_2.txt")
+
+    print("\n--- FULL 16x16 ADJACENCY MATRIX ---\n")
+    print_labeled_matrix(full_matrix)
+
+    build_adjacency_matrix_optymyze(mod, num_of_x)
 
 
 main()
