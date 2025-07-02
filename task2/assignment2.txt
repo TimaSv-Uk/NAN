@@ -1,0 +1,60 @@
+Приклад 
+(x1 x2 x3) [x1 + a,*,*]
+a can be 0,1 if mod 2
+
+N_a (x1 x2 x3) = [x1 + a,*,*]
+M_a [y1 y2 y3] = [y1 + a,*,*]
+Взяття сусіда по кольору 
+Нехай сусід (x1, x2, x3) він є [x1+a,z2,z3]
+
+first *
+z2 = (x1 * (x1+a)) - x2 
+
+second *
+z3 = ( x1 * z2 = x1 * z2[first *])-x3
+оператор сусіда точки
+
+M_a [y1,y2,y3] = (y1+a,z2,z3) 
+
+z2 = (y1 * (y1+a)) - y2 
+z3  = ((y1+a) * y2[z2] )-  y3
+
+
+Завдання
+
+Збільшити граф 
+(x1,x2,...,xn) [y1,y2,...,yn]
+
+x2+y2= x1*y1
+x3+y3 = x1*y2
+x4+y4 = x1*y3
+....
+xn+yn = x1*yn-1
+
+
+нормалізація шляху в графі (all d are uniqe)
+d1,d2,d3,...,ds
+
+
+(x1,x2,...,xn) = X
+N_d1 (X)  = X1
+M_d2 (X1)  = X2
+N_d3 (X2)  = X3
+M_d4 (X3)  = X4
+N_d5 (X4)  = X5
+...
+M_ds (Xs-1)  = Xs
+парне s
+
+text lenght N,128 uniqe simbols % 256
+to ascii to mod 256
+use resulting vector as as point in graph
+N = lenght of text
+Порахувати шлях у графі 
+вектор тексту це вершина ціого графа від вершини рахуємо шлях визначений d1,d2,d3,...,ds
+в кінці буде вектор (c1,c2,c3,...,cn) потім перетворити назад на текст ACkii
+
+
+
+
+
