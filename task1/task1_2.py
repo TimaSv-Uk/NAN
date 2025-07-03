@@ -96,7 +96,7 @@ def print_labeled_matrix(matrix, filename=None):
 
 
 def main():
-    mod = 2
+    mod = 80
     num_of_x = 3
     adjacency_matrix, size = build_adjacency_matrix_optimized(mod, num_of_x)
     print(adjacency_matrix)
