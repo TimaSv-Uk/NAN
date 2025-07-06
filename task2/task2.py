@@ -1,13 +1,3 @@
-def read_text_to_ascii(file_name, char_ecncode_mod):
-    #  read file
-    f = open(file_name, "r")
-
-    text = f.read()
-    chars = [ord(t) % char_ecncode_mod for t in text]
-    f.close()
-    return chars
-
-
 def write_text_to_file(file_name, text):
     f = open(file_name, "w")
     f.write(text)
@@ -121,6 +111,20 @@ def reverce_find_neigbors_M_a(point, a, mod):
     return original_point
 
 
+def encode(text: str, char_ecncode_mod: int, d_mod: int):
+    chars = [ord(t) % char_ecncode_mod for t in text]
+
+    d = [i for i in range(d_mod)]
+    for a in d:
+        if a % 2 == 0:
+            chars = find_neigbors_N_a(chars, a, char_ecncode_mod)
+            # print(chars, "Nx")
+        else:
+            chars = find_neigbors_M_a(chars, a, char_ecncode_mod)
+            # print(chars, "My")
+    return chars
+
+
 def decode(encoded_text: str, char_ecncode_mod: int, d_mod: int):
     chars = [ord(t) % char_ecncode_mod for t in encoded_text]
     for a in reversed(range(d_mod)):
@@ -130,36 +134,35 @@ def decode(encoded_text: str, char_ecncode_mod: int, d_mod: int):
         else:
             chars = reverce_find_neigbors_M_a(chars, a, char_ecncode_mod)
             # print(f"After reverse M_a({a}): {chars}")
-    return text_from_int_to_ascii(chars)
+    return chars
 
 
 def main():
     # початкова точка в графі X = (x1, x2, ..., xN)
     char_ecncode_mod = 256
-    chars = read_text_to_ascii("data2.txt", char_ecncode_mod)
 
     # список кроків d = [d1, d2, ..., ds]
     d_mod = 128
-    d = [i for i in range(d_mod)]
+
+    f = open("data2.txt", "r")
+
+    chars = f.read()
+    f.close()
+    
+    # print(chars)
+    print("start text: " + chars)
+    chars = encode(chars, char_ecncode_mod, d_mod)
+    encoded_text = text_from_int_to_ascii(chars)
+    decoded_text_int = decode(encoded_text, char_ecncode_mod, d_mod)
+    decoded_text = text_from_int_to_ascii(decoded_text_int)
 
     # print(chars)
-
-    print(chars)
-    print("start text: " + text_from_int_to_ascii(chars))
-    for a in d:
-        if a % 2 == 0:
-            chars = find_neigbors_N_a(chars, a, char_ecncode_mod)
-            # print(chars, "Nx")
-        else:
-            chars = find_neigbors_M_a(chars, a, char_ecncode_mod)
-            # print(chars, "My")
-
-    encoded_text = text_from_int_to_ascii(chars)
-
-    print(chars)
     print("encoded text: " + encoded_text)
-    print("decoded text: ", decode(encoded_text, char_ecncode_mod, d_mod))
+    # print(decoded_text_int)
+    print("decoded text: ", decoded_text)
+
     write_text_to_file("solution_task2.txt", encoded_text)
+    write_text_to_file("solution_task2_decoded.txt", decoded_text)
 
 
 main()
