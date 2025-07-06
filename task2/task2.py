@@ -1,3 +1,7 @@
+import base64
+import os
+
+
 def write_text_to_file(file_name, text):
     f = open(file_name, "w")
     f.write(text)
@@ -137,9 +141,28 @@ def decode(encoded_text: str, char_ecncode_mod: int, d_mod: int):
     return chars
 
 
+def file_to_base64_txt(file_path, save_txt_path):
+    with open(file_path, "rb") as file:
+        encoded = base64.b64encode(file.read()).decode("utf-8")
+
+    with open(save_txt_path, "w", encoding="utf-8") as txt_file:
+        txt_file.write(encoded)
+    print(f"{file_path} encoded to Base64 and saved to {save_txt_path}")
+
+
+def base64_txt_to_file(text, output_file_path):
+    decoded_data = base64.b64decode(text)
+
+    with open(output_file_path, "wb") as output_file:
+        output_file.write(decoded_data)
+    print(f"decoded and saved to {output_file_path}")
+
+
 def main():
     # початкова точка в графі X = (x1, x2, ..., xN)
     char_ecncode_mod = 256
+    # NOTE: to get pure ascii when encoding files
+    char_ecncode_mod = 128
 
     # список кроків d = [d1, d2, ..., ds]
     d_mod = 128
@@ -148,7 +171,7 @@ def main():
 
     chars = f.read()
     f.close()
-    
+
     # print(chars)
     print("start text: " + chars)
     chars = encode(chars, char_ecncode_mod, d_mod)
@@ -163,6 +186,33 @@ def main():
 
     write_text_to_file("solution_task2.txt", encoded_text)
     write_text_to_file("solution_task2_decoded.txt", decoded_text)
+
+    base_file = "img.jpg"
+    save_txt_path = "img.txt"
+    decode_txt_to_base = "img2.jpg"
+    if not os.path.exists(save_txt_path):
+        f = open(save_txt_path, "x")
+        f.close()
+        print(f"{save_txt_path} already exists. Skipping write.")
+
+    file_to_base64_txt(base_file, save_txt_path)
+
+    f = open(save_txt_path, "r")
+    txt_file = f.read()
+
+    print(len(txt_file), len(txt_file))
+    encode_text_file = encode(txt_file, char_ecncode_mod, d_mod)
+
+    decode_encoded_text_file = decode(
+        text_from_int_to_ascii(encode_text_file), char_ecncode_mod, d_mod
+    )
+
+    base64_txt_to_file(
+        text_from_int_to_ascii(encode_text_file), "encoded_" + decode_txt_to_base
+    )
+    base64_txt_to_file(
+        text_from_int_to_ascii(decode_encoded_text_file), decode_txt_to_base
+    )
 
 
 main()
