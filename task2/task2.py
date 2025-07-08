@@ -1,5 +1,6 @@
 import base64
 import os
+import sys
 
 
 def write_text_to_file(file_name, text):
@@ -158,60 +159,75 @@ def base64_txt_to_file(text, output_file_path):
     print(f"decoded and saved to {output_file_path}")
 
 
-def main():
-    # початкова точка в графі X = (x1, x2, ..., xN)
-    char_ecncode_mod = 256
-    # NOTE: to get pure ascii when encoding files
-    char_ecncode_mod = 128
+def get_unique_filename(base_name, suffix, extension):
+    i = 1
+    while True:
+        filename = f"{base_name}_{suffix}_{i}.{extension}"
+        if not os.path.exists(filename):
+            return filename
+        i += 1
 
-    # список кроків d = [d1, d2, ..., ds]
+
+def main():
+    # Setup encoding parameters
+    char_ecncode_mod = 128
     d_mod = 128
 
-    f = open("data2.txt", "r")
+    # Handle input file
+    if len(sys.argv) > 1:
+        base_file = sys.argv[1]
+    else:
+        base_file = input("Enter file to encode (e.g., img.jpg): ").strip()
 
-    chars = f.read()
-    f.close()
+    if not os.path.exists(base_file):
+        print(f"File '{base_file}' does not exist.")
+        return
 
-    # print(chars)
-    print("start text: " + chars)
-    chars = encode(chars, char_ecncode_mod, d_mod)
-    encoded_text = text_from_int_to_ascii(chars)
-    decoded_text_int = decode(encoded_text, char_ecncode_mod, d_mod)
-    decoded_text = text_from_int_to_ascii(decoded_text_int)
+    # Encode/decode text part
+    try:
+        with open("data2.txt", "r") as f:
+            chars = f.read()
+        print("Start text:", chars)
 
-    # print(chars)
-    print("encoded text: " + encoded_text)
-    # print(decoded_text_int)
-    print("decoded text: ", decoded_text)
+        chars = encode(chars, char_ecncode_mod, d_mod)
+        encoded_text = text_from_int_to_ascii(chars)
+        decoded_text_int = decode(encoded_text, char_ecncode_mod, d_mod)
+        decoded_text = text_from_int_to_ascii(decoded_text_int)
 
-    write_text_to_file("solution_task2.txt", encoded_text)
-    write_text_to_file("solution_task2_decoded.txt", decoded_text)
+        print("Encoded text:", encoded_text)
+        print("Decoded text:", decoded_text)
 
-    base_file = "img.jpg"
-    save_txt_path = "img.txt"
-    decode_txt_to_base = "img2.jpg"
-    if not os.path.exists(save_txt_path):
-        f = open(save_txt_path, "x")
-        f.close()
-        print(f"{save_txt_path} already exists. Skipping write.")
+        write_text_to_file("solution_task2.txt", encoded_text)
+        write_text_to_file("solution_task2_decoded.txt", decoded_text)
+    except Exception as e:
+        print(f"Warning: Could not encode text part: {e}")
+
+    # Handle base64 file encode/decode
+    base_name, ext = os.path.splitext(base_file)
+    ext = ext[1:]  # remove dot
+
+    save_txt_path = get_unique_filename(base_name, "b64txt", "txt")
+    encoded_img_path = get_unique_filename(base_name, "encoded", ext)
+    decoded_img_path = get_unique_filename(base_name, "decoded", ext)
 
     file_to_base64_txt(base_file, save_txt_path)
 
-    f = open(save_txt_path, "r")
-    txt_file = f.read()
+    with open(save_txt_path, "r") as f:
+        txt_file = f.read()
 
-    print(len(txt_file), len(txt_file))
-    encode_text_file = encode(txt_file, char_ecncode_mod, d_mod)
+    print("Encoded base64 length:", len(txt_file))
 
-    decode_encoded_text_file = decode(
-        text_from_int_to_ascii(encode_text_file), char_ecncode_mod, d_mod
+    encoded_vector = encode(txt_file, char_ecncode_mod, d_mod)
+    decoded_vector = decode(
+        text_from_int_to_ascii(encoded_vector), char_ecncode_mod, d_mod
     )
 
-    base64_txt_to_file(
-        text_from_int_to_ascii(encode_text_file), "encoded_" + decode_txt_to_base
-    )
-    base64_txt_to_file(
-        text_from_int_to_ascii(decode_encoded_text_file), decode_txt_to_base
+    # Save encoded and decoded image files
+    base64_txt_to_file(text_from_int_to_ascii(encoded_vector), encoded_img_path)
+    base64_txt_to_file(text_from_int_to_ascii(decoded_vector), decoded_img_path)
+
+    print(
+        f"Saved:\n - Encoded file: {encoded_img_path}\n - Decoded file: {decoded_img_path}"
     )
 
 
