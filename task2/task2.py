@@ -168,11 +168,66 @@ def get_unique_filename(base_name, suffix, extension):
         i += 1
 
 
+def get_change_first_symbol_based_on_full_vector(
+    chars: list[int], char_ecncode_mod: int
+) -> list[int]:
+    """
+    Calculates a new value for the first character in 'text' based on a weighted sum
+    of all characters' modulo values, then applies 'char_ecncode_mod' to the result.
+
+    Args:
+        text (str): The input string.
+        char_ecncode_mod (int): The modulus for character encoding and final calculation.
+
+    Returns:
+        list[int]: A list of integers with the modified first character's value
+                   and the original modulo values for the rest.
+    """
+    new_chars = list(chars)
+    # Calculate the sum of weighted subsequent characters
+    sum_weighted_subsequent_chars = sum(
+        [(2 * char_val + 1) for char_val in new_chars[1:]]
+    )
+
+    new_first_char_val = (
+        new_chars[0] * sum_weighted_subsequent_chars
+    ) % char_ecncode_mod
+
+    new_chars[0] = new_first_char_val
+    return new_chars
+
+
+def reverse_change_first_symbol_based_on_full_vector(
+    chars: list[int], char_ecncode_mod: int
+) -> list[int]:
+    new_chars = list(chars)
+    # Calculate the sum of weighted subsequent characters
+    sum_transformed_subsequent_chars = sum(
+        [(2 * char_val + 1) for char_val in new_chars[1:]]
+    )
+
+    original_first_char_val = (
+        new_chars[0] - sum_transformed_subsequent_chars
+    ) % char_ecncode_mod
+    new_chars[0] = original_first_char_val
+
+    return new_chars
+
+
 def main():
     # Setup encoding parameters
-    char_ecncode_mod = 128
-    d_mod = 128
+    char_ecncode_mod = 256
 
+    chars = [ord(t) % char_ecncode_mod for t in "hello"]
+    print(chars)
+    new_vector = get_change_first_symbol_based_on_full_vector(chars, char_ecncode_mod)
+    initial_vector = reverse_change_first_symbol_based_on_full_vector(
+        new_vector, char_ecncode_mod
+    )
+    print(chars, new_vector, initial_vector)
+    return
+
+    d_mod = 128
     # Handle input file
     if len(sys.argv) > 1:
         base_file = sys.argv[1]
