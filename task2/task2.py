@@ -1,5 +1,6 @@
 import base64
 import os
+import math
 import sys
 
 
@@ -116,28 +117,26 @@ def reverce_find_neigbors_M_a(point, a, mod):
     return original_point
 
 
-def encode(text: str, char_ecncode_mod: int, d_mod: int):
-    chars = [ord(t) % char_ecncode_mod for t in text]
-
+def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     d = [i for i in range(d_mod)]
+    print(encoded_text_int)
     for a in d:
         if a % 2 == 0:
-            chars = find_neigbors_N_a(chars, a, char_ecncode_mod)
+            chars = find_neigbors_N_a(encoded_text_int, a, char_ecncode_mod)
             # print(chars, "Nx")
         else:
-            chars = find_neigbors_M_a(chars, a, char_ecncode_mod)
+            chars = find_neigbors_M_a(encoded_text_int, a, char_ecncode_mod)
             # print(chars, "My")
     return chars
 
 
-def decode(encoded_text: str, char_ecncode_mod: int, d_mod: int):
-    chars = [ord(t) % char_ecncode_mod for t in encoded_text]
+def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     for a in reversed(range(d_mod)):
         if a % 2 == 0:
-            chars = reverce_find_neigbors_N_a(chars, a, char_ecncode_mod)
+            chars = reverce_find_neigbors_N_a(encoded_text_int, a, char_ecncode_mod)
             # print(f"After reverse N_a({a}): {chars}")
         else:
-            chars = reverce_find_neigbors_M_a(chars, a, char_ecncode_mod)
+            chars = reverce_find_neigbors_M_a(encoded_text_int, a, char_ecncode_mod)
             # print(f"After reverse M_a({a}): {chars}")
     return chars
 
@@ -184,31 +183,50 @@ def get_change_first_symbol_based_on_full_vector(
                    and the original modulo values for the rest.
     """
     new_chars = list(chars)
-    # Calculate the sum of weighted subsequent characters
-    sum_weighted_subsequent_chars = sum(
-        [(2 * char_val + 1) for char_val in new_chars[1:]]
-    )
+    # Make sure there are at least 2 elements
+    if len(new_chars) < 2:
+        return new_chars
 
-    new_first_char_val = (
-        new_chars[0] * sum_weighted_subsequent_chars
-    ) % char_ecncode_mod
+    M = 1
+    for char_val in new_chars[1:]:
+        M *= 2 * char_val + 1
+        M %= char_ecncode_mod
 
-    new_chars[0] = new_first_char_val
+    original_first_char_val = (new_chars[0] * M) % char_ecncode_mod
+    new_chars[0] = original_first_char_val
+
     return new_chars
 
 
 def reverse_change_first_symbol_based_on_full_vector(
     chars: list[int], char_ecncode_mod: int
 ) -> list[int]:
-    new_chars = list(chars)
-    # Calculate the sum of weighted subsequent characters
-    sum_transformed_subsequent_chars = sum(
-        [(2 * char_val + 1) for char_val in new_chars[1:]]
-    )
+    """
+    Why the inverse always exists
+    For any integer xi, 2 * xi is even.
+    So, 2 * xi + 1 is always odd.
 
-    original_first_char_val = (
-        new_chars[0] - sum_transformed_subsequent_chars
-    ) % char_ecncode_mod
+    M = (2 * x2 + 1) * (2 * x3+1) ... (2 * xn+1)
+
+    x1' => x1 * M
+    x1 = x1' / M
+    """
+    new_chars = list(chars)
+    # Make sure there are at least 2 elements
+    if len(new_chars) < 2:
+        return new_chars
+
+    M = 1
+    for char_val in new_chars[1:]:
+        M *= 2 * char_val + 1
+        M %= char_ecncode_mod
+
+    try:
+        M_inv = pow(M, -1, char_ecncode_mod)
+    except ValueError:
+        raise ValueError(f"M = {M} has no modular inverse modulo {char_ecncode_mod}")
+
+    original_first_char_val = (new_chars[0] * M_inv) % char_ecncode_mod
     new_chars[0] = original_first_char_val
 
     return new_chars
@@ -217,16 +235,6 @@ def reverse_change_first_symbol_based_on_full_vector(
 def main():
     # Setup encoding parameters
     char_ecncode_mod = 256
-
-    chars = [ord(t) % char_ecncode_mod for t in "hello"]
-    print(chars)
-    new_vector = get_change_first_symbol_based_on_full_vector(chars, char_ecncode_mod)
-    initial_vector = reverse_change_first_symbol_based_on_full_vector(
-        new_vector, char_ecncode_mod
-    )
-    print(chars, new_vector, initial_vector)
-    return
-
     d_mod = 128
     # Handle input file
     if len(sys.argv) > 1:
@@ -244,9 +252,12 @@ def main():
             chars = f.read()
         print("Start text:", chars)
 
-        chars = encode(chars, char_ecncode_mod, d_mod)
+        chars_int = [ord(char) % char_ecncode_mod for char in chars]
+        chars = encode(chars_int, char_ecncode_mod, d_mod)
         encoded_text = text_from_int_to_ascii(chars)
-        decoded_text_int = decode(encoded_text, char_ecncode_mod, d_mod)
+
+        chars_int = [ord(char) % char_ecncode_mod for char in encoded_text]
+        decoded_text_int = decode(chars_int, char_ecncode_mod, d_mod)
         decoded_text = text_from_int_to_ascii(decoded_text_int)
 
         print("Encoded text:", encoded_text)
@@ -282,8 +293,11 @@ def main():
     base64_txt_to_file(text_from_int_to_ascii(decoded_vector), decoded_img_path)
 
     print(
-        f"Saved:\n - Encoded file: {encoded_img_path}\n - Decoded file: {decoded_img_path}"
+        f"Saved:\n - Encoded file: {encoded_img_path}\n - Decoded file: {
+            decoded_img_path
+        }"
     )
 
 
-main()
+if __name__ == "__main__":
+    main()
