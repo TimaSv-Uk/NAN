@@ -1,6 +1,5 @@
 import base64
 import os
-import math
 import sys
 
 
@@ -119,24 +118,27 @@ def reverce_find_neigbors_M_a(point, a, mod):
 
 def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     d = [i for i in range(d_mod)]
-    print(encoded_text_int)
+    chars = encoded_text_int.copy()
+    # print(encoded_text_int)
     for a in d:
         if a % 2 == 0:
-            chars = find_neigbors_N_a(encoded_text_int, a, char_ecncode_mod)
+            chars = find_neigbors_N_a(chars, a, char_ecncode_mod)
             # print(chars, "Nx")
         else:
-            chars = find_neigbors_M_a(encoded_text_int, a, char_ecncode_mod)
+            chars = find_neigbors_M_a(chars, a, char_ecncode_mod)
             # print(chars, "My")
     return chars
 
 
 def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+
+    chars = encoded_text_int.copy()
     for a in reversed(range(d_mod)):
         if a % 2 == 0:
-            chars = reverce_find_neigbors_N_a(encoded_text_int, a, char_ecncode_mod)
+            chars = reverce_find_neigbors_N_a(chars, a, char_ecncode_mod)
             # print(f"After reverse N_a({a}): {chars}")
         else:
-            chars = reverce_find_neigbors_M_a(encoded_text_int, a, char_ecncode_mod)
+            chars = reverce_find_neigbors_M_a(chars, a, char_ecncode_mod)
             # print(f"After reverse M_a({a}): {chars}")
     return chars
 
@@ -147,7 +149,7 @@ def file_to_base64_txt(file_path, save_txt_path):
 
     with open(save_txt_path, "w", encoding="utf-8") as txt_file:
         txt_file.write(encoded)
-    print(f"{file_path} encoded to Base64 and saved to {save_txt_path}")
+    # print(f"{file_path} encoded to Base64 and saved to {save_txt_path}")
 
 
 def base64_txt_to_file(text, output_file_path):
@@ -155,7 +157,7 @@ def base64_txt_to_file(text, output_file_path):
 
     with open(output_file_path, "wb") as output_file:
         output_file.write(decoded_data)
-    print(f"decoded and saved to {output_file_path}")
+    # print(f"decoded and saved to {output_file_path}")
 
 
 def get_unique_filename(base_name, suffix, extension):
