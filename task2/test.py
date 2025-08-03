@@ -5,6 +5,7 @@ from task2 import (
     encode,
     decode,
     text_from_int_to_ascii,
+    get_encoded_text,
 )
 
 
@@ -113,16 +114,6 @@ class TestMathUtils(unittest.TestCase):
         print("Encoded text2:", encoded_text2)
 
         self.assertNotEqual(encoded_text1, encoded_text2)
-
-
-def get_encoded_text(text, char_ecncode_mod, d_mod):
-    chars_int = [ord(char) % char_ecncode_mod for char in text]
-    encoded_with_first = get_change_first_symbol_based_on_full_vector(
-        chars_int, char_ecncode_mod
-    )
-    encoded = encode(encoded_with_first, char_ecncode_mod, d_mod)
-    encoded_text = text_from_int_to_ascii(encoded)
-    return encoded_text
 
 
 if __name__ == "__main__":

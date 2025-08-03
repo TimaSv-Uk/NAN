@@ -3,6 +3,16 @@ import os
 import sys
 
 
+def get_encoded_text(text, char_ecncode_mod, d_mod):
+    chars_int = [ord(char) % char_ecncode_mod for char in text]
+    encoded_with_first = get_change_first_symbol_based_on_full_vector(
+        chars_int, char_ecncode_mod
+    )
+    encoded = encode(encoded_with_first, char_ecncode_mod, d_mod)
+    encoded_text = text_from_int_to_ascii(encoded)
+    return encoded_text
+
+
 def write_text_to_file(file_name, text):
     f = open(file_name, "w")
     f.write(text)
@@ -131,7 +141,6 @@ def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
 
 
 def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
-
     chars = encoded_text_int.copy()
     for a in reversed(range(d_mod)):
         if a % 2 == 0:
