@@ -4,9 +4,8 @@ from task2 import (
     reverse_change_first_symbol_based_on_full_vector,
     encode,
     decode,
-    text_from_int_to_ascii,
-    get_encoded_text,
 )
+from helpers import text_from_int_to_ascii, text_sameness_percentage, get_encoded_text
 
 
 class TestMathUtils(unittest.TestCase):
@@ -112,6 +111,10 @@ class TestMathUtils(unittest.TestCase):
 
         print("In text2:", text2)
         print("Encoded text2:", encoded_text2)
+        print(
+            "text_sameness_percentage: ",
+            text_sameness_percentage(encoded_text1, encoded_text2),
+        )
 
         self.assertNotEqual(encoded_text1, encoded_text2)
 

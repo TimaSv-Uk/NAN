@@ -1,30 +1,12 @@
-import base64
 import os
 import sys
-
-
-def get_encoded_text(text, char_ecncode_mod, d_mod):
-    chars_int = [ord(char) % char_ecncode_mod for char in text]
-    encoded_with_first = get_change_first_symbol_based_on_full_vector(
-        chars_int, char_ecncode_mod
-    )
-    encoded = encode(encoded_with_first, char_ecncode_mod, d_mod)
-    encoded_text = text_from_int_to_ascii(encoded)
-    return encoded_text
-
-
-def write_text_to_file(file_name, text):
-    f = open(file_name, "w")
-    f.write(text)
-
-    f.close()
-
-
-def text_from_int_to_ascii(point):
-    #  read file
-
-    decoded_text = [chr(int(element)) for element in point]
-    return "".join(decoded_text)
+from helpers import (
+    text_from_int_to_ascii,
+    file_to_base64_txt,
+    base64_txt_to_file,
+    get_unique_filename,
+    write_text_to_file,
+)
 
 
 def find_neigbors_N_a(point, a, mod):
@@ -32,7 +14,7 @@ def find_neigbors_N_a(point, a, mod):
     # де:
     # z2 = x1 * (x1 + a) - x2
     # z3 = x1 * z2 - x3
-    # ...
+    # ...,
     # zn = x1 * z(n-1) - xn
     point = point.copy()
     neigbor_point = []
@@ -150,32 +132,6 @@ def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
             chars = reverce_find_neigbors_M_a(chars, a, char_ecncode_mod)
             # print(f"After reverse M_a({a}): {chars}")
     return chars
-
-
-def file_to_base64_txt(file_path, save_txt_path):
-    with open(file_path, "rb") as file:
-        encoded = base64.b64encode(file.read()).decode("utf-8")
-
-    with open(save_txt_path, "w", encoding="utf-8") as txt_file:
-        txt_file.write(encoded)
-    # print(f"{file_path} encoded to Base64 and saved to {save_txt_path}")
-
-
-def base64_txt_to_file(text, output_file_path):
-    decoded_data = base64.b64decode(text)
-
-    with open(output_file_path, "wb") as output_file:
-        output_file.write(decoded_data)
-    # print(f"decoded and saved to {output_file_path}")
-
-
-def get_unique_filename(base_name, suffix, extension):
-    i = 1
-    while True:
-        filename = f"{base_name}_{suffix}_{i}.{extension}"
-        if not os.path.exists(filename):
-            return filename
-        i += 1
 
 
 def get_change_first_symbol_based_on_full_vector(
