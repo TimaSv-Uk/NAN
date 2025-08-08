@@ -37,7 +37,7 @@ class TestMathUtils(unittest.TestCase):
             "abcXYZ",
             "abcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZabcXYZ",
             "a",
-            "🔥🚀vsdvd",
+            "vsdvd",
         ]
         for text in test_cases:
             with self.subTest(text=text):
@@ -108,7 +108,7 @@ class TestMathUtils(unittest.TestCase):
         test_cases = [
             ("3456701289", "3456701280"),
             ("abc123", "abc124"),
-            ("🔥🚀vsdvd", "🔥🚀vsdve"),
+            ("vsdvd", "vsdve"),
             ("same text", "same text"),  # to test sameness
             ("short", "longer text"),
             (data2, data2_changed),

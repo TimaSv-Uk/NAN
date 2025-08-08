@@ -122,6 +122,44 @@ def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     return chars
 
 
+# TODO: assignment5
+
+
+def encode_assignment5(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+    d = [i for i in range(d_mod)]
+    chars = encoded_text_int.copy()
+    # print(encoded_text_int)
+    for a in d:
+        chars = find_neighbors_assignment5(chars, a, char_ecncode_mod)
+            # print(chars, "My")
+    return chars
+
+
+def find_neighbors_assignment5(point, a, mod):
+    # New N_a for new equation rules
+    # N_a(X) = [x1+a, z2, z3, ..., zn]
+    # Even (math index) => y1*x_{i-1}, Odd => x1*y_{i-1}
+    point = point.copy()
+    neighbor_point = []
+
+    for i in range(len(point)):
+        if i == 0:
+            # math index 1
+            x1_new = (point[0] + a) % mod
+            neighbor_point.append(x1_new)
+        elif i % 2 == 0:
+            # math index even → use y1 * prev_x
+            z_i = (
+                point[0] * neighbor_point[-1] - point[i]
+            ) % mod  # y1 is point[0] in M, but here?
+            neighbor_point.append(z_i)
+        else:
+            # math index odd → use x1 * prev_y
+            z_i = (point[0] * neighbor_point[-1] - point[i]) % mod
+            neighbor_point.append(z_i)
+    return neighbor_point
+
+
 def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     chars = encoded_text_int.copy()
     for a in reversed(range(d_mod)):
