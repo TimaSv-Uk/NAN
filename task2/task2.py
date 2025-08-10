@@ -1,14 +1,3 @@
-import os
-import sys
-from helpers import (
-    text_from_int_to_ascii,
-    file_to_base64_txt,
-    base64_txt_to_file,
-    get_unique_filename,
-    write_text_to_file,
-)
-
-
 def find_neigbors_N_a(point, a, mod):
     # N_a(X) = [x1+a, z2, z3, ..., zn]
     # де:
@@ -123,15 +112,13 @@ def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
 
 
 # TODO: assignment5
-
-
 def encode_assignment5(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     d = [i for i in range(d_mod)]
     chars = encoded_text_int.copy()
     # print(encoded_text_int)
     for a in d:
         chars = find_neighbors_assignment5(chars, a, char_ecncode_mod)
-            # print(chars, "My")
+        # print(chars, "My")
     return chars
 
 
@@ -235,74 +222,3 @@ def reverse_change_first_symbol_based_on_full_vector(
     new_chars[0] = original_first_char_val
 
     return new_chars
-
-
-def main():
-    # Setup encoding parameters
-    char_ecncode_mod = 256
-    d_mod = 128
-    # Handle input file
-    if len(sys.argv) > 1:
-        base_file = sys.argv[1]
-    else:
-        base_file = input("Enter file to encode (e.g., img.jpg): ").strip()
-
-    if not os.path.exists(base_file):
-        print(f"File '{base_file}' does not exist.")
-        return
-
-    # Encode/decode text part
-    try:
-        with open("data2.txt", "r") as f:
-            chars = f.read()
-        print("Start text:", chars)
-
-        chars_int = [ord(char) % char_ecncode_mod for char in chars]
-        chars = encode(chars_int, char_ecncode_mod, d_mod)
-        encoded_text = text_from_int_to_ascii(chars)
-
-        chars_int = [ord(char) % char_ecncode_mod for char in encoded_text]
-        decoded_text_int = decode(chars_int, char_ecncode_mod, d_mod)
-        decoded_text = text_from_int_to_ascii(decoded_text_int)
-
-        print("Encoded text:", encoded_text)
-        print("Decoded text:", decoded_text)
-
-        write_text_to_file("solution_task2.txt", encoded_text)
-        write_text_to_file("solution_task2_decoded.txt", decoded_text)
-    except Exception as e:
-        print(f"Warning: Could not encode text part: {e}")
-
-    # Handle base64 file encode/decode
-    base_name, ext = os.path.splitext(base_file)
-    ext = ext[1:]  # remove dot
-
-    save_txt_path = get_unique_filename(base_name, "b64txt", "txt")
-    encoded_img_path = get_unique_filename(base_name, "encoded", ext)
-    decoded_img_path = get_unique_filename(base_name, "decoded", ext)
-
-    file_to_base64_txt(base_file, save_txt_path)
-
-    with open(save_txt_path, "r") as f:
-        txt_file = f.read()
-
-    print("Encoded base64 length:", len(txt_file))
-
-    encoded_vector = encode(txt_file, char_ecncode_mod, d_mod)
-    decoded_vector = decode(
-        text_from_int_to_ascii(encoded_vector), char_ecncode_mod, d_mod
-    )
-
-    # Save encoded and decoded image files
-    base64_txt_to_file(text_from_int_to_ascii(encoded_vector), encoded_img_path)
-    base64_txt_to_file(text_from_int_to_ascii(decoded_vector), decoded_img_path)
-
-    print(
-        f"Saved:\n - Encoded file: {encoded_img_path}\n - Decoded file: {
-            decoded_img_path
-        }"
-    )
-
-
-if __name__ == "__main__":
-    main()

@@ -24,7 +24,7 @@ def get_data():
         d_mod = 8
         while d_mod < 128 + 1:
             start_time = time.perf_counter()
-            encoded_text1 = get_encoded_text(text, char_ecncode_mod, d_mod)
+            get_encoded_text(text, char_ecncode_mod, d_mod)
             end_time = time.perf_counter()
             execution_time = end_time - start_time
             execution_time_based_on_mod_and_text.append(
@@ -44,7 +44,7 @@ def get_data():
 def plot_time_complexity_chart() -> None:
     df = pd.DataFrame(get_data())
     sns.set(style="whitegrid")
-    plot = sns.lmplot(
+    sns.lmplot(
         data=df,
         x="text_len",
         hue="d_mod",

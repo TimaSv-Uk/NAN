@@ -18,6 +18,22 @@ def get_encoded_text(text, char_ecncode_mod, d_mod):
     return encoded_text
 
 
+def get_decoded_text(encoded_text, char_ecncode_mod, d_mod):
+    # Import here to avoid circular imports
+    from task2 import (
+        reverse_change_first_symbol_based_on_full_vector,
+        decode,
+    )
+
+    encoded_int_from_text = [ord(char) % char_ecncode_mod for char in encoded_text]
+    decoded = decode(encoded_int_from_text, char_ecncode_mod, d_mod)
+    reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(
+        decoded, char_ecncode_mod
+    )
+    encoded_text = text_from_int_to_ascii(reversed_first_symbol)
+    return encoded_text
+
+
 def get_encoded_text_int(text, char_ecncode_mod, d_mod):
     # Import here to avoid circular imports
     from task2 import (

@@ -5,12 +5,17 @@ from task2 import (
     encode,
     decode,
 )
-from helpers import text_from_int_to_ascii, text_sameness_percentage, get_encoded_text
+from helpers import (
+    text_from_int_to_ascii,
+    text_sameness_percentage,
+    get_encoded_text,
+    get_decoded_text,
+)
 
 
 class TestMathUtils(unittest.TestCase):
     def test_assignment2(self):
-        with open("data2.txt", "r") as f:
+        with open("test_files/data2.txt", "r") as f:
             chars = f.read()
         # Setup encoding parameters
         char_ecncode_mod = 256
@@ -57,7 +62,7 @@ class TestMathUtils(unittest.TestCase):
                 self.assertEqual(chars, initial_vector)
 
     def test_assignment3_2(self):
-        with open("data2.txt", "r") as f:
+        with open("test_files/data2.txt", "r") as f:
             chars = f.read()
 
         char_ecncode_mod = 256
@@ -96,14 +101,27 @@ class TestMathUtils(unittest.TestCase):
 
         self.assertEqual(chars, decoded_text)
 
+    def test_decode_encode_functions(self):
+        with open("test_files/data2.txt", "r") as f:
+            chars = f.read()
+
+        char_ecncode_mod = 256
+        d_mod = 128
+        encoded = get_encoded_text(chars, char_ecncode_mod, d_mod)
+        decoded = get_decoded_text(encoded, char_ecncode_mod, d_mod)
+
+        # print("Encoded text:", encoded)
+        # print("Decoded text:", decoded)
+        self.assertEqual(chars, decoded)
+
     def test_assignment4(self):
         char_ecncode_mod = 128
         d_mod = 128
 
-        with open("data2.txt", "r") as f:
+        with open("test_files/data2.txt", "r") as f:
             data2 = f.read()
 
-        with open("data2_changed.txt", "r") as f:
+        with open("test_files/data2_changed.txt", "r") as f:
             data2_changed = f.read()
         test_cases = [
             ("3456701289", "3456701280"),
@@ -113,19 +131,21 @@ class TestMathUtils(unittest.TestCase):
             ("short", "longer text"),
             (data2, data2_changed),
         ]
-        with open("test_text_sameness_encoding_results.txt", "w", encoding="utf-8") as f:
+        with open(
+            "test_text_sameness_encoding_results.txt", "w", encoding="utf-8"
+        ) as f:
             for text1, text2 in test_cases:
                 with self.subTest(text1=text1, text2=text2):
                     encoded_text1 = get_encoded_text(text1, char_ecncode_mod, d_mod)
                     encoded_text2 = get_encoded_text(text2, char_ecncode_mod, d_mod)
                     percent = (text_sameness_percentage(encoded_text1, encoded_text2),)
 
-                    print(f"\n\n")
-                    print(f"In text1: {text1}")
-                    print(f"Encoded text1: {encoded_text1}")
-                    print(f"In text2: {text2}")
-                    print(f"Encoded text2: {encoded_text2}")
-                    print("text_sameness_percentage: ", percent)
+                    # print(f"\n\n")
+                    # print(f"In text1: {text1}")
+                    # print(f"Encoded text1: {encoded_text1}")
+                    # print(f"In text2: {text2}")
+                    # print(f"Encoded text2: {encoded_text2}")
+                    # print("text_sameness_percentage: ", percent)
 
                     f.write(f"Text 1: {text1}\n")
                     f.write(f"Text 2: {text2}\n")
