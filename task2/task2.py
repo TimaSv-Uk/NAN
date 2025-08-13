@@ -1,34 +1,26 @@
 def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
-    d = [i for i in range(d_mod)]
     chars = encoded_text_int.copy()
-    # print(encoded_text_int)
-    nodes = [{"node": chars, "index": 0, "type": "X"}]
-    for a in d:
+    nodes = [{"node": chars, "index": 0, "type": "N-X"}]
+    for a in range(d_mod):
         prev_chars = chars.copy()
         if a % 2 == 0:
-            # print(f"a = {a},node = {prev_chars},next = N-X")
             chars = find_neigbors_N_a(chars, a, char_ecncode_mod)
-            nodes.append({"nodes": chars, "index": a, "type": "N-X"})
+            nodes.append({"node": chars, "index": a, "type": "N-X"})
+
         else:
-            # print(f"a = {a},node = {prev_chars},next = M-X")
             chars = find_neigbors_M_a(chars, a, char_ecncode_mod)
-            nodes.append({"nodes": chars, "index": a, "type": "M-Y"})
+            nodes.append({"node": chars, "index": a, "type": "M-Y"})
+
         if not follows_graph_rule(prev_chars, chars, char_ecncode_mod):
             print(f"Rule is broken at a={a}. For x ={prev_chars},y ={chars}")
             print(nodes[-2])
             print(nodes[-1])
             print("\n")
-            # print(f"X: {prev_chars}")
-            # print(f"Y: {chars}")
         else:
-
             print(f"Rule is not broken at a={a}. For x ={prev_chars},y ={chars}")
             print(nodes[-2])
             print(nodes[-1])
             print("\n")
-            # print(f"X: {prev_chars}")
-            # print(f"Y: {chars}")
-
     return chars
 
 
@@ -42,6 +34,7 @@ def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
             chars = reverce_find_neigbors_M_a(chars, a, char_ecncode_mod)
             # print(f"After reverse M_a({a}): {chars}")
     return chars
+
 
 
 def find_neigbors_N_a(point, a, mod):
@@ -214,6 +207,24 @@ def reverse_change_first_symbol_based_on_full_vector(
 
 
 def encode_assignment5(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+
+# (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
+#
+# х_2 - у_2 = у_1х_1
+# х_3 - у_3 = х_1у_2
+# х_4 - у_4 = у_1х_3
+# х_5 - у_5 = х_1у_4
+#
+# х_6 - у_6 = у_1х_5
+# х_7 - у_7 = х_1у_6
+#
+#
+# y_1 = x_1+a1
+# y2 = x2 - ( (x_1+a1) * x1 )
+# y3 = x3 - (х_1 у_2)
+#
+#
+# Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем. 
     d = [i for i in range(d_mod)]
     chars = encoded_text_int.copy()
     # print(encoded_text_int)
@@ -298,7 +309,7 @@ def follows_graph_rule_assignment5(x: list[int], y: list[int], mod: int) -> bool
 def main():
     char_ecncode_mod = 128
     d_mod = 10
-    text = [0 for i in range(10)]
+    text = [2 for i in range(10)]
     encoded = encode(text, char_ecncode_mod, d_mod)
 
     # Збільшити граф
