@@ -7,6 +7,7 @@ from helpers import (
     get_decoded_text,
     get_encoded_text,
 )
+from task2 import encode, decode
 
 
 def main():
@@ -41,8 +42,8 @@ def main():
 
     print("Encoded base64 length:", len(txt_file))
 
-    encoded_vector = get_encoded_text(txt_file, char_ecncode_mod, d_mod)
-    decoded_vector = get_decoded_text(encoded_vector, char_ecncode_mod, d_mod)
+    encoded_vector = get_encoded_text(txt_file, char_ecncode_mod, d_mod, encode)
+    decoded_vector = get_decoded_text(encoded_vector, char_ecncode_mod, d_mod, decode)
     # Save encoded and decoded image files
     base64_txt_to_file(encoded_vector, encoded_img_path)
     base64_txt_to_file(decoded_vector, decoded_img_path)

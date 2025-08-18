@@ -1,4 +1,4 @@
-def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int) -> list[int]:
     chars = encoded_text_int.copy()
     for a in range(d_mod):
         if a % 2 == 0:
@@ -8,7 +8,7 @@ def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
     return chars
 
 
-def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int) -> list[int]:
     chars = encoded_text_int.copy()
     for a in reversed(range(d_mod)):
         if a % 2 == 0:
@@ -193,7 +193,9 @@ def reverse_change_first_symbol_based_on_full_vector(
 # TODO: assignment5
 
 
-def encode_assignment5(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+def encode_assignment5(
+    encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
+) -> list[int]:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
     #
@@ -220,7 +222,9 @@ def encode_assignment5(encoded_text_int: list[int], char_ecncode_mod: int, d_mod
     return chars
 
 
-def decode_assignment5(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int):
+def decode_assignment5(
+    encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
+) -> list[int]:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
     #

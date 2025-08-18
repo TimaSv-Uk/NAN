@@ -4,6 +4,8 @@ from task2 import (
     reverse_change_first_symbol_based_on_full_vector,
     encode,
     decode,
+    encode_assignment5,
+    decode_assignment5,
 )
 from helpers import (
     text_from_int_to_ascii,
@@ -107,15 +109,15 @@ class TestMathUtils(unittest.TestCase):
 
         char_ecncode_mod = 256
         d_mod = 128
-        encoded = get_encoded_text(chars, char_ecncode_mod, d_mod)
-        decoded = get_decoded_text(encoded, char_ecncode_mod, d_mod)
+        encoded = get_encoded_text(chars, char_ecncode_mod, d_mod, encode)
+        decoded = get_decoded_text(encoded, char_ecncode_mod, d_mod, decode)
 
         # print("Encoded text:", encoded)
         # print("Decoded text:", decoded)
         self.assertEqual(chars, decoded)
 
     def test_assignment4(self):
-        char_ecncode_mod = 128
+        char_ecncode_mod = 256
         d_mod = 128
 
         with open("test_files/data2.txt", "r") as f:
@@ -136,8 +138,60 @@ class TestMathUtils(unittest.TestCase):
         ) as f:
             for text1, text2 in test_cases:
                 with self.subTest(text1=text1, text2=text2):
-                    encoded_text1 = get_encoded_text(text1, char_ecncode_mod, d_mod)
-                    encoded_text2 = get_encoded_text(text2, char_ecncode_mod, d_mod)
+                    encoded_text1 = get_encoded_text(
+                        text1, char_ecncode_mod, d_mod, encode
+                    )
+                    encoded_text2 = get_encoded_text(
+                        text2, char_ecncode_mod, d_mod, encode
+                    )
+                    percent = text_sameness_percentage(encoded_text1, encoded_text2)
+
+                    # print(f"\n\n")
+                    # print(f"In text1: {text1}")
+                    # print(f"Encoded text1: {encoded_text1}")
+                    # print(f"In text2: {text2}")
+                    # print(f"Encoded text2: {encoded_text2}")
+                    # print("text_sameness_percentage: ", percent)
+
+                    f.write(f"Text 1: {text1}\n")
+                    f.write(f"Text 2: {text2}\n")
+                    f.write(f"Encoded Text 1: {encoded_text1}\n")
+                    f.write(f"Encoded Text 2: {encoded_text2}\n")
+                    f.write(f"Sameness %: {percent}%\n")
+                    f.write("-" * 50 + "\n")
+                    if text1 == text2:
+                        self.assertEqual(encoded_text1, encoded_text2)
+                    else:
+                        self.assertNotEqual(encoded_text1, encoded_text2)
+
+    def test_assignment5(self):
+        char_ecncode_mod = 256
+        d_mod = 128
+
+        with open("test_files/data2.txt", "r") as f:
+            data2 = f.read()
+
+        with open("test_files/data2_changed.txt", "r") as f:
+            data2_changed = f.read()
+        test_cases = [
+            ("3456701289", "3456701280"),
+            ("abc123", "abc124"),
+            ("vsdvd", "vsdve"),
+            ("same text", "same text"),  # to test sameness
+            ("short", "longer text"),
+            (data2, data2_changed),
+        ]
+        with open(
+            "test_text_sameness_encoding_results_assignment5.txt", "w", encoding="utf-8"
+        ) as f:
+            for text1, text2 in test_cases:
+                with self.subTest(text1=text1, text2=text2):
+                    encoded_text1 = get_encoded_text(
+                        text1, char_ecncode_mod, d_mod, encode_assignment5
+                    )
+                    encoded_text2 = get_encoded_text(
+                        text2, char_ecncode_mod, d_mod, encode_assignment5
+                    )
                     percent = (text_sameness_percentage(encoded_text1, encoded_text2),)
 
                     # print(f"\n\n")

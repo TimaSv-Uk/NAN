@@ -1,32 +1,40 @@
 import base64
 import os
+from typing import Callable
 
-
-def get_encoded_text(text, char_ecncode_mod, d_mod):
+def get_encoded_text(
+    text: str,
+    char_ecncode_mod: int,
+    d_mod: int,
+    encode_function: Callable[[list[int], int, int], list[int]],
+) -> str:
     # Import here to avoid circular imports
     from task2 import (
         get_change_first_symbol_based_on_full_vector,
-        encode,
     )
 
     chars_int = [ord(char) % char_ecncode_mod for char in text]
     encoded_with_first = get_change_first_symbol_based_on_full_vector(
         chars_int, char_ecncode_mod
     )
-    encoded = encode(encoded_with_first, char_ecncode_mod, d_mod)
+    encoded = encode_function(encoded_with_first, char_ecncode_mod, d_mod)
     encoded_text = text_from_int_to_ascii(encoded)
     return encoded_text
 
 
-def get_decoded_text(encoded_text, char_ecncode_mod, d_mod):
+def get_decoded_text(
+    encoded_text: str,
+    char_ecncode_mod: int,
+    d_mod: int,
+    decode_function: Callable[[list[int], int, int], list[int]],
+) -> str:
     # Import here to avoid circular imports
     from task2 import (
         reverse_change_first_symbol_based_on_full_vector,
-        decode_assignment5,
     )
 
     encoded_int_from_text = [ord(char) % char_ecncode_mod for char in encoded_text]
-    decoded = decode_assignment5(encoded_int_from_text, char_ecncode_mod, d_mod)
+    decoded = decode_function(encoded_int_from_text, char_ecncode_mod, d_mod)
     reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(
         decoded, char_ecncode_mod
     )
