@@ -116,7 +116,7 @@ class TestMathUtils(unittest.TestCase):
         # print("Decoded text:", decoded)
         self.assertEqual(chars, decoded)
 
-    def test_assignment4(self):
+    def test_text_sameness_encoding_results(self):
         char_ecncode_mod = 256
         d_mod = 128
 
@@ -176,7 +176,7 @@ class TestMathUtils(unittest.TestCase):
         )
         self.assertNotEqual(original_algorithm, assignment5_algorithm)
 
-    def test_assignment5(self):
+    def test_text_sameness_encoding_resultsassignment5(self):
         char_ecncode_mod = 256
         d_mod = 128
 
