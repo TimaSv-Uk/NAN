@@ -41,3 +41,23 @@
 Для непарних індексів (i = 3, 5, 7, ...):
 
     odd math index: x_i = y_i + x1 * y_{i-1}
+
+
+
+У коді за це відповідають функції:
+```
+/task2.py
+
+def decode_assignment5(
+    encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
+) -> list[int]:
+
+def encode_assignment5(
+    encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
+) -> list[int]:
+
+def find_neighbors_assignment5(point, a, mod)
+
+def reverse_find_neighbors_assignment5(point, a, mod):
+
+```
