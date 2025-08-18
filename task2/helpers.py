@@ -2,6 +2,7 @@ import base64
 import os
 from typing import Callable
 
+
 def get_encoded_text(
     text: str,
     char_ecncode_mod: int,

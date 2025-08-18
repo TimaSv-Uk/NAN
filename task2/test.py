@@ -164,6 +164,18 @@ class TestMathUtils(unittest.TestCase):
                     else:
                         self.assertNotEqual(encoded_text1, encoded_text2)
 
+    def test_assignment5_not_same_as_original_algorithm(self):
+        with open("test_files/data2.txt", "r") as f:
+            text = f.read()
+        char_ecncode_mod = 256
+        d_mod = 128
+
+        original_algorithm = get_encoded_text(text, char_ecncode_mod, d_mod, encode)
+        assignment5_algorithm = get_encoded_text(
+            text, char_ecncode_mod, d_mod, encode_assignment5
+        )
+        self.assertNotEqual(original_algorithm, assignment5_algorithm)
+
     def test_assignment5(self):
         char_ecncode_mod = 256
         d_mod = 128
