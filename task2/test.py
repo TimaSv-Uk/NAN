@@ -204,7 +204,7 @@ class TestMathUtils(unittest.TestCase):
                     encoded_text2 = get_encoded_text(
                         text2, char_ecncode_mod, d_mod, encode_assignment5
                     )
-                    percent = (text_sameness_percentage(encoded_text1, encoded_text2),)
+                    percent = text_sameness_percentage(encoded_text1, encoded_text2)
 
                     # print(f"\n\n")
                     # print(f"In text1: {text1}")
