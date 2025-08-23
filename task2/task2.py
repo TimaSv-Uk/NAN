@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int) -> list[int]:
     chars = encoded_text_int.copy()
     for a in range(d_mod):
@@ -190,9 +193,6 @@ def reverse_change_first_symbol_based_on_full_vector(
     return new_chars
 
 
-# TODO: assignment5
-
-
 def encode_assignment5(
     encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
@@ -311,13 +311,42 @@ def reverse_find_neighbors_assignment5(point, a, mod):
     return neighbor_point
 
 
+# TODO: assignment6
+
+
+def get_change_symbols_based_on_full_vector(
+    chars: list[int], char_ecncode_mod: int, matrix
+) -> list[int]:
+    chars = np.array(chars)
+    multiplyed_vector_chars = np.dot(matrix, chars)
+    pass
+
+
+def generate_matrix(min_val, max_val, row_len, col_len, seed):
+    np.random.seed(seed)
+    matrix = np.random.randint(min_val, max_val, (row_len, col_len))
+    return matrix
+
+
 def main():
     char_ecncode_mod = 128
     d_mod = 10
-    text = [2 for i in range(10)]
-    encoded = encode_assignment5(text, char_ecncode_mod, d_mod)
+    text = [2 for i in range(3)]
+    a = np.array(text)
+    M = np.array([[4, 5, 6], [7, 8, 9], [1, 0, 2]])
+
+    result1 = np.dot(a, M)
+    print("a × M =", result1)
+
+    # Multiply matrix × vector
+    result2 = M @ a
+    print("M × a =", result2)
     print("-----------------------")
-    encoded = decode_assignment5(encoded, char_ecncode_mod, d_mod)
+    get_change_symbols_based_on_full_vector
+    # випадкова 4x4 матриця
+    for i in range(4):
+        print(generate_matrix(1, 10, 3, 3, 50 + i))
+        print(generate_matrix(1, 10, 3, 3, 50 + i))
 
     # Збільшити граф
     # (x1,x2,...,xn) [y1,y2,...,yn]
