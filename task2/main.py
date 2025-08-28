@@ -7,7 +7,7 @@ from helpers import (
     get_decoded_text,
     get_encoded_text,
 )
-from task2 import encode, decode
+from task2 import encode, decode, encode_assignment5, decode_assignment5
 
 
 def main():
@@ -22,7 +22,8 @@ def main():
         base_file = sys.argv[1]
     else:
         base_file = input("Enter file to encode (e.g., img.jpg): ").strip()
-
+    base_file = "./test_files/even_bigger_img.jpg"
+    print(f"Auto select {base_file}")
     if not os.path.exists(base_file):
         print(f"File '{base_file}' does not exist.")
         return
@@ -42,12 +43,20 @@ def main():
 
     print("Encoded base64 length:", len(txt_file))
 
-    encoded_vector = get_encoded_text(txt_file, char_ecncode_mod, d_mod, encode)
-    decoded_vector = get_decoded_text(encoded_vector, char_ecncode_mod, d_mod, decode)
+    encoded_vector = get_encoded_text(
+        txt_file, char_ecncode_mod, d_mod, encode_assignment5
+    )
+    decoded_vector = get_decoded_text(
+        encoded_vector, char_ecncode_mod, d_mod, decode_assignment5
+    )
     # Save encoded and decoded image files
-    base64_txt_to_file(encoded_vector, encoded_img_path)
+    # base64_txt_to_file(encoded_vector, encoded_img_path)
     base64_txt_to_file(decoded_vector, decoded_img_path)
-
+    # with open(encoded_img_path, "wb") as f:
+    #     f.write(encoded_vector.encode("utf-8"))
+    #
+    # with open(decoded_img_path, "wb") as f:
+    #     f.write(decoded_vector.encode("utf-8"))
     print(
         f"Saved:\n - Encoded file: {encoded_img_path}\n - Decoded file: {
             decoded_img_path

@@ -41,8 +41,8 @@ def main():
     vector = np.array([3, 1, 2])
     matrix = np.array([[1, 1, 2], [2, 1, 3], [1, 4, 2]])
     start_time = time.perf_counter()
-    print(matrix @ vector)
-    print(vector @ matrix)
+    print((matrix @ vector) % 2)
+    print((vector @ matrix) % 2)
     end_time = time.perf_counter()
     execution_time = end_time - start_time
     print(execution_time)

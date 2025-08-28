@@ -1,5 +1,6 @@
 from sympy import Matrix
 import numpy as np
+from numba import jit
 
 
 def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int) -> list[int]:
@@ -194,6 +195,7 @@ def reverse_change_first_symbol_based_on_full_vector(
     return new_chars
 
 
+@jit(nopython=True)
 def encode_assignment5(
     encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
@@ -214,15 +216,12 @@ def encode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
     chars = encoded_text_int.copy()
-    # print(encoded_text_int)
     for a in range(d_mod):
-        # prev_chars = chars.copy()
         chars = find_neighbors_assignment5(chars, a, char_ecncode_mod)
-        # print(follows_graph_rule_assignment5(prev_chars, chars, d_mod))
-        print(chars)
     return chars
 
 
+@jit(nopython=True)
 def decode_assignment5(
     encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
@@ -245,15 +244,13 @@ def decode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
     chars = encoded_text_int.copy()
-    # print(encoded_text_int)
-    for a in reversed(range(d_mod)):
-        # prev_chars = chars.copy()
+    # Replace reversed(range(d_mod)) with a backward range for @jit
+    for a in range(d_mod - 1, -1, -1):
         chars = reverse_find_neighbors_assignment5(chars, a, char_ecncode_mod)
-        # print(follows_graph_rule_assignment5(prev_chars, chars, d_mod))
-        print(chars)
     return chars
 
 
+@jit(nopython=True)
 def find_neighbors_assignment5(point, a, mod):
     """
     point = (x1, x2, x3, ...)
@@ -264,25 +261,19 @@ def find_neighbors_assignment5(point, a, mod):
     # odd math index: y_i = x_i - (x1 * y_{i-1})
 
     """
-    point = point.copy()
-    neighbor_point = []
-
-    for i in range(len(point)):
-        if i == 0:
-            # math index 1: y1 = x1 + a
-            y1 = (point[0] + a) % mod
-            neighbor_point.append(y1)
-        elif i % 2 == 0:
-            # even math index: y_i = x_i - (y1 * x_{i-1})
-            y_i = (point[i] - (neighbor_point[0] * point[i - 1])) % mod
-            neighbor_point.append(y_i)
+    n = len(point)
+    y = [0] * n  # pre-allocating a list of the correct size
+    y[0] = (point[0] + a) % mod
+    x0 = point[0]  # store x1 once for reuse
+    for i in range(1, n):
+        if i % 2 == 0:
+            y[i] = (point[i] - y[0] * point[i - 1]) % mod
         else:
-            # odd math index: y_i = x_i - (x1 * y_{i-1})
-            y_i = (point[i] - (point[0] * neighbor_point[i - 1])) % mod
-            neighbor_point.append(y_i)
-    return neighbor_point
+            y[i] = (point[i] - x0 * y[i - 1]) % mod
+    return y
 
 
+@jit(nopython=True)
 def reverse_find_neighbors_assignment5(point, a, mod):
     """
     point = [y1, y2, y3, ...]
@@ -293,72 +284,89 @@ def reverse_find_neighbors_assignment5(point, a, mod):
     # odd math index: x_i = y_i + x1 * y_{i-1}
 
     """
-    point = point.copy()
-    neighbor_point = []
-
-    for i in range(len(point)):
-        if i == 0:
-            # x1 = y1 - a
-            x1 = (point[0] - a) % mod
-            neighbor_point.append(x1)
-        elif i % 2 == 0:
-            # even math index x_i = y_i + y1 * x_{i-1}
-            x_i = (point[i] + (point[0] * neighbor_point[i - 1])) % mod
-            neighbor_point.append(x_i)
+    n = len(point)
+    x = [0] * n  # pre-allocating a list of the correct size
+    x[0] = (point[0] - a) % mod
+    x0 = x[0]  # store x1 for reuse
+    y0 = point[0]  # store y1 for reuse
+    for i in range(1, n):
+        if i % 2 == 0:
+            x[i] = (point[i] + y0 * x[i - 1]) % mod
         else:
-            # odd math index x_i = y_i + x1 * y_{i-1}
-            x_i = (point[i] + (neighbor_point[0] * point[i - 1])) % mod
-            neighbor_point.append(x_i)
-    return neighbor_point
+            x[i] = (point[i] + x0 * point[i - 1]) % mod
+    return x
 
 
 # TODO: assignment6
 
 
-# TODO: assignment6
-def change_full_vector_with_matrix(
-    chars: list[int], char_ecncode_mod: int, matrix_seed
-) -> list[int]:
-    """
-    Encodes a vector using a randomly generated invertible matrix (modular arithmetic).
+# def change_full_vector_with_matrix(
+#     chars: list[int], char_ecncode_mod: int, matrix_seed
+# ) -> list[int]:
+#     """
+#     Encodes a vector using a randomly generated invertible matrix (modular arithmetic).
+#
+#     Args:
+#         chars (list[int]): Input vector of integers to encode.
+#         char_ecncode_mod (int): The modulus for modular arithmetic (e.g. 258).
+#         matrix_seed (int): Seed for the random generator to ensure reproducibility.
+#
+#     Returns:
+#         list[int]: Encoded vector (same length as input).
+#     """
+#     matrix = generate_invertible_matrix(
+#         0, char_ecncode_mod, len(chars), matrix_seed, char_ecncode_mod
+#     )
+#     vector = np.array(chars)
+#     new_vector = (vector @ matrix) % char_ecncode_mod
+#     return new_vector
+#
+#
+# def reverse_change_full_vector_with_matrix(
+#     chars: list[int], char_ecncode_mod: int, matrix_seed
+# ) -> list[int]:
+#     """
+#     Decodes a vector that was encoded with `change_full_vector_with_matrix`.
+#
+#     Args:
+#         chars (list[int]): Encoded vector of integers.
+#         char_ecncode_mod (int): The modulus for modular arithmetic (must match encoding).
+#         matrix_seed (int): The same seed used during encoding (to regenerate the matrix).
+#
+#     Returns:
+#         list[int]: Decoded vector (original input).
+#     """
+#     matrix = generate_invertible_matrix(
+#         0, char_ecncode_mod, len(chars), matrix_seed, char_ecncode_mod
+#     )
+#     inv_matrix = mod_matrix_inversion(matrix, char_ecncode_mod)
+#     vector = np.array(chars)
+#     decoded_vector = (vector @ inv_matrix) % char_ecncode_mod
+#     return decoded_vector
 
-    Args:
-        chars (list[int]): Input vector of integers to encode.
-        char_ecncode_mod (int): The modulus for modular arithmetic (e.g. 258).
-        matrix_seed (int): Seed for the random generator to ensure reproducibility.
 
-    Returns:
-        list[int]: Encoded vector (same length as input).
+def change_full_vector_with_matrix(chars: list[int], matrix_seed: int) -> np.ndarray:
     """
-    matrix = generate_invertible_matrix(
-        1, 10, len(chars), matrix_seed, char_ecncode_mod
-    )
+    Encodes a vector using a seed-based invertible matrix (no modular arithmetic).
+    """
+    n = len(chars)
+    M = generate_upper_triangular_matrix(n, 1, 258, matrix_seed)
     vector = np.array(chars)
-    new_vector = (matrix @ vector) % char_ecncode_mod
-    return new_vector
+    encoded = vector @ M
+    return encoded
 
 
 def reverse_change_full_vector_with_matrix(
-    chars: list[int], char_ecncode_mod: int, matrix_seed
-) -> list[int]:
+    encoded: list[int], matrix_seed: int
+) -> np.ndarray:
     """
-    Decodes a vector that was encoded with `change_full_vector_with_matrix`.
-
-    Args:
-        chars (list[int]): Encoded vector of integers.
-        char_ecncode_mod (int): The modulus for modular arithmetic (must match encoding).
-        matrix_seed (int): The same seed used during encoding (to regenerate the matrix).
-
-    Returns:
-        list[int]: Decoded vector (original input).
+    Decodes a vector using the same seed (regenerates the matrix).
     """
-    matrix = generate_invertible_matrix(
-        1, 10, len(chars), matrix_seed, char_ecncode_mod
-    )
-    inv_matrix = mod_matrix_inversion(matrix, char_ecncode_mod)
-    vector = np.array(chars)
-    decoded_vector = (inv_matrix @ vector) % char_ecncode_mod
-    return decoded_vector
+    n = len(encoded)
+    M = generate_upper_triangular_matrix(n, 1, 258, matrix_seed)
+    inv_M = np.linalg.inv(M)  # normal inverse
+    decoded = np.rint(encoded @ inv_M).astype(int)  # round back to int
+    return decoded
 
 
 def mod_matrix_inversion(matrix: np.ndarray, mod: int) -> np.ndarray:
@@ -379,49 +387,13 @@ def mod_matrix_inversion(matrix: np.ndarray, mod: int) -> np.ndarray:
     return np.array(M.inv_mod(mod)).astype(int)
 
 
-def generate_matrix(min_val: int, max_val: int, size: int, seed: int) -> np.ndarray:
-    """
-    Generates a random square matrix with integer entries.
-
-    Args:
-        min_val (int): Minimum value for entries.
-        max_val (int): Maximum value for entries.
-        size (int): Dimension of the matrix (size x size).
-        seed (int): Random seed for reproducibility.
-
-    Returns:
-        np.ndarray: Randomly generated square matrix.
-    """
-    np.random.seed(seed)
-    matrix = np.random.randint(min_val, max_val, (size, size))
-    return matrix
-
-
-def generate_invertible_matrix(
-    min_val: int, max_val: int, size: int, seed: int, mod: int
-) -> np.ndarray:
-    """
-    Generates a random invertible square matrix modulo `mod`.
-
-    Keeps generating random matrices until one is found
-    whose determinant is nonzero modulo `mod` and coprime with `mod`.
-
-    Args:
-        min_val (int): Minimum value for entries.
-        max_val (int): Maximum value for entries.
-        size (int): Dimension of the matrix (size x size).
-        seed (int): Random seed for reproducibility.
-        mod (int): Modulus for modular arithmetic.
-
-    Returns:
-        np.ndarray: Invertible square matrix modulo `mod`.
-    """
+def generate_invertible_matrix(n: int, seed: int) -> np.ndarray:
+    """Generate a reproducible random invertible integer matrix using a seed."""
     np.random.seed(seed)
     while True:
-        matrix = np.random.randint(min_val, max_val, (size, size))
-        M = Matrix(matrix)
-        if M.det() % mod != 0 and np.gcd(int(M.det()), mod) == 1:
-            return matrix
+        M = np.random.randint(1, 10, size=(n, n))
+        if np.linalg.det(M) != 0:  # non-singular
+            return M
 
 
 def generate_upper_triangular_matrix(
@@ -468,14 +440,14 @@ def generate_upper_triangular_matrix(
 
 
 def main():
-    chars = [i for i in range(10)]
-    seed = 42
+    chars = [i for i in range(1000)]
+    seed = 122
     mod = 258
 
-    encoded = change_full_vector_with_matrix(chars, mod, seed)
+    encoded = change_full_vector_with_matrix(chars, seed)
     print("Encoed:", encoded)
 
-    decoded = reverse_change_full_vector_with_matrix(encoded, mod, seed)
+    decoded = reverse_change_full_vector_with_matrix(encoded, seed)
     print("Decoded:", decoded)
 
 

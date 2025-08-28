@@ -39,8 +39,7 @@ def get_decoded_text(
     reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(
         decoded, char_ecncode_mod
     )
-    encoded_text = text_from_int_to_ascii(reversed_first_symbol)
-    return encoded_text
+    return "".join([chr(i) for i in reversed_first_symbol])
 
 
 def get_encoded_text_int(text, char_ecncode_mod, d_mod):
