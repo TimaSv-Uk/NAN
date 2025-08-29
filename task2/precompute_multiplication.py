@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+from numba import njit
 
 DIR = "multiplication_table"
 
@@ -37,14 +38,14 @@ if __name__ == "__main__":
     print(read_precompute_multiplication(3, 2, mod))
     print(read_precompute_multiplication(3, 2, mod))
 
-    start_time = time.perf_counter()
-    end_time = time.perf_counter()
-    print(read_precompute_multiplication(257, 257, mod))
-    execution_time = end_time - start_time
-    print(f"read_precompute_multiplication: {execution_time}")
-
-    start_time = time.perf_counter()
-    end_time = time.perf_counter()
-    print((257 * 257) % mod)
-    execution_time = end_time - start_time
-    print(f"multiplication: {execution_time}")
+    # start_time = time.perf_counter()
+    # end_time = time.perf_counter()
+    # print(read_precompute_multiplication(257, 257, mod))
+    # execution_time = end_time - start_time
+    # print(f"read_precompute_multiplication: {execution_time}")
+    #
+    # start_time = time.perf_counter()
+    # end_time = time.perf_counter()
+    # print((257 * 257) % mod)
+    # execution_time = end_time - start_time
+    # print(f"multiplication: {execution_time}")

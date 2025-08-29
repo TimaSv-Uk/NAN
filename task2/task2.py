@@ -69,10 +69,57 @@ def reverse_change_first_symbol_based_on_full_vector(
     return new_chars
 
 
+def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
+    # Load table once
+    mul_table = np.load(f"multiplication_table/mul_mod_{char_encode_mod}.npy")
+
+    current_state = chars.copy()
+    next_state = np.empty_like(current_state)
+    for a in range(d_mod):
+        find_neighbors_assignment5_with_table(
+            current_state, next_state, a, char_encode_mod, mul_table
+        )
+        current_state, next_state = next_state, current_state
+    return chars
+
+
+@njit
+def find_neighbors_assignment5_with_table(point_in, point_out, a, mod, mul_table):
+    """
+    Calculates the next state and writes it into the pre-allocated point_out array.
+    This version uses the precomputed multiplication table.
+
+    point_in: The input array (X vector)
+    point_out: The output array (Y vector)
+    """
+    n = len(point_in)
+
+    # Calculate the first element (y1) and write it to the output array
+    point_out[0] = (point_in[0] + a) % mod
+
+    # Store x1 and y1 for reuse in the loop
+    x0 = point_in[0]
+    y0 = point_out[0]
+
+    for i in range(1, n):
+        if i % 2 == 0:
+            # Even math index: y_i = x_i - (y1 * x_{i-1})
+            # Use the multiplication table for y1 * x_{i-1}
+            mult_result = mul_table[y0, point_in[i - 1]]
+            temp = point_in[i] - mult_result
+            point_out[i] = temp % mod
+        else:
+            # Odd math index: y_i = x_i - (x1 * y_{i-1})
+            # Use the multiplication table for x1 * y_{i-1}
+            mult_result = mul_table[x0, point_out[i - 1]]
+            temp = point_in[i] - mult_result
+            point_out[i] = temp % mod
+
+
 @njit
 def encode_assignment5(
-    chars: list[int], char_ecncode_mod: int, d_mod: int
-) -> list[int]:
+    chars: np.ndarray, char_ecncode_mod: int, d_mod: int
+) -> np.ndarray:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
     #
@@ -89,15 +136,38 @@ def encode_assignment5(
     # y3 = x3 - (х_1 у_2)
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
+
+    current_state = chars.copy()
+    next_state = np.empty_like(current_state)
+
     for a in range(d_mod):
-        chars = find_neighbors_assignment5(chars, a, char_ecncode_mod)
-    return chars
+        find_neighbors_assignment5(current_state, next_state, a, char_ecncode_mod)
+
+        current_state, next_state = next_state, current_state
+
+    return current_state
+
+
+@njit
+def find_neighbors_assignment5(point_in, point_out, a, mod):
+    # This function takes an input array and writes to a pre-allocated output array
+    n = len(point_in)
+    point_out[0] = (point_in[0] + a) % mod
+    x0 = point_in[0]
+
+    for i in range(1, n):
+        if i % 2 == 0:
+            temp = point_in[i] - point_out[0] * point_in[i - 1]
+            point_out[i] = temp % mod
+        else:
+            temp = point_in[i] - x0 * point_out[i - 1]
+            point_out[i] = temp % mod
 
 
 @njit
 def decode_assignment5(
-    chars: list[int], char_ecncode_mod: int, d_mod: int
-) -> list[int]:
+    chars: np.ndarray, char_ecncode_mod: int, d_mod: int
+) -> np.ndarray:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
     #
@@ -116,14 +186,21 @@ def decode_assignment5(
     x4 = y4 + (y_1 x_3)
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
+
+    current_state = chars.copy()
+    next_state = np.empty_like(current_state)
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
-        chars = reverse_find_neighbors_assignment5(chars, a, char_ecncode_mod)
-    return chars
+        reverse_find_neighbors_assignment5(
+            current_state, next_state, a, char_ecncode_mod
+        )
+        current_state, next_state = next_state, current_state  # Swap
+
+    return current_state
 
 
 @njit
-def find_neighbors_assignment5(point, a, mod):
+def find_neighbors_assignment5(point_in, point_out, a, mod):
     """
     point = (x1, x2, x3, ...)
     get Y node from X
@@ -133,27 +210,21 @@ def find_neighbors_assignment5(point, a, mod):
     # odd math index: y_i = x_i - (x1 * y_{i-1})
 
     """
-    n = len(point)
-    y = [0] * n  # pre-allocating a list of the correct size
-    y[0] = (point[0] + a) % mod
-    x0 = point[0]  # store x1 once for reuse
+    n = len(point_in)
+    point_out[0] = (point_in[0] + a) % mod
+    x0 = point_in[0]
+
     for i in range(1, n):
         if i % 2 == 0:
-            # read_precompute_multiplication
-            # print(f"{y[0]}, {point[i - 1]}")
-            # y[i] = (
-            #     point[i] - read_precompute_multiplication(y[0], point[i - 1], mod)
-            # ) % mod
-            y[i] = (point[i] - y[0] * point[i - 1]) % mod
+            temp = point_in[i] - point_out[0] * point_in[i - 1]
+            point_out[i] = temp % mod
         else:
-            # print(f"{x0}, {y[i - 1]}")
-            # y[i] = (point[i] - read_precompute_multiplication(x0, y[i - 1], mod)) % mod
-            y[i] = (point[i] - x0 * y[i - 1]) % mod
-    return y
+            temp = point_in[i] - x0 * point_out[i - 1]
+            point_out[i] = temp % mod
 
 
 @njit
-def reverse_find_neighbors_assignment5(point, a, mod):
+def reverse_find_neighbors_assignment5(point_in, point_out, a, mod):
     """
     point = [y1, y2, y3, ...]
     get X node from Y
@@ -163,21 +234,21 @@ def reverse_find_neighbors_assignment5(point, a, mod):
     # odd math index: x_i = y_i + x1 * y_{i-1}
 
     """
-    n = len(point)
-    x = [0] * n  # pre-allocating a list of the correct size
-    x[0] = (point[0] - a) % mod
-    x0 = x[0]  # store x1 for reuse
-    y0 = point[0]  # store y1 for reuse
+    n = len(point_in)
+    point_out[0] = (point_in[0] - a) % mod
+    x0 = point_out[0]  # x1 is from the new array
+    y0 = point_in[0]  # y1 is from the input array
     for i in range(1, n):
         if i % 2 == 0:
-            x[i] = (point[i] + y0 * x[i - 1]) % mod
-            # x[i] = (point[i] + read_precompute_multiplication(y0, x[i - 1], mod)) % mod
+            # temp = (point[i] + read_precompute_multiplication(y0, x[i - 1], mod)) % mod
+            temp = point_in[i] + y0 * point_out[i - 1]
+            point_out[i] = temp % mod
         else:
-            x[i] = (point[i] + x0 * point[i - 1]) % mod
-            # x[i] = (
+            # temp = (
             #     point[i] + read_precompute_multiplication(x0, point[i - 1], mod)
             # ) % mod
-    return x
+            temp = point_in[i] + x0 * point_in[i - 1]
+            point_out[i] = temp % mod
 
 
 # TODO: assignment6
