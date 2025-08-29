@@ -42,21 +42,6 @@ def get_decoded_text(
     return "".join([chr(i) for i in reversed_first_symbol])
 
 
-def get_encoded_text_int(text, char_ecncode_mod, d_mod):
-    # Import here to avoid circular imports
-    from task2 import (
-        get_change_first_symbol_based_on_full_vector,
-        encode,
-    )
-
-    chars_int = [ord(char) % char_ecncode_mod for char in text]
-    encoded_with_first = get_change_first_symbol_based_on_full_vector(
-        chars_int, char_ecncode_mod
-    )
-    encoded = encode(encoded_with_first, char_ecncode_mod, d_mod)
-    return encoded
-
-
 def write_text_to_file(file_name, text):
     with open(file_name, "w") as f:
         f.write(text)

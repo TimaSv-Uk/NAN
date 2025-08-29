@@ -1,9 +1,11 @@
 import unittest
+from assignment2 import (
+    encode_assignment2,
+    decode_assignment2,
+)
 from task2 import (
     get_change_first_symbol_based_on_full_vector,
     reverse_change_first_symbol_based_on_full_vector,
-    encode,
-    decode,
     encode_assignment5,
     decode_assignment5,
 )
@@ -25,11 +27,13 @@ class TestMathUtils(unittest.TestCase):
 
         chars_int = [ord(char) % char_ecncode_mod for char in chars]
         # Handle input file
-        chars_int_encoded = encode(chars_int, char_ecncode_mod, d_mod)
+        chars_int_encoded = encode_assignment2(chars_int, char_ecncode_mod, d_mod)
         encoded_text = text_from_int_to_ascii(chars_int_encoded)
 
         encoded_int_from_text = [ord(c) % char_ecncode_mod for c in encoded_text]
-        decoded_text_int = decode(encoded_int_from_text, char_ecncode_mod, d_mod)
+        decoded_text_int = decode_assignment2(
+            encoded_int_from_text, char_ecncode_mod, d_mod
+        )
         decoded_text = text_from_int_to_ascii(decoded_text_int)
 
         # print("Encoded text:", encoded_text)
@@ -78,7 +82,7 @@ class TestMathUtils(unittest.TestCase):
         )
 
         # Step 3: encode full list
-        encoded = encode(encoded_with_first, char_ecncode_mod, d_mod)
+        encoded = encode_assignment2(encoded_with_first, char_ecncode_mod, d_mod)
 
         # Step 4: convert to text
         encoded_text = text_from_int_to_ascii(encoded)
@@ -87,7 +91,7 @@ class TestMathUtils(unittest.TestCase):
         encoded_int_from_text = [ord(c) % char_ecncode_mod for c in encoded_text]
 
         # Step 6: decode
-        decoded = decode(encoded_int_from_text, char_ecncode_mod, d_mod)
+        decoded = decode_assignment2(encoded_int_from_text, char_ecncode_mod, d_mod)
 
         # Step 7: reverse change of first symbol (M⁻¹)
         reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(
@@ -109,8 +113,8 @@ class TestMathUtils(unittest.TestCase):
 
         char_ecncode_mod = 256
         d_mod = 128
-        encoded = get_encoded_text(chars, char_ecncode_mod, d_mod, encode)
-        decoded = get_decoded_text(encoded, char_ecncode_mod, d_mod, decode)
+        encoded = get_encoded_text(chars, char_ecncode_mod, d_mod, encode_assignment2)
+        decoded = get_decoded_text(encoded, char_ecncode_mod, d_mod, decode_assignment2)
 
         # print("Encoded text:", encoded)
         # print("Decoded text:", decoded)
@@ -139,10 +143,10 @@ class TestMathUtils(unittest.TestCase):
             for text1, text2 in test_cases:
                 with self.subTest(text1=text1, text2=text2):
                     encoded_text1 = get_encoded_text(
-                        text1, char_ecncode_mod, d_mod, encode
+                        text1, char_ecncode_mod, d_mod, encode_assignment2
                     )
                     encoded_text2 = get_encoded_text(
-                        text2, char_ecncode_mod, d_mod, encode
+                        text2, char_ecncode_mod, d_mod, encode_assignment2
                     )
                     percent = text_sameness_percentage(encoded_text1, encoded_text2)
 
@@ -170,7 +174,9 @@ class TestMathUtils(unittest.TestCase):
         char_ecncode_mod = 256
         d_mod = 128
 
-        original_algorithm = get_encoded_text(text, char_ecncode_mod, d_mod, encode)
+        original_algorithm = get_encoded_text(
+            text, char_ecncode_mod, d_mod, encode_assignment2
+        )
         assignment5_algorithm = get_encoded_text(
             text, char_ecncode_mod, d_mod, encode_assignment5
         )

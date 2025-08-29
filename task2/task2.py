@@ -1,133 +1,7 @@
 from sympy import Matrix
 import numpy as np
-from numba import jit
-
-
-def encode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int) -> list[int]:
-    chars = encoded_text_int.copy()
-    for a in range(d_mod):
-        if a % 2 == 0:
-            chars = find_neigbors_N_a(chars, a, char_ecncode_mod)
-        else:
-            chars = find_neigbors_M_a(chars, a, char_ecncode_mod)
-    return chars
-
-
-def decode(encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int) -> list[int]:
-    chars = encoded_text_int.copy()
-    for a in reversed(range(d_mod)):
-        if a % 2 == 0:
-            chars = reverce_find_neigbors_N_a(chars, a, char_ecncode_mod)
-            # print(f"After reverse N_a({a}): {chars}")
-        else:
-            chars = reverce_find_neigbors_M_a(chars, a, char_ecncode_mod)
-            # print(f"After reverse M_a({a}): {chars}")
-    return chars
-
-
-def find_neigbors_N_a(point, a, mod):
-    """
-    # N_a(X) = [x1+a, z2, z3, ..., zn]
-    # де:
-    # z2 = x1 * (x1 + a) - x2
-    # z3 = x1 * z2 - x3
-    # ...,
-    # zn = x1 * z(n-1) - xn
-    """
-    point = point.copy()
-    neigbor_point = []
-
-    for i, coord in enumerate(point):
-        if i == 0:
-            x1 = (point[0] + a) % mod
-            neigbor_point.append(x1)
-        elif i == 1:
-            z2 = (point[0] * (point[0] + a) - point[i]) % mod
-            neigbor_point.append(z2)
-        else:
-            z_i = (point[0] * neigbor_point[-1] - point[i]) % mod
-            neigbor_point.append(z_i)
-    return neigbor_point
-
-
-def find_neigbors_M_a(point, a, mod):
-    """
-    # M_a(X) = [y1+a, z2, z3, ..., zn]
-    # де:
-    # z2 = y1 * (y1 + a) - x2
-    # z3 = (y1 + a) * z2 - x3
-    """
-    point = point.copy()
-    neigbor_point = []
-
-    for i, coord in enumerate(point):
-        if i == 0:
-            y1 = (point[0] + a) % mod
-            neigbor_point.append(y1)
-        elif i == 1:
-            z2 = (point[0] * (point[0] + a) - point[i]) % mod
-            neigbor_point.append(z2)
-        else:
-            z_i = ((point[0] + a) * neigbor_point[-1] - point[i]) % mod
-            neigbor_point.append(z_i)
-    return neigbor_point
-
-
-# NOTE: decode
-# n від - as
-# n - a1
-# M as-1
-# last step N - a1
-def reverce_find_neigbors_N_a(point, a, mod):
-    """
-    # Reverse of N_a(X) = [x1+a, z2, z3, ..., zn]
-    # where:
-    # z2 = x1 * (x1 + a) - x2  =>  x2 = x1 * (x1 + a) - z2
-    # z3 = x1 * z2 - x3  =>  x3 = x1 * z2 - z3
-    # ...
-    # zn = x1 * z(n-1) - xn  =>  xn = x1 * z(n-1) - zn
-    """
-    point = point.copy()
-    original_point = []
-
-    for i in range(len(point)):
-        if i == 0:
-            x1 = (point[0] - a) % mod
-            original_point.append(x1)
-        elif i == 1:
-            x2 = (original_point[0] * (original_point[0] + a) - point[i]) % mod
-            original_point.append(x2)
-        else:
-            xi = (original_point[0] * point[i - 1] - point[i]) % mod
-            original_point.append(xi)
-    return original_point
-
-
-def reverce_find_neigbors_M_a(point, a, mod):
-    # Reverse of M_a(X) = [y1+a, z2, z3, ..., zn]
-    # where:
-    # z2 = y1 * (y1 + a) - x2  =>  x2 = y1 * (y1 + a) - z2
-    # z3 = (y1 + a) * z2 - x3  =>  x3 = (y1 + a) * z2 - z3
-    # ...
-    # zn = (y1 + a) * z(n-1) - xn  =>  xn = (y1 + a) * z(n-1) - zn
-
-    point = point.copy()
-    original_point = []
-
-    for i in range(len(point)):
-        if i == 0:
-            # x1 = z1 - a
-            x1 = (point[0] - a) % mod
-            original_point.append(x1)
-        elif i == 1:
-            # x2 = x1 * (x1 + a) - z2
-            x2 = (original_point[0] * (original_point[0] + a) - point[i]) % mod
-            original_point.append(x2)
-        else:
-            # xi = (x1 + a) * z(i-1) - zi
-            xi = ((original_point[0] + a) * point[i - 1] - point[i]) % mod
-            original_point.append(xi)
-    return original_point
+from numba import njit
+from precompute_multiplication import read_precompute_multiplication
 
 
 def get_change_first_symbol_based_on_full_vector(
@@ -195,9 +69,9 @@ def reverse_change_first_symbol_based_on_full_vector(
     return new_chars
 
 
-@jit(nopython=True)
+@njit
 def encode_assignment5(
-    encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
+    chars: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
@@ -215,15 +89,14 @@ def encode_assignment5(
     # y3 = x3 - (х_1 у_2)
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
-    chars = encoded_text_int.copy()
     for a in range(d_mod):
         chars = find_neighbors_assignment5(chars, a, char_ecncode_mod)
     return chars
 
 
-@jit(nopython=True)
+@njit
 def decode_assignment5(
-    encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
+    chars: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
@@ -243,14 +116,13 @@ def decode_assignment5(
     x4 = y4 + (y_1 x_3)
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
-    chars = encoded_text_int.copy()
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
         chars = reverse_find_neighbors_assignment5(chars, a, char_ecncode_mod)
     return chars
 
 
-@jit(nopython=True)
+@njit
 def find_neighbors_assignment5(point, a, mod):
     """
     point = (x1, x2, x3, ...)
@@ -267,13 +139,20 @@ def find_neighbors_assignment5(point, a, mod):
     x0 = point[0]  # store x1 once for reuse
     for i in range(1, n):
         if i % 2 == 0:
+            # read_precompute_multiplication
+            # print(f"{y[0]}, {point[i - 1]}")
+            # y[i] = (
+            #     point[i] - read_precompute_multiplication(y[0], point[i - 1], mod)
+            # ) % mod
             y[i] = (point[i] - y[0] * point[i - 1]) % mod
         else:
+            # print(f"{x0}, {y[i - 1]}")
+            # y[i] = (point[i] - read_precompute_multiplication(x0, y[i - 1], mod)) % mod
             y[i] = (point[i] - x0 * y[i - 1]) % mod
     return y
 
 
-@jit(nopython=True)
+@njit
 def reverse_find_neighbors_assignment5(point, a, mod):
     """
     point = [y1, y2, y3, ...]
@@ -292,8 +171,12 @@ def reverse_find_neighbors_assignment5(point, a, mod):
     for i in range(1, n):
         if i % 2 == 0:
             x[i] = (point[i] + y0 * x[i - 1]) % mod
+            # x[i] = (point[i] + read_precompute_multiplication(y0, x[i - 1], mod)) % mod
         else:
             x[i] = (point[i] + x0 * point[i - 1]) % mod
+            # x[i] = (
+            #     point[i] + read_precompute_multiplication(x0, point[i - 1], mod)
+            # ) % mod
     return x
 
 
