@@ -12,17 +12,28 @@ from task2 import (
 
 
 def main():
-    char_ecncode_mod = 258
+    char_ecncode_mod = 256
     d_mod = 128
-    # text = [i for i in range(258)]
-    # text = np.array([i % char_ecncode_mod for i in range(10)], dtype=np.int64)
-    # # text = "".join([f"{i}" for i in range(50000)])
-    # text = [i % char_ecncode_mod for i in range(10)]
-    # text = np.array([i % char_ecncode_mod for i in range(1000000)], dtype=np.int64)
-    text = np.array([i % char_ecncode_mod for i in range(5659400)], dtype=np.int64)
-    # text = np.arange(5659400, dtype=np.int32)
-    # print(np.arange(10, dtype=np.int32))
-    # 5659400
+
+    # NOTE:
+    # uint8 can store values from 0 to 255. lower X in unit_X gets faster execution time
+    sizes = {
+        "10 B": 10,
+        "1 MB": 1_000_000,
+        "5 MB": 5_659_400,
+        "10 MB": 10_000_000,
+        "100 MB": 100_000_000,
+        "1 GB": 1_000_000_000,
+    }
+
+    selected_size_label = "100 MB"
+    size_in_elements = sizes[selected_size_label]
+
+    text = np.array(
+        [i % char_ecncode_mod for i in range(size_in_elements)], dtype=np.uint8
+    )
+
+    print(f"Generated array of size: {selected_size_label} ({text.nbytes} bytes)\n")
 
     start_time = time.perf_counter()
     encoded = encode_assignment5_with_table(text, char_ecncode_mod, d_mod)
@@ -30,7 +41,6 @@ def main():
     execution_time = end_time - start_time
     print(f"WITH TABLE Encoded_vector execution_time: {execution_time}")
 
-    # encoded_vector = get_encoded_text(text, char_ecncode_mod, d_mod, encode_assignment5)
     start_time = time.perf_counter()
     encoded = encode_assignment5(text, char_ecncode_mod, d_mod)
     end_time = time.perf_counter()
@@ -42,8 +52,13 @@ def main():
     decoded_vector = decode_assignment5(encoded, char_ecncode_mod, d_mod)
     end_time = time.perf_counter()
     execution_time = end_time - start_time
-    print(f"Decoded_vector execution_time: {execution_time}")
+    print(f"Decoded_vector execution_time: {execution_time}\n")
     # print(f"Decoded_vector: {decoded_vector}")
+
+    if np.array_equal(text, decoded_vector):
+        print("decoded_vector == text")
+    else:
+        print("decoded_vector =! text")
 
 
 if __name__ == "__main__":

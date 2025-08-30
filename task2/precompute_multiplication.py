@@ -32,7 +32,7 @@ def read_precompute_multiplication(x: int, y: int, mod: int) -> int:
 
 
 if __name__ == "__main__":
-    mod = 258
+    mod = 256
     precompute_multiplication(mod)
 
     print(read_precompute_multiplication(3, 2, mod))

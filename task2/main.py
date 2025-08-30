@@ -7,7 +7,7 @@ from helpers import (
     get_decoded_text,
     get_encoded_text,
 )
-from task2 import encode, decode_assignment2, encode_assignment5, decode_assignment5
+from task2 import encode_assignment5, decode_assignment5
 
 
 def main():

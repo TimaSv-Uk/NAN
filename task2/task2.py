@@ -4,6 +4,17 @@ from numba import njit
 from precompute_multiplication import read_precompute_multiplication
 
 
+# NOTE:
+# val = (x * y) & mod  # instead of % 256, only works if your modulus is a power of two
+def multiply_mod(x: int, mod: int):
+    # Check if mod is power of two
+    if (mod & (mod - 1)) == 0:
+        mask = mod - 1
+        return (x) & mask
+    else:
+        return (x) % mod
+
+
 def get_change_first_symbol_based_on_full_vector(
     chars: list[int], char_ecncode_mod: int
 ) -> list[int]:
@@ -72,6 +83,7 @@ def reverse_change_first_symbol_based_on_full_vector(
 def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
     # Load table once
     mul_table = np.load(f"multiplication_table/mul_mod_{char_encode_mod}.npy")
+    mul_table = mul_table.astype(np.uint16)  # optional for speed & memory
 
     current_state = chars.copy()
     next_state = np.empty_like(current_state)
@@ -80,11 +92,13 @@ def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod
             current_state, next_state, a, char_encode_mod, mul_table
         )
         current_state, next_state = next_state, current_state
-    return chars
+    return current_state
 
 
 @njit
-def find_neighbors_assignment5_with_table(point_in, point_out, a, mod, mul_table):
+def find_neighbors_assignment5_with_table(
+    point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int, mul_table
+) -> None:
     """
     Calculates the next state and writes it into the pre-allocated point_out array.
     This version uses the precomputed multiplication table.
@@ -107,13 +121,15 @@ def find_neighbors_assignment5_with_table(point_in, point_out, a, mod, mul_table
             # Use the multiplication table for y1 * x_{i-1}
             mult_result = mul_table[y0, point_in[i - 1]]
             temp = point_in[i] - mult_result
-            point_out[i] = temp % mod
+            # point_out[i] = temp % mod
+            point_out[i] = temp & mod
         else:
             # Odd math index: y_i = x_i - (x1 * y_{i-1})
             # Use the multiplication table for x1 * y_{i-1}
             mult_result = mul_table[x0, point_out[i - 1]]
             temp = point_in[i] - mult_result
-            point_out[i] = temp % mod
+            # point_out[i] = temp % mod
+            point_out[i] = temp & mod
 
 
 @njit
@@ -137,7 +153,7 @@ def encode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars.copy()
+    current_state = chars
     next_state = np.empty_like(current_state)
 
     for a in range(d_mod):
@@ -146,22 +162,6 @@ def encode_assignment5(
         current_state, next_state = next_state, current_state
 
     return current_state
-
-
-@njit
-def find_neighbors_assignment5(point_in, point_out, a, mod):
-    # This function takes an input array and writes to a pre-allocated output array
-    n = len(point_in)
-    point_out[0] = (point_in[0] + a) % mod
-    x0 = point_in[0]
-
-    for i in range(1, n):
-        if i % 2 == 0:
-            temp = point_in[i] - point_out[0] * point_in[i - 1]
-            point_out[i] = temp % mod
-        else:
-            temp = point_in[i] - x0 * point_out[i - 1]
-            point_out[i] = temp % mod
 
 
 @njit
@@ -187,7 +187,7 @@ def decode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars.copy()
+    current_state = chars
     next_state = np.empty_like(current_state)
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
@@ -200,9 +200,11 @@ def decode_assignment5(
 
 
 @njit
-def find_neighbors_assignment5(point_in, point_out, a, mod):
+def find_neighbors_assignment5(
+    point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
+) -> None:
     """
-    point = (x1, x2, x3, ...)
+    point_in = (x1, x2, x3, ...)
     get Y node from X
 
     # index 1: y1 = x1 + a
@@ -214,19 +216,26 @@ def find_neighbors_assignment5(point_in, point_out, a, mod):
     point_out[0] = (point_in[0] + a) % mod
     x0 = point_in[0]
 
+    # NOTE:
+    # val = (x) & mod  # instead of % 258, only works if your modulus is a power of two
     for i in range(1, n):
         if i % 2 == 0:
             temp = point_in[i] - point_out[0] * point_in[i - 1]
-            point_out[i] = temp % mod
+            # point_out[i] = temp % mod
+            point_out[i] = temp & mod
         else:
             temp = point_in[i] - x0 * point_out[i - 1]
-            point_out[i] = temp % mod
+            # point_out[i] = temp % mod
+            point_out[i] = temp & mod
+    return None
 
 
 @njit
-def reverse_find_neighbors_assignment5(point_in, point_out, a, mod):
+def reverse_find_neighbors_assignment5(
+    point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
+) -> None:
     """
-    point = [y1, y2, y3, ...]
+    point_in = [y1, y2, y3, ...]
     get X node from Y
 
     # index 1: x1 = y1 - a
@@ -238,17 +247,23 @@ def reverse_find_neighbors_assignment5(point_in, point_out, a, mod):
     point_out[0] = (point_in[0] - a) % mod
     x0 = point_out[0]  # x1 is from the new array
     y0 = point_in[0]  # y1 is from the input array
+
+    # NOTE:
+    # val = (x) & mod  # instead of % 258, only works if your modulus is a power of two
     for i in range(1, n):
         if i % 2 == 0:
             # temp = (point[i] + read_precompute_multiplication(y0, x[i - 1], mod)) % mod
             temp = point_in[i] + y0 * point_out[i - 1]
-            point_out[i] = temp % mod
+            # point_out[i] = temp % mod
+            point_out[i] = temp & mod
         else:
             # temp = (
             #     point[i] + read_precompute_multiplication(x0, point[i - 1], mod)
             # ) % mod
             temp = point_in[i] + x0 * point_in[i - 1]
-            point_out[i] = temp % mod
+            # point_out[i] = temp % mod
+            point_out[i] = temp & mod
+    return None
 
 
 # TODO: assignment6

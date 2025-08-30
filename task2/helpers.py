@@ -1,5 +1,6 @@
 import base64
 import os
+from numpy import np
 from typing import Callable
 
 
@@ -79,6 +80,12 @@ def text_sameness_percentage(text1: str, text2: str) -> float:
         return 0.0
     same_symbols = sum(1 for a, b in zip(text1, text2) if a == b)
     return same_symbols / len(text1)
+
+
+def load_file_bites(file_name: str) -> np.ndarray:
+    with open(file_name, "rb") as file:
+        np_arr = np.frombuffer(file.read(), dtype=np.uint8)
+    return np_arr
 
 
 if __name__ == "__main__":
