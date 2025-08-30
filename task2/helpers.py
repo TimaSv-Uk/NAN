@@ -1,7 +1,35 @@
 import base64
 import os
-from numpy import np
+import numpy as np
 from typing import Callable
+from task2 import encode_assignment5, decode_assignment5
+
+
+def encode_file(
+    file_path="test_files/data2.txt",
+    save_encoded_file_path="test_files/data2_encoded.txt",
+):
+    char_ecncode_mod = 256
+    d_mod = 128
+    file_bites = load_file_to_bites(file_path)
+    print(file_bites)
+    encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, d_mod)
+
+    print(encoded_bites)
+    save_file_from_bites(save_encoded_file_path, encoded_bites)
+
+
+def decode_file(
+    encoded_file_path="test_files/data2_encoded.txt",
+    save_decoded_file_path="test_files/data2_decoded.txt",
+):
+    char_ecncode_mod = 256
+    d_mod = 128
+    file_bites = load_file_to_bites(encoded_file_path)
+    print(file_bites)
+    decoded_bites = decode_assignment5(file_bites, char_ecncode_mod, d_mod)
+    print(decoded_bites)
+    save_file_from_bites(save_decoded_file_path, decoded_bites)
 
 
 def get_encoded_text(
@@ -82,11 +110,26 @@ def text_sameness_percentage(text1: str, text2: str) -> float:
     return same_symbols / len(text1)
 
 
-def load_file_bites(file_name: str) -> np.ndarray:
+def load_file_to_bites(file_name: str) -> np.ndarray:
+    """Load file contents into a NumPy uint8 array."""
+    if not os.path.exists(file_name):
+        print(f"Error: File '{file_name}' does not exist.")
+        return np.array([], dtype=np.uint8)
     with open(file_name, "rb") as file:
-        np_arr = np.frombuffer(file.read(), dtype=np.uint8)
-    return np_arr
+        bites = np.frombuffer(file.read(), dtype=np.uint8)
+    return np.array(bites, dtype=np.uint8)
+
+
+def save_file_from_bites(file_name: str, data: np.ndarray) -> None:
+    """Save a NumPy uint8 array back to a file."""
+    try:
+        with open(file_name, "wb") as file:
+            file.write(data.tobytes())
+        print(f"File saved successfully: {file_name}")
+    except Exception as e:
+        print(f"Error writing '{file_name}': {e}")
 
 
 if __name__ == "__main__":
-    print(text_sameness_percentage("bon", "bob"))
+    encode_file()
+    decode_file()

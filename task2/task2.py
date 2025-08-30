@@ -120,16 +120,16 @@ def find_neighbors_assignment5_with_table(
             # Even math index: y_i = x_i - (y1 * x_{i-1})
             # Use the multiplication table for y1 * x_{i-1}
             mult_result = mul_table[y0, point_in[i - 1]]
-            temp = point_in[i] - mult_result
+            point_out[i] = point_in[i] - mult_result
             # point_out[i] = temp % mod
-            point_out[i] = temp & mod
+            # point_out[i] = temp & mod
         else:
             # Odd math index: y_i = x_i - (x1 * y_{i-1})
             # Use the multiplication table for x1 * y_{i-1}
             mult_result = mul_table[x0, point_out[i - 1]]
-            temp = point_in[i] - mult_result
+            point_out[i] = point_in[i] - mult_result
             # point_out[i] = temp % mod
-            point_out[i] = temp & mod
+            # point_out[i] = temp & mod
 
 
 @njit
@@ -153,7 +153,7 @@ def encode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars
+    current_state = chars.copy()
     next_state = np.empty_like(current_state)
 
     for a in range(d_mod):
@@ -187,7 +187,7 @@ def decode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars
+    current_state = chars.copy()
     next_state = np.empty_like(current_state)
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
@@ -213,20 +213,22 @@ def find_neighbors_assignment5(
 
     """
     n = len(point_in)
+    # point_out[0] = point_in[0] + a
     point_out[0] = (point_in[0] + a) % mod
     x0 = point_in[0]
 
     # NOTE:
     # val = (x) & mod  # instead of % 258, only works if your modulus is a power of two
+    # automaticli aply mod 256 is use uint8
     for i in range(1, n):
         if i % 2 == 0:
-            temp = point_in[i] - point_out[0] * point_in[i - 1]
+            point_out[i] = point_in[i] - point_out[0] * point_in[i - 1]
             # point_out[i] = temp % mod
-            point_out[i] = temp & mod
+            # point_out[i] = temp & mod
         else:
-            temp = point_in[i] - x0 * point_out[i - 1]
+            point_out[i] = point_in[i] - x0 * point_out[i - 1]
             # point_out[i] = temp % mod
-            point_out[i] = temp & mod
+            # point_out[i] = temp & mod
     return None
 
 
@@ -244,25 +246,24 @@ def reverse_find_neighbors_assignment5(
 
     """
     n = len(point_in)
+    # point_out[0] = point_in[0] - a
     point_out[0] = (point_in[0] - a) % mod
     x0 = point_out[0]  # x1 is from the new array
     y0 = point_in[0]  # y1 is from the input array
 
     # NOTE:
     # val = (x) & mod  # instead of % 258, only works if your modulus is a power of two
+    # automaticli aply mod 256 is use uint8
+
     for i in range(1, n):
         if i % 2 == 0:
-            # temp = (point[i] + read_precompute_multiplication(y0, x[i - 1], mod)) % mod
-            temp = point_in[i] + y0 * point_out[i - 1]
+            point_out[i] = point_in[i] + y0 * point_out[i - 1]
             # point_out[i] = temp % mod
-            point_out[i] = temp & mod
+            # point_out[i] = temp & mod
         else:
-            # temp = (
-            #     point[i] + read_precompute_multiplication(x0, point[i - 1], mod)
-            # ) % mod
-            temp = point_in[i] + x0 * point_in[i - 1]
+            point_out[i] = point_in[i] + x0 * point_in[i - 1]
             # point_out[i] = temp % mod
-            point_out[i] = temp & mod
+            # point_out[i] = temp & mod
     return None
 
 
