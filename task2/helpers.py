@@ -1,8 +1,14 @@
+import time
 import base64
 import os
 import numpy as np
 from typing import Callable
-from task2 import encode_assignment5, decode_assignment5
+from task2 import (
+    encode_assignment5,
+    decode_assignment5,
+    change_first_symbol_based_on_full_vector,
+    reverse_change_first_symbol_based_on_full_vector,
+)
 
 
 def encode_file(
@@ -12,10 +18,8 @@ def encode_file(
     char_ecncode_mod = 256
     d_mod = 128
     file_bites = load_file_to_bites(file_path)
-    print(file_bites)
+    file_bites = change_first_symbol_based_on_full_vector(file_bites)
     encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, d_mod)
-
-    print(encoded_bites)
     save_file_from_bites(save_encoded_file_path, encoded_bites)
 
 
@@ -26,9 +30,9 @@ def decode_file(
     char_ecncode_mod = 256
     d_mod = 128
     file_bites = load_file_to_bites(encoded_file_path)
-    print(file_bites)
     decoded_bites = decode_assignment5(file_bites, char_ecncode_mod, d_mod)
-    print(decoded_bites)
+    decoded_bites = reverse_change_first_symbol_based_on_full_vector(decoded_bites)
+
     save_file_from_bites(save_decoded_file_path, decoded_bites)
 
 
@@ -40,11 +44,11 @@ def get_encoded_text(
 ) -> str:
     # Import here to avoid circular imports
     from task2 import (
-        get_change_first_symbol_based_on_full_vector,
+        change_first_symbol_based_on_full_vector,
     )
 
     chars_int = [ord(char) % char_ecncode_mod for char in text]
-    encoded_with_first = get_change_first_symbol_based_on_full_vector(
+    encoded_with_first = change_first_symbol_based_on_full_vector(
         chars_int, char_ecncode_mod
     )
     encoded = encode_function(encoded_with_first, char_ecncode_mod, d_mod)
@@ -131,5 +135,16 @@ def save_file_from_bites(file_name: str, data: np.ndarray) -> None:
 
 
 if __name__ == "__main__":
-    encode_file()
-    decode_file()
+    file_path = "test_files/csv_123mb.csv"
+    save_encoded_file_path = "test_files/csv_123mb_encoded.csv"
+    save_decoded_file_path = "test_files/csv_123mb_decoded.csv"
+    start_time = time.perf_counter()
+    encode_file(file_path, save_encoded_file_path)
+    end_time = time.perf_counter()
+    execution_time = end_time - start_time
+    print(f"Encode file execution_time: {execution_time}")
+    start_time = time.perf_counter()
+    decode_file(save_encoded_file_path, save_decoded_file_path)
+    end_time = time.perf_counter()
+    execution_time = end_time - start_time
+    print(f"Decode file execution_time: {execution_time}")

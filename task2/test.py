@@ -4,7 +4,7 @@ from assignment2 import (
     decode_assignment2,
 )
 from task2 import (
-    get_change_first_symbol_based_on_full_vector,
+    change_first_symbol_based_on_full_vector,
     reverse_change_first_symbol_based_on_full_vector,
     encode_assignment5,
     decode_assignment5,
@@ -53,7 +53,7 @@ class TestMathUtils(unittest.TestCase):
         for text in test_cases:
             with self.subTest(text=text):
                 chars = [ord(t) % char_ecncode_mod for t in text]
-                new_vector = get_change_first_symbol_based_on_full_vector(
+                new_vector = change_first_symbol_based_on_full_vector(
                     chars, char_ecncode_mod
                 )
 
@@ -77,7 +77,7 @@ class TestMathUtils(unittest.TestCase):
         # Step 1: convert text to int list
         chars_int = [ord(char) % char_ecncode_mod for char in chars]
         # Step 2: apply change to first symbol
-        encoded_with_first = get_change_first_symbol_based_on_full_vector(
+        encoded_with_first = change_first_symbol_based_on_full_vector(
             chars_int, char_ecncode_mod
         )
 

@@ -5,19 +5,14 @@ from precompute_multiplication import read_precompute_multiplication
 
 
 # NOTE:
+# np.uint8 used inted of  modulo operation only works with  mod 256
+
+# NOTE:
 # val = (x * y) & mod  # instead of % 256, only works if your modulus is a power of two
-def multiply_mod(x: int, mod: int):
-    # Check if mod is power of two
-    if (mod & (mod - 1)) == 0:
-        mask = mod - 1
-        return (x) & mask
-    else:
-        return (x) % mod
 
 
-def get_change_first_symbol_based_on_full_vector(
-    chars: list[int], char_ecncode_mod: int
-) -> list[int]:
+@njit
+def change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
     """
     Calculates a new value for the first character in 'text' based on a weighted sum
     of all characters' modulo values, then applies 'char_ecncode_mod' to the result.
@@ -30,54 +25,78 @@ def get_change_first_symbol_based_on_full_vector(
         list[int]: A list of integers with the modified first character's value
                    and the original modulo values for the rest.
     """
-    new_chars = list(chars)
+    new_chars = chars.copy().astype(np.uint8)
     # Make sure there are at least 2 elements
     if len(new_chars) < 2:
         return new_chars
 
-    M = 1
+    # NOTE:
+    # Initialize M with a uint8 data type to ensure all subsequent
+    # multiplications also wrap around at 256.
+
+    M = np.uint8(1)
+
     for char_val in new_chars[1:]:
         M *= 2 * char_val + 1
-        M %= char_ecncode_mod
+        # M %= char_ecncode_mod
 
-    original_first_char_val = (new_chars[0] * M) % char_ecncode_mod
+    # original_first_char_val = (new_chars[0] * M) % char_ecncode_mod
+    original_first_char_val = new_chars[0] * M
     new_chars[0] = original_first_char_val
 
     return new_chars
 
 
-def reverse_change_first_symbol_based_on_full_vector(
-    chars: list[int], char_ecncode_mod: int
-) -> list[int]:
+@njit
+def reverse_change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
     """
-    Why the inverse always exists
-    For any integer xi, 2 * xi is even.
-    So, 2 * xi + 1 is always odd.
+    Reverses the encoding performed by the `change_first_symbol_based_on_full_vector`
+    function.
 
-    M = (2 * x2 + 1) * (2 * x3+1) ... (2 * xn+1)
+    Args:
+        chars (np.ndarray): The input NumPy array of encoded integer values.
 
-    x1' => x1 * M
-    x1 = x1' / M
+    Returns:
+        np.ndarray: The decoded NumPy array.
     """
-    new_chars = list(chars)
-    # Make sure there are at least 2 elements
+    new_chars = chars.copy().astype(np.uint8)
     if len(new_chars) < 2:
         return new_chars
 
-    M = 1
+    # Recalculate M from the array
+    M = np.uint8(1)
     for char_val in new_chars[1:]:
         M *= 2 * char_val + 1
-        M %= char_ecncode_mod
 
-    try:
-        M_inv = pow(M, -1, char_ecncode_mod)
-    except ValueError:
-        raise ValueError(f"M = {M} has no modular inverse modulo {char_ecncode_mod}")
+    # Get the modular inverse of M.
+    # The inverse always exists because M is a product of odd numbers,
+    # and 256 is a power of 2, so they are always coprime.
+    M_inv = modInverse(M, 256)
 
-    original_first_char_val = (new_chars[0] * M_inv) % char_ecncode_mod
+    # Decode the first character
+    original_first_char_val = new_chars[0] * M_inv
     new_chars[0] = original_first_char_val
 
     return new_chars
+
+
+@njit
+def modInverse(a: int, m: int) -> int:
+    """
+    Calculates the modular multiplicative inverse of a modulo m
+    using the Extended Euclidean Algorithm.
+    This function is Numba-compatible.
+    """
+    m0, x0, x1 = m, 0, 1
+    if m == 1:
+        return 0
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0:
+        x1 += m0
+    return x1
 
 
 def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
@@ -153,7 +172,8 @@ def encode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars.copy()
+    current_state = chars.copy().astype(np.uint8)
+    # current_state = chars.copy()
     next_state = np.empty_like(current_state)
 
     for a in range(d_mod):
@@ -187,7 +207,8 @@ def decode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars.copy()
+    current_state = chars.copy().astype(np.uint8)
+    # current_state = chars.copy()
     next_state = np.empty_like(current_state)
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
@@ -222,11 +243,11 @@ def find_neighbors_assignment5(
     # automaticli aply mod 256 is use uint8
     for i in range(1, n):
         if i % 2 == 0:
-            point_out[i] = point_in[i] - point_out[0] * point_in[i - 1]
+            point_out[i] = np.uint8(point_in[i] - point_out[0] * point_in[i - 1])
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
         else:
-            point_out[i] = point_in[i] - x0 * point_out[i - 1]
+            point_out[i] = np.uint8(point_in[i] - x0 * point_out[i - 1])
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
     return None
@@ -252,16 +273,17 @@ def reverse_find_neighbors_assignment5(
     y0 = point_in[0]  # y1 is from the input array
 
     # NOTE:
+    # np.uint8 used inted of  modulo operation only works with  mod 256
     # val = (x) & mod  # instead of % 258, only works if your modulus is a power of two
     # automaticli aply mod 256 is use uint8
 
     for i in range(1, n):
         if i % 2 == 0:
-            point_out[i] = point_in[i] + y0 * point_out[i - 1]
+            point_out[i] = np.uint8(point_in[i] + y0 * point_out[i - 1])
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
         else:
-            point_out[i] = point_in[i] + x0 * point_in[i - 1]
+            point_out[i] = np.uint8(point_in[i] + x0 * point_in[i - 1])
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
     return None
