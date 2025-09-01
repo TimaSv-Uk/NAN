@@ -1,0 +1,67 @@
+Dobryj vechir Timofiju!
+
+Podyvyvsja na rezul'taty.Grafiky vygljadajut' dobre.
+
+Davajte doslidzhuvaty scho bude pry zmini grafu na nastupnyj novyj:
+
+(x_x1, x_2,..., x_n) I [y_1,y_2,..., y_n) koly
+
+x_2-y_2=y_1x_1
+x_3-y_3=x_1y_2
+x_4-y_4=y_1x_3
+x_5-y_5=x_1y_4
+
+x_6-y_6=y_1x_5
+x_7-y_7=x_1y_6
+...
+x_n-y_n= (x_1y_n-1 abo y_1x_n-1 v zalezhnosti vid togo parne n chy neparne).
+
+Pratsjujemo z lyshkamy za modulem 256.
+
+Doslidzhennja za chasom vykonannja nepotribni bo shvydkist' pry zmini grafu ne bude minjatysja.
+
+Ale vymirjuvannja efektu pry zmini odnogo symvolu mozhlyvo bude inshe.
+
+Z pobazhannjamy novyh uspihiv.
+
+Vasul' Oleksandrovych
+
+--------------------------------
+
+Добрий вечір Тимофію!
+
+Подивився на результати. Графіки виглядають добре.
+
+Давайте досліджувати що буде при зміні графу на наступний новий:
+
+(х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
+
+х_2 - у_2 = у_1х_1
+х_3 - у_3 = х_1у_2
+х_4 - у_4 = у_1х_3
+х_5 - у_5 = х_1у_4
+
+х_6 - у_6 = у_1х_5
+х_7 - у_7 = х_1у_6
+
+
+y_1 = x_1+a1
+y2 = x2 - ( (x_1+a1) * x1 )
+y3 = x3 - (х_1 у_2)
+
+
+Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем. 
+
+
+...
+х_п - у_п = (х_1у_п-1 або у_1х_п-1 в залежності від того, парне п чи непарне).
+
+Працюємо з лишками за модулем 256.
+
+Дослідження за часом виконання непотрібні, бо швидкість при зміні графу не буде мінятися.
+
+Але вимірювання ефекту при зміні одного символу можливо буде інше.
+
+З побажаннями нових успіхів.
+
+Василь Олександрович
