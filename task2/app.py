@@ -5,6 +5,38 @@ from PySide6.QtGui import QAction, QIntValidator, QFont, QTextCursor
 from helpers import encode_file, decode_file
 
 
+class EncodeWorker(QtCore.QThread):
+    finished = QtCore.Signal(bool, str)
+
+    def __init__(self, file_path, save_path):
+        super().__init__()
+        self.file_path = file_path
+        self.save_path = save_path
+
+    def run(self):
+        try:
+            encode_file(self.file_path, self.save_path)
+            self.finished.emit(True, "File encoded successfully!")
+        except Exception as e:
+            self.finished.emit(False, str(e))
+
+
+class DecodeWorker(QtCore.QThread):
+    finished = QtCore.Signal(bool, str)
+
+    def __init__(self, file_path, save_path):
+        super().__init__()
+        self.file_path = file_path
+        self.save_path = save_path
+
+    def run(self):
+        try:
+            encode_file(self.file_path, self.save_path)
+            self.finished.emit(True, "File decoded successfully!")
+        except Exception as e:
+            self.finished.emit(False, str(e))
+
+
 class MainPage(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -134,7 +166,15 @@ class MainPage(QtWidgets.QWidget):
             return
 
         try:
-            encode_file(file_path, save_path)
+            self.loader = QtWidgets.QProgressDialog("Encoding...", None, 0, 0, self)
+            self.loader.setWindowTitle("Please wait")
+            self.loader.setWindowModality(QtCore.Qt.WindowModal)
+            self.loader.setCancelButton(None)
+            self.loader.show()
+            # encode_file(file_path, save_path)
+            self.worker = EncodeWorker(file_path, save_path)
+            self.worker.finished.connect(self.on_done)
+            self.worker.start()
 
             self.update_status(f"[ENCODED] File encoded successfully!")
             self.update_status(f"   Input: {file_path}")
@@ -142,14 +182,8 @@ class MainPage(QtWidgets.QWidget):
             if number:
                 self.update_status(f"   Number: {number}")
 
-            QtWidgets.QMessageBox.information(
-                self, "Success", "File has been encoded successfully!"
-            )
         except Exception as e:
             self.update_status(f"[ERROR] Error encoding file: {str(e)}")
-            QtWidgets.QMessageBox.critical(
-                self, "Error", f"Failed to encode file:\n{str(e)}"
-            )
 
     def decode_file_action(self):
         file_path, save_path, number = self.validate_inputs()
@@ -157,7 +191,15 @@ class MainPage(QtWidgets.QWidget):
             return
 
         try:
-            decode_file(file_path, save_path)
+            self.loader = QtWidgets.QProgressDialog("Decoding...", None, 0, 0, self)
+            self.loader.setWindowTitle("Please wait")
+            self.loader.setWindowModality(QtCore.Qt.WindowModal)
+            self.loader.setCancelButton(None)
+            self.loader.show()
+            # encode_file(file_path, save_path)
+            self.worker = DecodeWorker(file_path, save_path)
+            self.worker.finished.connect(self.on_done)
+            self.worker.start()
 
             self.update_status(f"[DECODED] File decoded successfully!")
             self.update_status(f"   Input: {file_path}")
@@ -165,14 +207,15 @@ class MainPage(QtWidgets.QWidget):
             if number:
                 self.update_status(f"   Number: {number}")
 
-            QtWidgets.QMessageBox.information(
-                self, "Success", "File has been decoded successfully!"
-            )
         except Exception as e:
             self.update_status(f"[ERROR] Error decoding file: {str(e)}")
-            QtWidgets.QMessageBox.critical(
-                self, "Error", f"Failed to decode file:\n{str(e)}"
-            )
+
+    def on_done(self, success, message):
+        self.loader.close()
+        if success:
+            QtWidgets.QMessageBox.information(self, "Success", message)
+        else:
+            QtWidgets.QMessageBox.critical(self, "Error", message)
 
 
 class PageOne(QtWidgets.QWidget):

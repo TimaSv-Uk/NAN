@@ -2,6 +2,7 @@ import os
 import time
 import numpy as np
 from numba import njit
+import pickle
 
 DIR = "multiplication_table"
 
@@ -11,8 +12,16 @@ def precompute_multiplication(mod: int):
     for i in range(mod):
         for j in range(mod):
             arr[i][j] = i * j
-    print(arr)
     np.save(f"multiplication_table/mul_mod_{mod}.npy", arr)
+
+
+def precompute_multiplication_set(mod: int):
+    set = {}
+    for i in range(mod):
+        for j in range(mod):
+            set[(i, j)] = i * j
+    with open(f"multiplication_table/mul_mod_{mod}.pkl", "wb") as file:
+        pickle.dump(set, file)
 
 
 def ensure_mul_table_exist(mod: int) -> str:
@@ -31,12 +40,29 @@ def read_precompute_multiplication(x: int, y: int, mod: int) -> int:
     return mmap_arr[x, y]
 
 
+def read_precompute_multiplication_set(x: int, y: int, mod: int) -> int:
+    path = f"multiplication_table/mul_mod_{mod}.pkl"
+    with open(path, "rb") as file:
+        arr = pickle.load(file)
+    return arr[(x, y)]
+
+
 if __name__ == "__main__":
     mod = 256
     precompute_multiplication(mod)
+    precompute_multiplication_set(mod)
+    # NOTE: Pickle (.pkl) read is ~10x faster than NumPy .npy
+    start_time = time.perf_counter()
+    end_time = time.perf_counter()
+    print(read_precompute_multiplication(3, 2, mod))
+    execution_time = end_time - start_time
+    print(f"NP.ARRAY npy read_precompute_multiplication: {execution_time}")
 
-    print(read_precompute_multiplication(3, 2, mod))
-    print(read_precompute_multiplication(3, 2, mod))
+    start_time = time.perf_counter()
+    end_time = time.perf_counter()
+    print(read_precompute_multiplication_set(3, 2, mod))
+    execution_time = end_time - start_time
+    print(f"SET pkl read_precompute_multiplication_set: {execution_time}")
 
     # start_time = time.perf_counter()
     # end_time = time.perf_counter()

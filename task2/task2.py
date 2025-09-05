@@ -1,7 +1,5 @@
-from sympy import Matrix
 import numpy as np
 from numba import njit
-from precompute_multiplication import read_precompute_multiplication
 
 
 # NOTE:
@@ -173,7 +171,6 @@ def encode_assignment5(
     """
 
     current_state = chars.copy().astype(np.uint8)
-    # current_state = chars.copy()
     next_state = np.empty_like(current_state)
 
     for a in range(d_mod):
@@ -208,7 +205,6 @@ def decode_assignment5(
     """
 
     current_state = chars.copy().astype(np.uint8)
-    # current_state = chars.copy()
     next_state = np.empty_like(current_state)
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
@@ -244,10 +240,12 @@ def find_neighbors_assignment5(
     for i in range(1, n):
         if i % 2 == 0:
             point_out[i] = np.uint8(point_in[i] - point_out[0] * point_in[i - 1])
+            # temp = (point_in[i] - point_out[0] * point_in[i - 1])
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
         else:
             point_out[i] = np.uint8(point_in[i] - x0 * point_out[i - 1])
+            # temp = (point_in[i] - x0 * point_out[i - 1])
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
     return None
@@ -289,119 +287,10 @@ def reverse_find_neighbors_assignment5(
     return None
 
 
-# TODO: assignment6
-
-
-def change_full_vector_with_matrix(
-    chars: np.ndarray, matrix_seed: int, mod: int = 256
-) -> np.ndarray:
-    """
-    Encodes a vector using a seed-based invertible matrix (no modular arithmetic).
-    """
-    n = len(chars)
-    M = generate_upper_triangular_matrix_of_bytes(n, matrix_seed)
-    print(M)
-    encoded = (chars @ M) % mod
-
-    return encoded
-
-
-def reverse_change_full_vector_with_matrix(
-    encoded: np.ndarray, matrix_seed: int, mod: int = 256
-) -> np.ndarray:
-    """
-    Decodes a vector using the same seed (regenerates the matrix).
-    """
-    n = len(encoded)
-    M = generate_upper_triangular_matrix_of_bytes(n, matrix_seed)
-    print(M)
-
-    inv_M = invert_upper_triangular_mod(M, mod)
-    decoded = (encoded @ inv_M) % mod
-    return decoded
-
-
-def mod_matrix_inversion(matrix: np.ndarray, mod: int) -> np.ndarray:
-    """
-    Computes the modular inverse of a square matrix.
-
-    Args:
-        matrix (np.ndarray): Square matrix to invert.
-        mod (int): Modulus for modular arithmetic.
-
-    Returns:
-        np.ndarray: Inverse matrix modulo `mod`.
-
-    Raises:
-        ValueError: If the matrix is not invertible modulo `mod`.
-    """
-    M = Matrix(matrix)
-    return np.array(M.inv_mod(mod)).astype(int)
-
-
-def generate_upper_triangular_matrix_of_bytes(
-    size: int, seed: int | None = None
-) -> np.ndarray:
-    """
-    Generate an upper triangular matrix with:
-      - Diagonal elements are 1.
-      - Elements below diagonal are 0.
-
-    Args:
-        size (int): Matrix size (size x size).
-        seed (int | None): Random seed for reproducibility.
-
-    Returns:
-        np.ndarray: The generated matrix (dtype=uint8).
-    """
-    if seed is not None:
-        np.random.seed(seed)
-
-    matrix = np.zeros((size, size), int)
-
-    # Set diagonal elements to 1
-    np.fill_diagonal(matrix, 1)
-
-    # all rows above the diagonal non-zero random odd numbers
-
-    for i in range(size):
-        for j in range(i + 1, size):
-            val = np.random.randint(1, 256)
-            if val % 2 == 0:
-                val += 1
-                if val > 255:
-                    val -= 2
-            matrix[i, j] = val
-    #
-    return matrix
-
-
-# TODO:
-def invert_upper_triangular_mod(M, mod=256):
-    return M
-
-
 def main():
-    # chars = np.array([i for i in range(100)], int)
-    #
-    # seed = 42
-    # mod = 256
-    # encoded = change_full_vector_with_matrix(chars, seed)
-    # decode = reverse_change_full_vector_with_matrix(encoded, seed)
-    # print(chars)
-    # print(encoded)
-    # print(decode)
     mod = 256
     chars = np.arange(100, dtype=int)
     seed = 42
-
-    M = generate_upper_triangular_matrix_of_bytes(len(chars), seed)
-    inv_M = invert_upper_triangular_mod(M, mod)
-
-    encoded = (chars @ M) % mod
-    decoded = (encoded @ inv_M) % mod
-
-    print(np.all(decoded == chars))  # should print True
 
 
 if __name__ == "__main__":
