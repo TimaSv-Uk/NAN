@@ -49,6 +49,7 @@ def read_precompute_multiplication_set(x: int, y: int, mod: int) -> int:
 
 if __name__ == "__main__":
     mod = 256
+
     precompute_multiplication(mod)
     precompute_multiplication_set(mod)
     # NOTE: Pickle (.pkl) read is ~10x faster than NumPy .npy

@@ -10,6 +10,7 @@ from task2 import (
 
 def main():
     char_ecncode_mod = 256
+    char_ecncode_mod = 512
     d_mod = 128
 
     # NOTE:

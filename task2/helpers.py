@@ -3,11 +3,15 @@ import base64
 import os
 import numpy as np
 from typing import Callable
+from change_first_bite import (
+    change_first_symbol_based_on_full_vector,
+    reverse_change_first_symbol_based_on_full_vector,
+    change_first_symbol_based_on_random_vector,
+    reverse_change_first_symbol_based_on_random_vector,
+)
 from task2 import (
     encode_assignment5,
     decode_assignment5,
-    change_first_symbol_based_on_full_vector,
-    reverse_change_first_symbol_based_on_full_vector,
 )
 
 
@@ -17,8 +21,9 @@ def encode_file(
 ):
     char_ecncode_mod = 256
     d_mod = 128
+    seed = 42
     file_bites = load_file_to_bites(file_path)
-    file_bites = change_first_symbol_based_on_full_vector(file_bites)
+    file_bites = change_first_symbol_based_on_random_vector(file_bites, seed)
     encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, d_mod)
     save_file_from_bites(save_encoded_file_path, encoded_bites)
 
@@ -29,9 +34,12 @@ def decode_file(
 ):
     char_ecncode_mod = 256
     d_mod = 128
+    seed = 42
     file_bites = load_file_to_bites(encoded_file_path)
     decoded_bites = decode_assignment5(file_bites, char_ecncode_mod, d_mod)
-    decoded_bites = reverse_change_first_symbol_based_on_full_vector(decoded_bites)
+    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
+        decoded_bites, seed
+    )
 
     save_file_from_bites(save_decoded_file_path, decoded_bites)
 
@@ -43,9 +51,6 @@ def get_encoded_text(
     encode_function: Callable[[list[int], int, int], list[int]],
 ) -> str:
     # Import here to avoid circular imports
-    from task2 import (
-        change_first_symbol_based_on_full_vector,
-    )
 
     chars_int = [ord(char) % char_ecncode_mod for char in text]
     encoded_with_first = change_first_symbol_based_on_full_vector(
@@ -63,9 +68,6 @@ def get_decoded_text(
     decode_function: Callable[[list[int], int, int], list[int]],
 ) -> str:
     # Import here to avoid circular imports
-    from task2 import (
-        reverse_change_first_symbol_based_on_full_vector,
-    )
 
     encoded_int_from_text = [ord(char) % char_ecncode_mod for char in encoded_text]
     decoded = decode_function(encoded_int_from_text, char_ecncode_mod, d_mod)

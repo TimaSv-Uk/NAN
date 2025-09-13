@@ -9,94 +9,6 @@ from numba import njit
 # val = (x * y) & mod  # instead of % 256, only works if your modulus is a power of two
 
 
-@njit
-def change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
-    """
-    Calculates a new value for the first character in 'text' based on a weighted sum
-    of all characters' modulo values, then applies 'char_ecncode_mod' to the result.
-
-    Args:
-        text (str): The input string.
-        char_ecncode_mod (int): The modulus for character encoding and final calculation.
-
-    Returns:
-        list[int]: A list of integers with the modified first character's value
-                   and the original modulo values for the rest.
-    """
-    new_chars = chars.copy().astype(np.uint8)
-    # Make sure there are at least 2 elements
-    if len(new_chars) < 2:
-        return new_chars
-
-    # NOTE:
-    # Initialize M with a uint8 data type to ensure all subsequent
-    # multiplications also wrap around at 256.
-
-    M = np.uint8(1)
-
-    for char_val in new_chars[1:]:
-        M *= 2 * char_val + 1
-        # M %= char_ecncode_mod
-
-    # original_first_char_val = (new_chars[0] * M) % char_ecncode_mod
-    original_first_char_val = new_chars[0] * M
-    new_chars[0] = original_first_char_val
-
-    return new_chars
-
-
-@njit
-def reverse_change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
-    """
-    Reverses the encoding performed by the `change_first_symbol_based_on_full_vector`
-    function.
-
-    Args:
-        chars (np.ndarray): The input NumPy array of encoded integer values.
-
-    Returns:
-        np.ndarray: The decoded NumPy array.
-    """
-    new_chars = chars.copy().astype(np.uint8)
-    if len(new_chars) < 2:
-        return new_chars
-
-    # Recalculate M from the array
-    M = np.uint8(1)
-    for char_val in new_chars[1:]:
-        M *= 2 * char_val + 1
-
-    # Get the modular inverse of M.
-    # The inverse always exists because M is a product of odd numbers,
-    # and 256 is a power of 2, so they are always coprime.
-    M_inv = modInverse(M, 256)
-
-    # Decode the first character
-    original_first_char_val = new_chars[0] * M_inv
-    new_chars[0] = original_first_char_val
-
-    return new_chars
-
-
-@njit
-def modInverse(a: int, m: int) -> int:
-    """
-    Calculates the modular multiplicative inverse of a modulo m
-    using the Extended Euclidean Algorithm.
-    This function is Numba-compatible.
-    """
-    m0, x0, x1 = m, 0, 1
-    if m == 1:
-        return 0
-    while a > 1:
-        q = a // m
-        m, a = a % m, m
-        x0, x1 = x1 - q * x0, x0
-    if x1 < 0:
-        x1 += m0
-    return x1
-
-
 def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
     # Load table once
     mul_table = np.load(f"multiplication_table/mul_mod_{char_encode_mod}.npy")
@@ -287,11 +199,7 @@ def reverse_find_neighbors_assignment5(
     return None
 
 
-def main():
-    mod = 256
-    chars = np.arange(100, dtype=int)
-    seed = 42
-
-
 if __name__ == "__main__":
-    main()
+    mod = 256
+    chars = np.array([10, 23, 23, 12, 123, 3213, 1])
+    seed = 42

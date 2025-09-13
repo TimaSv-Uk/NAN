@@ -114,6 +114,28 @@ def generate_upper_triangular_matrix_of_bytes(
     return matrix
 
 
+def generate_vector_of_bytes(size: int, seed: int | None = None) -> np.ndarray:
+    """
+    Generate vector or random bites:
+
+    Args:
+        size (int): Vector size (size x size).
+        seed (int | None): Random seed for reproducibility.
+
+    Returns:
+        np.ndarray: The generated vector (dtype=uint8).
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    vector = np.empty(size, np.uint8)
+
+    for i in range(size):
+        val = np.random.randint(1, 256)
+        vector[i] = val
+    return vector
+
+
 def main():
     mod = 256
     chars = np.random.randint(1, mod - 1, size=10, dtype=int)
@@ -135,6 +157,7 @@ def main():
     print(encoded)
     print(decode)
     print(np.all(decoded == chars))  # should print True
+
 
 if __name__ == "__main__":
     main()
