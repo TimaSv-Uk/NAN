@@ -48,16 +48,16 @@ def get_encoded_text(
     text: str,
     char_ecncode_mod: int,
     d_mod: int,
-    encode_function: Callable[[list[int], int, int], list[int]],
 ) -> str:
-    # Import here to avoid circular imports
-
-    chars_int = [ord(char) % char_ecncode_mod for char in text]
-    encoded_with_first = change_first_symbol_based_on_full_vector(
-        chars_int, char_ecncode_mod
+    chars_uint8 = np.array(
+        [ord(char) % char_ecncode_mod for char in text], dtype=np.uint8
     )
-    encoded = encode_function(encoded_with_first, char_ecncode_mod, d_mod)
-    encoded_text = text_from_int_to_ascii(encoded)
+
+    encoded_with_first = change_first_symbol_based_on_full_vector(chars_uint8)
+
+    encoded = encode_assignment5(encoded_with_first, char_ecncode_mod, d_mod)
+
+    encoded_text = "".join(chr(int(x)) for x in encoded)
     return encoded_text
 
 
@@ -65,16 +65,16 @@ def get_decoded_text(
     encoded_text: str,
     char_ecncode_mod: int,
     d_mod: int,
-    decode_function: Callable[[list[int], int, int], list[int]],
 ) -> str:
-    # Import here to avoid circular imports
-
-    encoded_int_from_text = [ord(char) % char_ecncode_mod for char in encoded_text]
-    decoded = decode_function(encoded_int_from_text, char_ecncode_mod, d_mod)
-    reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(
-        decoded, char_ecncode_mod
+    encoded_uint8 = np.array(
+        [ord(char) % char_ecncode_mod for char in encoded_text], dtype=np.uint8
     )
-    return "".join([chr(i) for i in reversed_first_symbol])
+
+    decoded = decode_assignment5(encoded_uint8, char_ecncode_mod, d_mod)
+
+    reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(decoded)
+
+    return "".join(chr(int(x)) for x in reversed_first_symbol)
 
 
 def write_text_to_file(file_name, text):
