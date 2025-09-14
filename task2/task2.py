@@ -82,7 +82,7 @@ def encode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars.copy().astype(np.uint8)
+    current_state = chars.astype(np.uint8).copy()
     next_state = np.empty_like(current_state)
 
     for a in range(d_mod):
@@ -116,7 +116,7 @@ def decode_assignment5(
     # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
     """
 
-    current_state = chars.copy().astype(np.uint8)
+    current_state = chars.astype(np.uint8).copy()
     next_state = np.empty_like(current_state)
     # Replace reversed(range(d_mod)) with a backward range for @jit
     for a in range(d_mod - 1, -1, -1):
@@ -199,7 +199,173 @@ def reverse_find_neighbors_assignment5(
     return None
 
 
+# NOTE:
+# change_first_bite functions, if i put this in difirent file njit becomes realy slow and probsbly dont work
+
+
+@njit
+def change_first_symbol_based_on_random_vector(
+    chars: np.ndarray, seed: int
+) -> np.ndarray:
+    new_chars = chars.astype(np.uint8).copy()
+    if len(new_chars) < 2:
+        return new_chars
+
+    M = generate_M_from_seed(seed)
+
+    new_chars[0] = chars[0] * M
+
+    return new_chars
+
+
+@njit
+def reverse_change_first_symbol_based_on_random_vector(
+    chars: np.ndarray, seed: int
+) -> np.ndarray:
+    new_chars = chars.astype(np.uint8).copy()
+    if len(new_chars) < 2:
+        return new_chars
+
+    M = generate_M_from_seed(seed)
+
+    M_inv = modInverse(M, 256)
+
+    new_chars[0] = chars[0] * M_inv
+
+    return new_chars
+
+
+@njit
+def change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
+    """
+    Calculates a new value for the first character in 'text' based on a weighted sum
+    of all characters' modulo values, then applies 'char_ecncode_mod' to the result.
+
+    Args:
+        text (str): The input string.
+        char_ecncode_mod (int): The modulus for character encoding and final calculation.
+
+    Returns:
+        list[int]: A list of integers with the modified first character's value
+                   and the original modulo values for the rest.
+    """
+    new_chars = chars.astype(np.uint8).copy()
+    # Make sure there are at least 2 elements
+    if len(new_chars) < 2:
+        return new_chars
+
+    # NOTE:
+    # Initialize M with a uint8 data type to ensure all subsequent
+    # multiplications also wrap around at 256.
+
+    M = np.uint8(1)
+
+    for char_val in new_chars[1:]:
+        M *= 2 * char_val + 1
+        # M %= char_ecncode_mod
+
+    # original_first_char_val = (new_chars[0] * M) % char_ecncode_mod
+    original_first_char_val = new_chars[0] * M
+    new_chars[0] = original_first_char_val
+
+    return new_chars
+
+
+@njit
+def reverse_change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
+    """
+    Reverses the encoding performed by the `change_first_symbol_based_on_full_vector`
+    function.
+
+    Args:
+        chars (np.ndarray): The input NumPy array of encoded integer values.
+
+    Returns:
+        np.ndarray: The decoded NumPy array.
+    """
+    new_chars = chars.astype(np.uint8).copy()
+
+    if len(new_chars) < 2:
+        return new_chars
+
+    # Recalculate M from the array
+    M = np.uint8(1)
+    for char_val in new_chars[1:]:
+        M *= 2 * char_val + 1
+
+    # Get the modular inverse of M.
+    # The inverse always exists because M is a product of odd numbers,
+    # and 256 is a power of 2, so they are always coprime.
+    M_inv = modInverse(M, 256)
+
+    # Decode the first character
+    original_first_char_val = new_chars[0] * M_inv
+    new_chars[0] = original_first_char_val
+
+    return new_chars
+
+
+@njit
+def generate_M_from_seed(seed: int) -> np.uint8:
+    """Generate M value using seed without massive vector."""
+    np.random.seed(seed)
+    M = np.uint8(1)
+    # small fixed number of iterations instead of file size
+    for _ in range(32):
+        val = np.random.randint(1, 256)
+        M = (M * (2 * val + 1)) % 256  # Keep in uint8 range
+    return M
+
+
+@njit
+def generate_vector_of_bytes(size: int, seed: int | None = None) -> np.ndarray:
+    """
+    Generate vector or random bites:
+
+    Args:
+        size (int): Vector size (size x size).
+        seed (int | None): Random seed for reproducibility.
+
+    Returns:
+        np.ndarray: The generated vector (dtype=uint8).
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    vector = np.empty(size, np.uint8)
+
+    for i in range(size):
+        val = np.random.randint(1, 256)
+        vector[i] = val
+    return vector
+
+
+@njit
+def modInverse(a: int, m: int) -> int:
+    """
+    Calculates the modular multiplicative inverse of a modulo m
+    using the Extended Euclidean Algorithm.
+    This function is Numba-compatible.
+    """
+    m0, x0, x1 = m, 0, 1
+    if m == 1:
+        return 0
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0:
+        x1 += m0
+    return x1
+
+
 if __name__ == "__main__":
     mod = 256
     chars = np.array([10, 23, 23, 12, 123, 3213, 1])
-    seed = 42
+    seed = 32312
+
+    new_arr = change_first_symbol_based_on_random_vector(chars, seed)
+    old_arr = reverse_change_first_symbol_based_on_random_vector(new_arr, seed)
+    print(chars)
+    print(new_arr)
+    print(old_arr)

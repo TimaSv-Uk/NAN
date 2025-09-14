@@ -2,26 +2,24 @@ import time
 import base64
 import os
 import numpy as np
-from typing import Callable
-from change_first_bite import (
+
+from task2 import (
+    encode_assignment5,
+    decode_assignment5,
     change_first_symbol_based_on_full_vector,
     reverse_change_first_symbol_based_on_full_vector,
     change_first_symbol_based_on_random_vector,
     reverse_change_first_symbol_based_on_random_vector,
-)
-from task2 import (
-    encode_assignment5,
-    decode_assignment5,
 )
 
 
 def encode_file(
     file_path="test_files/data2.txt",
     save_encoded_file_path="test_files/data2_encoded.txt",
+    seed=42,
 ):
     char_ecncode_mod = 256
     d_mod = 128
-    seed = 42
     file_bites = load_file_to_bites(file_path)
     file_bites = change_first_symbol_based_on_random_vector(file_bites, seed)
     encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, d_mod)
@@ -31,10 +29,10 @@ def encode_file(
 def decode_file(
     encoded_file_path="test_files/data2_encoded.txt",
     save_decoded_file_path="test_files/data2_decoded.txt",
+    seed=42,
 ):
     char_ecncode_mod = 256
     d_mod = 128
-    seed = 42
     file_bites = load_file_to_bites(encoded_file_path)
     decoded_bites = decode_assignment5(file_bites, char_ecncode_mod, d_mod)
     decoded_bites = reverse_change_first_symbol_based_on_random_vector(
@@ -140,6 +138,10 @@ if __name__ == "__main__":
     file_path = "test_files/csv_123mb.csv"
     save_encoded_file_path = "test_files/csv_123mb_encoded.csv"
     save_decoded_file_path = "test_files/csv_123mb_decoded.csv"
+    # file_path = "test_files/vid_31mb.mp4"
+    # save_encoded_file_path = "test_files/vid_31mb.mp4"
+    # save_decoded_file_path = "test_files/vid_31mb.mp4"
+
     start_time = time.perf_counter()
     encode_file(file_path, save_encoded_file_path)
     end_time = time.perf_counter()
