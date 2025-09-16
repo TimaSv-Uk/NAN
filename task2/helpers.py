@@ -114,6 +114,13 @@ def text_sameness_percentage(text1: str, text2: str) -> float:
     return same_symbols / len(text1)
 
 
+def bites_sameness_percentage(bites1: [int], bites2: [int]) -> float:
+    if len(bites1) != len(bites2) or len(bites1) == 0:
+        return 0.0
+    same_symbols = sum(1 for a, b in zip(bites1, bites2) if a == b)
+    return same_symbols / len(bites1)
+
+
 def load_file_to_bites(file_name: str) -> np.ndarray:
     """Load file contents into a NumPy uint8 array."""
     if not os.path.exists(file_name):

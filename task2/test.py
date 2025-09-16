@@ -1,9 +1,19 @@
 import unittest
 from helpers import (
     text_sameness_percentage,
+    bites_sameness_percentage,
     get_encoded_text,
     get_decoded_text,
+    load_file_to_bites,
 )
+from task2 import (
+    encode_assignment5,
+    change_first_symbol_based_on_random_vector,
+    change_first_symbol_based_on_full_vector,
+)
+
+import numpy as np
+import random
 
 
 class TestMathUtils(unittest.TestCase):
@@ -56,6 +66,128 @@ class TestMathUtils(unittest.TestCase):
                         self.assertEqual(encoded_text1, encoded_text2)
                     else:
                         self.assertNotEqual(encoded_text1, encoded_text2)
+
+    def test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_random_vector(
+        self,
+    ):
+        file_path = "test_files/img.jpg"
+        # file_path = "test_files/data2.txt"
+
+        save_results_path = "test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_random_vector.txt"
+
+        seed = 42
+
+        file_bites = load_file_to_bites(file_path)  # np.array dtype=uint8
+
+        file_bites_based_on_random_vector = change_first_symbol_based_on_random_vector(
+            file_bites, seed
+        )
+        encoded_original = encode_assignment5(
+            file_bites_based_on_random_vector, 256, 128
+        )
+
+        # Ensure deterministic encoding
+        encoded_original_2 = encode_assignment5(
+            file_bites_based_on_random_vector, 256, 128
+        )
+        self.assertTrue(np.array_equal(encoded_original, encoded_original_2))
+
+        length = len(file_bites)
+        quarter_indices = [length // 4, length // 2, 3 * length // 4, length - 1]
+
+        with open(save_results_path, "w", encoding="utf-8") as f:
+            for i, idx in enumerate(quarter_indices, 1):
+                with self.subTest(quarter=i):
+                    modified_bites = file_bites.copy()
+
+                    # Pick a random new value different from original
+                    original_val = int(modified_bites[idx])
+                    new_val = random.randint(0, 255)
+                    while new_val == original_val:
+                        new_val = random.randint(0, 255)
+
+                    modified_bites[idx] = np.uint8(new_val)
+
+                    modified_bites = change_first_symbol_based_on_random_vector(
+                        modified_bites, seed
+                    )
+
+                    encoded_modified = encode_assignment5(modified_bites, 256, 128)
+
+                    percent = bites_sameness_percentage(
+                        encoded_original, encoded_modified
+                    )
+
+                    # Write to file
+                    f.write(f"Quarter {i} change at index {idx}\n")
+                    f.write(
+                        f"Original byte: {original_val}, Modified byte: {new_val}\n"
+                    )
+                    f.write(f"Sameness %: {percent}%\n")
+                    f.write("-" * 50 + "\n")
+
+                    self.assertLess(percent, 100)
+
+    def test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_full_vector(
+        self,
+    ):
+        file_path = "test_files/img.jpg"
+        # file_path = "test_files/data2.txt"
+
+        save_results_path = "test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_full_vector.txt"
+
+        seed = 42
+
+        file_bites = load_file_to_bites(file_path)  # np.array dtype=uint8
+
+        file_bites_based_on_random_vector = change_first_symbol_based_on_full_vector(
+            file_bites
+        )
+        encoded_original = encode_assignment5(
+            file_bites_based_on_random_vector, 256, 128
+        )
+
+        # Ensure deterministic encoding
+        encoded_original_2 = encode_assignment5(
+            file_bites_based_on_random_vector, 256, 128
+        )
+        self.assertTrue(np.array_equal(encoded_original, encoded_original_2))
+
+        length = len(file_bites)
+        quarter_indices = [length // 4, length // 2, 3 * length // 4, length - 1]
+
+        with open(save_results_path, "w", encoding="utf-8") as f:
+            for i, idx in enumerate(quarter_indices, 1):
+                with self.subTest(quarter=i):
+                    modified_bites = file_bites.copy()
+
+                    # Pick a random new value different from original
+                    original_val = int(modified_bites[idx])
+                    new_val = random.randint(0, 255)
+                    while new_val == original_val:
+                        new_val = random.randint(0, 255)
+
+                    modified_bites[idx] = np.uint8(new_val)
+
+                    modified_bites = change_first_symbol_based_on_full_vector(
+                        modified_bites
+                    )
+
+                    encoded_modified = encode_assignment5(modified_bites, 256, 128)
+
+                    percent = bites_sameness_percentage(
+                        encoded_original, encoded_modified
+                    )
+
+                    # Write to file
+                    f.write(f"Quarter {i} change at index {idx}\n")
+                    f.write(
+                        f"Original byte: {original_val}, Modified byte: {new_val}\n"
+                    )
+                    f.write(f"Sameness %: {percent}%\n")
+                    f.write("-" * 50 + "\n")
+
+                    self.assertLess(percent, 100)
 
     def test_text_sameness_encoding_resultsassignment5(self):
         char_ecncode_mod = 256
