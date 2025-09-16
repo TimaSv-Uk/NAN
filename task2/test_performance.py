@@ -10,7 +10,6 @@ from task2 import (
 
 def main():
     char_ecncode_mod = 256
-    char_ecncode_mod = 512
     d_mod = 128
 
     # NOTE:
@@ -34,7 +33,8 @@ def main():
 
     # vid_31mb.mp4
     # big_img.JPG
-    text = load_file_to_bites("test_files/vid_31mb.mp4")
+    # text = load_file_to_bites("test_files/vid_31mb.mp4")
+    text = load_file_to_bites("test_files/csv_123mb.csv")
 
     print(f"Generated array of size: {text.shape} bytes\n")
 

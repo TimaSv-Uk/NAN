@@ -30,6 +30,43 @@ class TestMathUtils(unittest.TestCase):
         # print("Decoded text:", decoded)
         self.assertEqual(chars, decoded)
 
+    def test_text_sameness_encoding_resultsassignment5(self):
+        char_ecncode_mod = 256
+        d_mod = 128
+
+        with open("test_files/data2.txt", "r") as f:
+            data2 = f.read()
+
+        with open("test_files/data2_changed.txt", "r") as f:
+            data2_changed = f.read()
+        test_cases = [
+            ("3456701289", "3456701280"),
+            ("abc123", "abc124"),
+            ("vsdvd", "vsdve"),
+            ("same text", "same text"),  # to test sameness
+            ("short", "longer text"),
+            (data2, data2_changed),
+        ]
+        with open(
+            "test_text_sameness_encoding_results_assignment5.txt", "w", encoding="utf-8"
+        ) as f:
+            for text1, text2 in test_cases:
+                with self.subTest(text1=text1, text2=text2):
+                    encoded_text1 = get_encoded_text(text1, char_ecncode_mod, d_mod)
+                    encoded_text2 = get_encoded_text(text2, char_ecncode_mod, d_mod)
+                    percent = text_sameness_percentage(encoded_text1, encoded_text2)
+
+                    f.write(f"Text 1: {text1}\n")
+                    f.write(f"Text 2: {text2}\n")
+                    f.write(f"Encoded Text 1: {encoded_text1}\n")
+                    f.write(f"Encoded Text 2: {encoded_text2}\n")
+                    f.write(f"Sameness %: {percent}%\n")
+                    f.write("-" * 50 + "\n")
+                    if text1 == text2:
+                        self.assertEqual(encoded_text1, encoded_text2)
+                    else:
+                        self.assertNotEqual(encoded_text1, encoded_text2)
+
     def test_text_sameness_encoding_results(self):
         char_ecncode_mod = 256
         d_mod = 128
@@ -70,11 +107,14 @@ class TestMathUtils(unittest.TestCase):
     def test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_random_vector(
         self,
     ):
-        file_path = "test_files/img.jpg"
         # file_path = "test_files/data2.txt"
+        file_name = "img.jpg"
+        # file_name = "vid_31mb.mp4"
+        file_path = f"test_files/{file_name}"
 
-        save_results_path = "test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_random_vector.txt"
-
+        save_results_path = f"test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_random_vector_{
+            file_name.split('.')[0]
+        }.txt"
         seed = 42
 
         file_bites = load_file_to_bites(file_path)  # np.array dtype=uint8
@@ -109,7 +149,7 @@ class TestMathUtils(unittest.TestCase):
                     modified_bites[idx] = np.uint8(new_val)
 
                     modified_bites = change_first_symbol_based_on_random_vector(
-                        modified_bites, seed
+                        modified_bites, seed + 1
                     )
 
                     encoded_modified = encode_assignment5(modified_bites, 256, 128)
@@ -131,12 +171,15 @@ class TestMathUtils(unittest.TestCase):
     def test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_full_vector(
         self,
     ):
-        file_path = "test_files/img.jpg"
+        file_name = "img.jpg"
         # file_path = "test_files/data2.txt"
+        # file_name = "vid_31mb.mp4"
 
-        save_results_path = "test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_full_vector.txt"
+        file_path = f"test_files/{file_name}"
 
-        seed = 42
+        save_results_path = f"test_text_sameness_FILE_encoding_results_change_first_symbol_based_on_full_vector_{
+            file_name.split('.')[0]
+        }.txt"
 
         file_bites = load_file_to_bites(file_path)  # np.array dtype=uint8
 
@@ -188,43 +231,6 @@ class TestMathUtils(unittest.TestCase):
                     f.write("-" * 50 + "\n")
 
                     self.assertLess(percent, 100)
-
-    def test_text_sameness_encoding_resultsassignment5(self):
-        char_ecncode_mod = 256
-        d_mod = 128
-
-        with open("test_files/data2.txt", "r") as f:
-            data2 = f.read()
-
-        with open("test_files/data2_changed.txt", "r") as f:
-            data2_changed = f.read()
-        test_cases = [
-            ("3456701289", "3456701280"),
-            ("abc123", "abc124"),
-            ("vsdvd", "vsdve"),
-            ("same text", "same text"),  # to test sameness
-            ("short", "longer text"),
-            (data2, data2_changed),
-        ]
-        with open(
-            "test_text_sameness_encoding_results_assignment5.txt", "w", encoding="utf-8"
-        ) as f:
-            for text1, text2 in test_cases:
-                with self.subTest(text1=text1, text2=text2):
-                    encoded_text1 = get_encoded_text(text1, char_ecncode_mod, d_mod)
-                    encoded_text2 = get_encoded_text(text2, char_ecncode_mod, d_mod)
-                    percent = text_sameness_percentage(encoded_text1, encoded_text2)
-
-                    f.write(f"Text 1: {text1}\n")
-                    f.write(f"Text 2: {text2}\n")
-                    f.write(f"Encoded Text 1: {encoded_text1}\n")
-                    f.write(f"Encoded Text 2: {encoded_text2}\n")
-                    f.write(f"Sameness %: {percent}%\n")
-                    f.write("-" * 50 + "\n")
-                    if text1 == text2:
-                        self.assertEqual(encoded_text1, encoded_text2)
-                    else:
-                        self.assertNotEqual(encoded_text1, encoded_text2)
 
 
 if __name__ == "__main__":

@@ -317,7 +317,7 @@ def generate_M_from_seed(seed: int) -> np.uint8:
     return M
 
 
-@njit
+# @njit
 def generate_vector_of_bytes(size: int, seed: int | None = None) -> np.ndarray:
     """
     Generate vector or random bites:
