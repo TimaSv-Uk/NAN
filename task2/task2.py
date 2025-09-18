@@ -305,7 +305,7 @@ def reverse_change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.nd
     return new_chars
 
 
-@njit
+# @njit
 def generate_M_from_seed(seed: int) -> np.uint8:
     """Generate M value using seed without massive vector."""
     np.random.seed(seed)

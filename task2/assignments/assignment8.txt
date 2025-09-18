@@ -1,0 +1,6 @@
+change 1 randomly_seeded a in d_mod (гасло) modify encode and decode functions, 
+write sameness encodeing test after 
+
+
+show encoding result on visual images, pdf, video encod all but image header 
+
