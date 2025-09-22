@@ -1,7 +1,7 @@
-import time
 import base64
 import os
 import numpy as np
+from PIL import Image
 
 from task2 import (
     encode_assignment5,
@@ -14,9 +14,9 @@ from task2 import (
 
 
 def encode_file(
-    file_path="test_files/data2.txt",
-    save_encoded_file_path="test_files/data2_encoded.txt",
-    seed=42,
+    file_path: str = "test_files/data2.txt",
+    save_encoded_file_path: str = "test_files/data2_encoded.txt",
+    seed: int = 42,
 ):
     char_ecncode_mod = 256
     d_mod = 128
@@ -26,10 +26,47 @@ def encode_file(
     save_file_from_bites(save_encoded_file_path, encoded_bites)
 
 
+def encode_image_file_without_header(
+    file_path: str = "test_files/data2.txt",
+    save_encoded_file_path: str = "test_files/data2_encoded.txt",
+    seed: int = 42,
+):
+    """
+    Saves encoded file that can be read and visualy encryption algirithm
+    """
+    # header_length = get_header_length(file_path)
+    # if header_length is None:
+    #     raise ValueError(f"No header size for {file_path} found")
+    #
+    # print(header_length)
+
+    # char_ecncode_mod = 256
+    # d_mod = 128
+    # file_bites = load_file_to_bites(file_path)
+    # file_heder, file_body = file_bites[:header_length], file_bites[header_length:]
+    # file_body = change_first_symbol_based_on_random_vector(file_body, seed)
+    # encoded_body = encode_assignment5(file_body, char_ecncode_mod, d_mod)
+    # encoded_bites = np.concatenate((file_heder, encoded_body))
+    #
+    # save_file_from_bites(save_encoded_file_path, encoded_bites)
+
+    img = Image.open(file_path)
+    pixels = np.array(img)
+    pixels_vector = pixels.flatten()
+
+    pixels_vector = change_first_symbol_based_on_random_vector(pixels_vector, seed)
+    encoded_pixels_vector = encode_assignment5(pixels_vector)
+
+    encoded_pixels = encoded_pixels_vector.reshape(np.shape(pixels))
+    Image.fromarray(encoded_pixels).save(save_file_path)
+
+
+
+
 def decode_file(
-    encoded_file_path="test_files/data2_encoded.txt",
-    save_decoded_file_path="test_files/data2_decoded.txt",
-    seed=42,
+    encoded_file_path: str = "test_files/data2_encoded.txt",
+    save_decoded_file_path: str = "test_files/data2_decoded.txt",
+    seed: int = 42,
 ):
     char_ecncode_mod = 256
     d_mod = 128
@@ -142,20 +179,8 @@ def save_file_from_bites(file_name: str, data: np.ndarray) -> None:
 
 
 if __name__ == "__main__":
-    file_path = "test_files/csv_123mb.csv"
-    save_encoded_file_path = "test_files/csv_123mb_encoded.csv"
-    save_decoded_file_path = "test_files/csv_123mb_decoded.csv"
-    # file_path = "test_files/vid_31mb.mp4"
-    # save_encoded_file_path = "test_files/vid_31mb.mp4"
-    # save_decoded_file_path = "test_files/vid_31mb.mp4"
+    image_name = "img.jpg"
 
-    start_time = time.perf_counter()
-    encode_file(file_path, save_encoded_file_path)
-    end_time = time.perf_counter()
-    execution_time = end_time - start_time
-    print(f"Encode file execution_time: {execution_time}")
-    start_time = time.perf_counter()
-    decode_file(save_encoded_file_path, save_decoded_file_path)
-    end_time = time.perf_counter()
-    execution_time = end_time - start_time
-    print(f"Decode file execution_time: {execution_time}")
+    file_path = f"test_files/{image_name}"
+    save_file_path = f"test_files/visual_encoded_{image_name}"
+    encode_image_file_without_header(file_path, save_file_path, 42)

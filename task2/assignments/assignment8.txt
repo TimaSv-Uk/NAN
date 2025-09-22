@@ -1,5 +1,5 @@
 change 1 randomly_seeded a in d_mod (гасло) modify encode and decode functions, 
-write sameness encodeing test after 
+write sameness encodeing test after, compere original algo with  range(randomly_seeded_d_mod) and original range(d_mod)
 
 
 show encoding result on visual images, pdf, video encod all but image header 

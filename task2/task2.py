@@ -6,7 +6,8 @@ from numba import njit
 # np.uint8 used inted of  modulo operation only works with  mod 256
 
 # NOTE:
-# val = (x * y) & mod  # instead of % 256, only works if your modulus is a power of two
+# val = (x * y) & mod  # instead of % 256,
+# only works if your modulus is a power of two
 
 
 def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
@@ -29,7 +30,8 @@ def find_neighbors_assignment5_with_table(
     point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int, mul_table
 ) -> None:
     """
-    Calculates the next state and writes it into the pre-allocated point_out array.
+    Calculates the next state and writes it into the pre-allocated
+    point_out array.
     This version uses the precomputed multiplication table.
 
     point_in: The input array (X vector)
@@ -63,7 +65,7 @@ def find_neighbors_assignment5_with_table(
 
 @njit
 def encode_assignment5(
-    chars: np.ndarray, char_ecncode_mod: int, d_mod: int
+    chars: np.ndarray, char_ecncode_mod: int = 256, d_mod: int = 128
 ) -> np.ndarray:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
@@ -79,7 +81,8 @@ def encode_assignment5(
     # y_1 = x_1+a1
     # y2 = x2 - ( (x_1+a1) * x1 )
     # y3 = x3 - (х_1 у_2)
-    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
+    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за
+        формулою та використати його в якості X за модулем.
     """
 
     current_state = chars.astype(np.uint8).copy()
@@ -113,7 +116,8 @@ def decode_assignment5(
     x2 = y2 + ( (x_1+a1) * x1 )
     x3 = y3 + (х_1 у_2)
     x4 = y4 + (y_1 x_3)
-    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за формулою та використати його в якості X за модулем.
+    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за
+      формулою та використати його в якості X за модулем.
     """
 
     current_state = chars.astype(np.uint8).copy()
@@ -305,7 +309,7 @@ def reverse_change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.nd
     return new_chars
 
 
-# @njit
+@njit
 def generate_M_from_seed(seed: int) -> np.uint8:
     """Generate M value using seed without massive vector."""
     np.random.seed(seed)
