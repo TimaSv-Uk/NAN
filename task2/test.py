@@ -16,6 +16,7 @@ from task2 import (
 
 import numpy as np
 import random
+import time
 
 
 class TestMathUtils(unittest.TestCase):
@@ -31,6 +32,7 @@ class TestMathUtils(unittest.TestCase):
             "txt": "data2.txt",
             "img": "img.jpg",
             "vid": "vid_31mb.mp4",
+            # "big_csv": "csv_123mb.csv",
         }
 
     def test_encode_decode_consistency(self):
@@ -94,20 +96,40 @@ class TestMathUtils(unittest.TestCase):
 
                     self.assertLess(percent, 100)
 
-    def test_text_sameness_FILE_encoding_rand(self):
+    def test_text_sameness_FILE_encoding(self):
+        # file_lable = "vid"
+        file_lable = "img"
+        # test_text_sameness_FILE_encoding_rand
         self._test_file_encoding_sameness(
-            "vid", encode_bites_rand, self.seed, "results_rand"
+            file_lable, encode_bites_rand, self.seed, "results_rand"
         )
 
-    def test_text_sameness_FILE_encoding_full(self):
+        # test_text_sameness_FILE_encoding_full
         self._test_file_encoding_sameness(
-            "vid", encode_bites_full, self.seed, "results_full"
+            file_lable, encode_bites_full, self.seed, "results_full"
+        )
+        # test_text_sameness_original_d_mod
+        self._test_file_encoding_sameness(
+            file_lable, encode_bites, self.seed, "results_original_d_mod"
         )
 
-    def test_text_sameness_original_d_mod(self):
-        self._test_file_encoding_sameness(
-            "vid", encode_bites, self.seed, "results_original_d_mod"
-        )
+    def test_execution_time(self):
+        for file_name in self.file_names.values():
+            file_bites = load_file_to_bites(f"{self.test_file_dir}{file_name}")
+            print(f"File name: {file_name}")
+            print(f"Generated array of size: {file_bites.shape} bytes\n")
+
+            start_time = time.perf_counter()
+            encoded = encode_bites(file_bites, self.char_mod, self.d_mod, self.seed)
+            end_time = time.perf_counter()
+            execution_time = end_time - start_time
+            print(f"Encoded_vector execution_time: {execution_time}")
+
+            start_time = time.perf_counter()
+            decoded = decode_bites(encoded, self.char_mod, self.d_mod, self.seed)
+            end_time = time.perf_counter()
+            execution_time = end_time - start_time
+            print(f"Decoded_vector execution_time: {execution_time}\n")
 
 
 if __name__ == "__main__":
