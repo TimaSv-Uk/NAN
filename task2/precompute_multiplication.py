@@ -1,7 +1,6 @@
 import os
 import time
 import numpy as np
-from numba import njit
 import pickle
 
 DIR = "multiplication_table"

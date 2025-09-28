@@ -1,16 +1,16 @@
 Quarter 1 change at index 8138112
-Original byte: 0, Modified byte: 212
-Sameness %: 0.9999999078410324%
+Original byte: 0, Modified byte: 7
+Sameness %: 0.9999996313641296%
 --------------------------------------------------
 Quarter 2 change at index 16276224
-Original byte: 78, Modified byte: 244
-Sameness %: 0.9999997542427531%
+Original byte: 78, Modified byte: 71
+Sameness %: 0.9999996313641296%
 --------------------------------------------------
 Quarter 3 change at index 24414336
-Original byte: 0, Modified byte: 147
+Original byte: 0, Modified byte: 145
 Sameness %: 0.9999996313641296%
 --------------------------------------------------
 Quarter 4 change at index 32552447
-Original byte: 97, Modified byte: 108
+Original byte: 97, Modified byte: 222
 Sameness %: 0.9999999692803442%
 --------------------------------------------------

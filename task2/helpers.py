@@ -1,7 +1,5 @@
-import base64
 import os
 import numpy as np
-from PIL import Image
 
 from task2 import (
     encode_assignment5,
@@ -10,7 +8,56 @@ from task2 import (
     reverse_change_first_symbol_based_on_full_vector,
     change_first_symbol_based_on_random_vector,
     reverse_change_first_symbol_based_on_random_vector,
+    randomize_d_mod,
 )
+
+
+def encode_bites(
+    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+) -> np.ndarray:
+    random_d_mod_range = np.arange(d_mod)
+    file_bites = change_first_symbol_based_on_random_vector(bites, seed)
+    encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, random_d_mod_range)
+    return encoded_bites
+
+
+def decode_bites(
+    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+) -> np.ndarray:
+    random_d_mod_range = np.arange(d_mod)
+    decoded_bites = decode_assignment5(bites, char_ecncode_mod, random_d_mod_range)
+    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
+        decoded_bites, seed
+    )
+    return decoded_bites
+
+
+def encode_bites_rand(bites: np.ndarray, mod: int, d_mod: int, seed: int) -> np.ndarray:
+    """Encode using random first-symbol modification."""
+    d_range = randomize_d_mod(d_mod, seed)
+    bites_mod = change_first_symbol_based_on_random_vector(bites, seed)
+    return encode_assignment5(bites_mod, mod, d_range)
+
+
+def decode_bites_rand(bites: np.ndarray, mod: int, d_mod: int, seed: int) -> np.ndarray:
+    """Decode using random first-symbol modification."""
+    d_range = randomize_d_mod(d_mod, seed)
+    bites_dec = decode_assignment5(bites, mod, d_range)
+    return reverse_change_first_symbol_based_on_random_vector(bites_dec, seed)
+
+
+def encode_bites_full(bites: np.ndarray, mod: int, d_mod: int, seed: int) -> np.ndarray:
+    """Encode using full-vector first-symbol modification."""
+    d_range = randomize_d_mod(d_mod, seed)
+    bites_mod = change_first_symbol_based_on_full_vector(bites)
+    return encode_assignment5(bites_mod, mod, d_range)
+
+
+def decode_bites_full(bites: np.ndarray, mod: int, d_mod: int, seed: int) -> np.ndarray:
+    """Decode using full-vector first-symbol modification."""
+    d_range = randomize_d_mod(d_mod, seed)
+    bites_dec = decode_assignment5(bites, mod, d_range)
+    return reverse_change_first_symbol_based_on_full_vector(bites_dec)
 
 
 def encode_file(
@@ -20,47 +67,12 @@ def encode_file(
 ):
     char_ecncode_mod = 256
     d_mod = 128
+
     file_bites = load_file_to_bites(file_path)
-    file_bites = change_first_symbol_based_on_random_vector(file_bites, seed)
-    encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, d_mod)
+
+    encoded_bites = encode_bites(file_bites, char_ecncode_mod, d_mod, seed)
+
     save_file_from_bites(save_encoded_file_path, encoded_bites)
-
-
-def encode_image_file_without_header(
-    file_path: str = "test_files/data2.txt",
-    save_encoded_file_path: str = "test_files/data2_encoded.txt",
-    seed: int = 42,
-):
-    """
-    Saves encoded file that can be read and visualy encryption algirithm
-    """
-    # header_length = get_header_length(file_path)
-    # if header_length is None:
-    #     raise ValueError(f"No header size for {file_path} found")
-    #
-    # print(header_length)
-
-    # char_ecncode_mod = 256
-    # d_mod = 128
-    # file_bites = load_file_to_bites(file_path)
-    # file_heder, file_body = file_bites[:header_length], file_bites[header_length:]
-    # file_body = change_first_symbol_based_on_random_vector(file_body, seed)
-    # encoded_body = encode_assignment5(file_body, char_ecncode_mod, d_mod)
-    # encoded_bites = np.concatenate((file_heder, encoded_body))
-    #
-    # save_file_from_bites(save_encoded_file_path, encoded_bites)
-
-    img = Image.open(file_path)
-    pixels = np.array(img)
-    pixels_vector = pixels.flatten()
-
-    pixels_vector = change_first_symbol_based_on_random_vector(pixels_vector, seed)
-    encoded_pixels_vector = encode_assignment5(pixels_vector)
-
-    encoded_pixels = encoded_pixels_vector.reshape(np.shape(pixels))
-    Image.fromarray(encoded_pixels).save(save_file_path)
-
-
 
 
 def decode_file(
@@ -71,68 +83,10 @@ def decode_file(
     char_ecncode_mod = 256
     d_mod = 128
     file_bites = load_file_to_bites(encoded_file_path)
-    decoded_bites = decode_assignment5(file_bites, char_ecncode_mod, d_mod)
-    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
-        decoded_bites, seed
-    )
+
+    decoded_bites = decode_bites(file_bites, char_ecncode_mod, d_mod, seed)
 
     save_file_from_bites(save_decoded_file_path, decoded_bites)
-
-
-def get_encoded_text(
-    text: str,
-    char_ecncode_mod: int,
-    d_mod: int,
-) -> str:
-    chars_uint8 = np.array(
-        [ord(char) % char_ecncode_mod for char in text], dtype=np.uint8
-    )
-
-    encoded_with_first = change_first_symbol_based_on_full_vector(chars_uint8)
-
-    encoded = encode_assignment5(encoded_with_first, char_ecncode_mod, d_mod)
-
-    encoded_text = "".join(chr(int(x)) for x in encoded)
-    return encoded_text
-
-
-def get_decoded_text(
-    encoded_text: str,
-    char_ecncode_mod: int,
-    d_mod: int,
-) -> str:
-    encoded_uint8 = np.array(
-        [ord(char) % char_ecncode_mod for char in encoded_text], dtype=np.uint8
-    )
-
-    decoded = decode_assignment5(encoded_uint8, char_ecncode_mod, d_mod)
-
-    reversed_first_symbol = reverse_change_first_symbol_based_on_full_vector(decoded)
-
-    return "".join(chr(int(x)) for x in reversed_first_symbol)
-
-
-def write_text_to_file(file_name, text):
-    with open(file_name, "w") as f:
-        f.write(text)
-
-
-def text_from_int_to_ascii(point):
-    decoded_text = [chr(int(element)) for element in point]
-    return "".join(decoded_text)
-
-
-def file_to_base64_txt(file_path, save_txt_path):
-    with open(file_path, "rb") as file:
-        encoded = base64.b64encode(file.read()).decode("utf-8")
-    with open(save_txt_path, "w", encoding="utf-8") as txt_file:
-        txt_file.write(encoded)
-
-
-def base64_txt_to_file(text, output_file_path):
-    decoded_data = base64.b64decode(text)
-    with open(output_file_path, "wb") as output_file:
-        output_file.write(decoded_data)
 
 
 def get_unique_filename(base_name, suffix, extension):
@@ -183,4 +137,5 @@ if __name__ == "__main__":
 
     file_path = f"test_files/{image_name}"
     save_file_path = f"test_files/visual_encoded_{image_name}"
-    encode_image_file_without_header(file_path, save_file_path, 42)
+
+    encode_file(file_path, save_file_path)

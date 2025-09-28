@@ -10,6 +10,76 @@ from numba import njit
 # only works if your modulus is a power of two
 
 
+@njit
+def encode_assignment5(
+    chars: np.ndarray, char_ecncode_mod: int, d_mod_range: np.ndarray
+) -> np.ndarray:
+    """
+    # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
+    #
+    # х_2 - у_2 = у_1х_1
+    # х_3 - у_3 = х_1у_2
+    # х_4 - у_4 = у_1х_3
+    # х_5 - у_5 = х_1у_4
+    #
+    # х_6 - у_6 = у_1х_5
+    # х_7 - у_7 = х_1у_6
+    #
+    # y_1 = x_1+a1
+    # y2 = x2 - ( (x_1+a1) * x1 )
+    # y3 = x3 - (х_1 у_2)
+    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за
+        формулою та використати його в якості X за модулем.
+    """
+    current_state = chars.astype(np.uint8).copy()
+    next_state = np.empty_like(current_state)
+
+    for a in d_mod_range:
+        find_neighbors_assignment5(current_state, next_state, a, char_ecncode_mod)
+
+        current_state, next_state = next_state, current_state
+
+    return current_state
+
+
+@njit
+def decode_assignment5(
+    chars: np.ndarray, char_ecncode_mod: int, d_mod_range: np.ndarray
+) -> np.ndarray:
+    """
+    # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
+    #
+    # х_2 - у_2 = у_1х_1
+    # х_3 - у_3 = х_1у_2
+    # х_4 - у_4 = у_1х_3
+    # х_5 - у_5 = х_1у_4
+    #
+    # х_6 - у_6 = у_1х_5
+    # х_7 - у_7 = х_1у_6
+    #
+
+    x_1 = y_1-a1
+    x2 = y2 + ( (x_1+a1) * x1 )
+    x3 = y3 + (х_1 у_2)
+    x4 = y4 + (y_1 x_3)
+    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за
+      формулою та використати його в якості X за модулем.
+    """
+
+    current_state = chars.astype(np.uint8).copy()
+    next_state = np.empty_like(current_state)
+    # Replace reversed(range(d_mod)) with a backward range for @jit
+
+    for i in range(len(d_mod_range) - 1, -1, -1):
+        a = d_mod_range[i]
+        reverse_find_neighbors_assignment5(
+            current_state, next_state, a, char_ecncode_mod
+        )
+        current_state, next_state = next_state, current_state  # Swap
+
+    return current_state
+
+
 def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
     # Load table once
     mul_table = np.load(f"multiplication_table/mul_mod_{char_encode_mod}.npy")
@@ -61,75 +131,6 @@ def find_neighbors_assignment5_with_table(
             point_out[i] = point_in[i] - mult_result
             # point_out[i] = temp % mod
             # point_out[i] = temp & mod
-
-
-@njit
-def encode_assignment5(
-    chars: np.ndarray, char_ecncode_mod: int = 256, d_mod: int = 128
-) -> np.ndarray:
-    """
-    # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
-    #
-    # х_2 - у_2 = у_1х_1
-    # х_3 - у_3 = х_1у_2
-    # х_4 - у_4 = у_1х_3
-    # х_5 - у_5 = х_1у_4
-    #
-    # х_6 - у_6 = у_1х_5
-    # х_7 - у_7 = х_1у_6
-    #
-    # y_1 = x_1+a1
-    # y2 = x2 - ( (x_1+a1) * x1 )
-    # y3 = x3 - (х_1 у_2)
-    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за
-        формулою та використати його в якості X за модулем.
-    """
-
-    current_state = chars.astype(np.uint8).copy()
-    next_state = np.empty_like(current_state)
-
-    for a in range(d_mod):
-        find_neighbors_assignment5(current_state, next_state, a, char_ecncode_mod)
-
-        current_state, next_state = next_state, current_state
-
-    return current_state
-
-
-@njit
-def decode_assignment5(
-    chars: np.ndarray, char_ecncode_mod: int, d_mod: int
-) -> np.ndarray:
-    """
-    # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
-    #
-    # х_2 - у_2 = у_1х_1
-    # х_3 - у_3 = х_1у_2
-    # х_4 - у_4 = у_1х_3
-    # х_5 - у_5 = х_1у_4
-    #
-    # х_6 - у_6 = у_1х_5
-    # х_7 - у_7 = х_1у_6
-    #
-
-    x_1 = y_1-a1
-    x2 = y2 + ( (x_1+a1) * x1 )
-    x3 = y3 + (х_1 у_2)
-    x4 = y4 + (y_1 x_3)
-    # Наш початковий вектор це X тобто всі Х відомі Треба знайти Y (сусідa) за
-      формулою та використати його в якості X за модулем.
-    """
-
-    current_state = chars.astype(np.uint8).copy()
-    next_state = np.empty_like(current_state)
-    # Replace reversed(range(d_mod)) with a backward range for @jit
-    for a in range(d_mod - 1, -1, -1):
-        reverse_find_neighbors_assignment5(
-            current_state, next_state, a, char_ecncode_mod
-        )
-        current_state, next_state = next_state, current_state  # Swap
-
-    return current_state
 
 
 @njit
@@ -363,13 +364,14 @@ def modInverse(a: int, m: int) -> int:
     return x1
 
 
-if __name__ == "__main__":
-    mod = 256
-    chars = np.array([10, 23, 23, 12, 123, 3213, 1])
-    seed = 32312
+def randomize_d_mod(d_mod: int, seed: int) -> np.ndarray:
+    np.random.seed(seed)
+    index_to_randomize = np.random.randint(0, d_mod)
+    random_val = np.random.randint(0, d_mod)
+    range_d_mod = np.arange(d_mod, dtype=np.int64)
 
-    new_arr = change_first_symbol_based_on_random_vector(chars, seed)
-    old_arr = reverse_change_first_symbol_based_on_random_vector(new_arr, seed)
-    print(chars)
-    print(new_arr)
-    print(old_arr)
+    while range_d_mod[index_to_randomize] == random_val:
+        random_val = np.random.randint(0, d_mod)
+    range_d_mod[index_to_randomize] = random_val
+
+    return range_d_mod
