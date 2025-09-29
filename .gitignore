@@ -1,2 +1,4 @@
 ./venv
-
+/cryptall_2/.venv
+/cryptall_2/test_files
+/cryptall_2/src/cryptall_2.egg-info
