@@ -9,7 +9,8 @@ if __name__ == "__main__":
     d_mod: int = 8
     seed: int = 42
 
-    image_name = "img.jpg"
+    # image_name = "img.jpg"
+    image_name = "png.png"
     image_file_path = f"test_files/{image_name}"
     image_save_file_path = f"test_files/visual_encoded_{image_name}"
 

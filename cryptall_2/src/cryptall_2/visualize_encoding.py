@@ -94,8 +94,9 @@ def visualy_encode_audio_wav_file(
         n_frames = wf.getnframes()
         frames = wf.readframes(n_frames)
 
-    # NOTE: so far works only for np.uint8
-    dtype_map = {1: np.uint8}
+    # NOTE: encode_bites_rand converst to np.uint8
+    dtype_map = {1: np.uint8, 2: np.int16, 4: np.int32}
+
     if sampwidth not in dtype_map:
         raise ValueError(f"Unsupported sample width: {sampwidth}")
     audio_array = np.frombuffer(frames, dtype=dtype_map[sampwidth])
