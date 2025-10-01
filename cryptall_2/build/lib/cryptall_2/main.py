@@ -1,13 +1,14 @@
 import os
 import sys
-from helpers import (
+
+from .helpers import (
     file_to_base64_txt,
     base64_txt_to_file,
     get_unique_filename,
     get_decoded_text,
     get_encoded_text,
 )
-from core import encode_assignment5, decode_assignment5
+from .core import encode_assignment5, decode_assignment5
 
 
 

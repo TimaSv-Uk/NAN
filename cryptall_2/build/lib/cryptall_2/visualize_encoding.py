@@ -1,35 +1,69 @@
+import cv2
 import numpy as np
-from PIL import Image
 
-from core import (
-    encode_assignment5,
-    change_first_symbol_based_on_random_vector,
-)
+from .helpers import encode_bites_rand
 
 
-def encode_image_file_without_header(
-    file_path: str = "test_files/data2.txt",
-    save_encoded_file_path: str = "test_files/data2_encoded.txt",
+def visualy_encode_image_file(
+    file_path: str,
+    save_encoded_file_path: str,
+    bite_ecncode_mod: int = 256,
+    d_mod: int = 128,
     seed: int = 42,
 ):
     """
     Saves encoded file that can be read and visualy encryption algirithm
     """
 
-    img = Image.open(file_path)
+    img = cv2.imread(file_path, cv2.IMREAD_UNCHANGED)
+
     pixels = np.array(img)
     pixels_vector = pixels.flatten()
 
-    pixels_vector = change_first_symbol_based_on_random_vector(pixels_vector, seed)
-    encoded_pixels_vector = encode_assignment5(pixels_vector)
+    pixels_vector = encode_bites_rand(pixels_vector, bite_ecncode_mod, d_mod, seed)
 
-    encoded_pixels = encoded_pixels_vector.reshape(np.shape(pixels))
-    Image.fromarray(encoded_pixels).save(save_file_path)
+    encoded_pixels = pixels_vector.reshape(np.shape(pixels))
+
+    cv2.imwrite(save_encoded_file_path, encoded_pixels)
 
 
-if __name__ == "__main__":
-    image_name = "img.jpg"
+def visualy_encode_video_file(
+    file_path: str,
+    save_encoded_file_path: str,
+    bite_ecncode_mod: int = 256,
+    d_mod: int = 128,
+    seed: int = 42,
+):
+    """
+    Saves encoded file that can be read and visualy encryption algirithm
+    """
+    cap = cv2.VideoCapture(file_path)
+    frameCount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    frameWidth = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    file_path = f"test_files/{image_name}"
-    save_file_path = f"test_files/visual_encoded_{image_name}"
-    encode_image_file_without_header(file_path, save_file_path, 42)
+    buf = np.empty((frameCount, frameHeight, frameWidth, 3), dtype=np.uint8)
+
+    fc = 0
+    ret = True
+
+    while fc < frameCount and ret:
+        ret, buf[fc] = cap.read()
+        fc += 1
+    cap.release()
+
+    video_vector = buf.flatten()
+
+    video_vector = encode_bites_rand(video_vector, bite_ecncode_mod, d_mod, seed)
+
+    encoded_video = video_vector.reshape(np.shape(buf))
+
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    out = cv2.VideoWriter(
+        save_encoded_file_path, fourcc, frameCount, (frameWidth, frameHeight)
+    )
+    # Write frames to the video file
+    for frame in encoded_video:
+        out.write(frame)
+
+    out.release()

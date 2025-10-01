@@ -1,6 +1,7 @@
 import numpy as np
-from helpers import load_file_to_bites
-from core import (
+
+from .helpers import load_file_to_bites
+from .core import (
     encode_assignment5,
     encode_assignment5_with_table,
     decode_assignment5,

@@ -6,21 +6,25 @@ import numpy as np
 import time
 from pathlib import Path
 
-from .helpers import encode_assignment5, load_file_to_bites
+from cryptall_2.helpers import encode_bites_rand, load_file_to_bites
 
+BASE_DIR = Path(__file__).parent.parent.parent
+TEST_FILES_DIR = BASE_DIR / "test_files"
+SAVE_FILES_DIR = BASE_DIR / "test_results"
 
 # List of files to analyze
 file_paths = [
-    "test_files/data2.txt",
-    "test_files/img.jpg",
-    "test_files/vid_31mb.mp4",
-    "test_files/csv_123mb.csv",
+    TEST_FILES_DIR / "data2.txt",
+    TEST_FILES_DIR / "img.jpg",
+    TEST_FILES_DIR / "vid_31mb.mp4",
+    TEST_FILES_DIR / "csv_123mb.csv",
 ]
 
 
 def get_file_data(file_paths: list[str]):
     char_ecncode_mod = 256
     d_mod = 128
+    seed = 42
     execution_time_data = []
 
     for path_str in file_paths:
@@ -34,7 +38,7 @@ def get_file_data(file_paths: list[str]):
         print(text_len)
 
         start_time = time.perf_counter()
-        encode_assignment5(file_bites, char_ecncode_mod, d_mod)
+        encode_bites_rand(file_bites, char_ecncode_mod, d_mod, seed)
         end_time = time.perf_counter()
         execution_time_data.append(
             {
@@ -67,7 +71,11 @@ def plot_bite_length_chart(file_paths: list[str]) -> None:
     plt.title("Execution Time vs File Byte Length")
     plt.xlabel("File Byte Length (MB)")
     plt.ylabel("Execution Time (s)")
-    plt.savefig("execution_times_by_bite_length.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig(
+        SAVE_FILES_DIR / "execution_times_by_bite_length.pdf",
+        format="pdf",
+        bbox_inches="tight",
+    )
     plt.close()
 
 

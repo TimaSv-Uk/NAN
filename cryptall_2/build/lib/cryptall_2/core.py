@@ -1,6 +1,7 @@
 import numpy as np
 from numba import njit
 
+import os
 
 # NOTE:
 # np.uint8 used inted of  modulo operation only works with  mod 256
@@ -10,7 +11,6 @@ from numba import njit
 # only works if your modulus is a power of two
 
 
-@njit
 def encode_assignment5(
     chars: np.ndarray, char_ecncode_mod: int, d_mod_range: np.ndarray
 ) -> np.ndarray:
@@ -42,7 +42,6 @@ def encode_assignment5(
     return current_state
 
 
-@njit
 def decode_assignment5(
     chars: np.ndarray, char_ecncode_mod: int, d_mod_range: np.ndarray
 ) -> np.ndarray:
@@ -81,8 +80,11 @@ def decode_assignment5(
 
 
 def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
-    # Load table once
-    mul_table = np.load(f"multiplication_table/mul_mod_{char_encode_mod}.npy")
+    BASE_DIR = os.path.dirname(__file__)
+    mul_table_path = os.path.join(
+        BASE_DIR, "multiplication_table", f"mul_mod_{char_encode_mod}.npy"
+    )
+    mul_table = np.load(mul_table_path)
     mul_table = mul_table.astype(np.uint16)  # optional for speed & memory
 
     current_state = chars.copy()

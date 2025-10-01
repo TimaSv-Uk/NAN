@@ -1,7 +1,8 @@
-import os
 import numpy as np
 
-from core import (
+import os
+
+from .core import (
     encode_assignment5,
     decode_assignment5,
     change_first_symbol_based_on_full_vector,
@@ -136,6 +137,6 @@ if __name__ == "__main__":
     image_name = "img.jpg"
 
     file_path = f"test_files/{image_name}"
-    save_file_path = f"test_files/visual_encoded_{image_name}"
+    save_file_path = f"test_files/222_visual_encoded_{image_name}"
 
     encode_file(file_path, save_file_path)
