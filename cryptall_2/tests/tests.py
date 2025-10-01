@@ -92,8 +92,8 @@ class TestMathUtils(unittest.TestCase):
                     self.assertLess(percent, 100)
 
     def test_text_sameness_FILE_encoding(self):
-        # file_lable = "vid"
-        file_lable = "img"
+        file_lable = "vid"
+        # file_lable = "img"
         # test_text_sameness_FILE_encoding_rand
         self._test_file_encoding_sameness(
             file_lable, encode_bites_rand, self.seed, "results_rand"

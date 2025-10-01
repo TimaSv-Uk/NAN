@@ -1,0 +1,5 @@
+x1 -> x1 * (2x2 + 1) * (2x3+1) *  (2x4+1) *... (2xn+1)
+
+
+test sameness compere to original algorithm
+

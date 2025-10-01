@@ -1,4 +1,0 @@
-Quarter 1 change at index 8138112
-Original byte: 0, Modified byte: 192
-Sameness %: 0.8055215079369761%
---------------------------------------------------
