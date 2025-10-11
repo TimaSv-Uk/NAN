@@ -6,7 +6,7 @@ import numpy as np
 import time
 from pathlib import Path
 
-from cryptall_2.helpers import encode_bites_rand, load_file_to_bites
+from cryptall_2.encode_decode import encode_bites_rand, load_file_to_bites
 
 BASE_DIR = Path(__file__).parent.parent.parent
 TEST_FILES_DIR = BASE_DIR / "test_files"

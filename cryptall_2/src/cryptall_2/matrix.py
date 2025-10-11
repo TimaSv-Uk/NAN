@@ -3,6 +3,7 @@ from sympy import Matrix
 
 # NOTE: way too slow to use in core encription algorithm
 
+
 def matrix_vector_mult(matrix, vector):
     new_vector = []
     for row in matrix:

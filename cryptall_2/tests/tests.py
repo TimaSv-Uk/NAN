@@ -1,11 +1,14 @@
 import unittest
-from cryptall_2.helpers import (
-    bites_sameness_percentage,
-    load_file_to_bites,
+
+from cryptall_2.encode_decode import (
     encode_bites,
     decode_bites,
     encode_bites_rand,
     encode_bites_full,
+)
+from cryptall_2.helpers import (
+    bites_sameness_percentage,
+    load_file_to_bites,
 )
 from cryptall_2.core import randomize_d_mod
 
@@ -21,8 +24,8 @@ class TestMathUtils(unittest.TestCase):
         self.seed = 50
 
         self.random_d_mod_range = randomize_d_mod(self.d_mod, self.seed)
-        self.test_file_dir = "test_files/"
-        self.test_results_file_dir = "test_results/"
+        self.test_file_dir = "./tests/test_files/"
+        self.test_results_file_dir = "./tests/test_results/"
         self.file_names = {
             "txt": "data2.txt",
             "img": "img.jpg",
@@ -47,7 +50,7 @@ class TestMathUtils(unittest.TestCase):
         self, file_key: str, encode_func, seed: int, save_prefix: str
     ):
         """Helper to test file encoding sameness and save results to a file."""
-        file_path = f"test_files/{self.file_names[file_key]}"
+        file_path = f"{self.test_file_dir}{self.file_names[file_key]}"
         save_path = f"{self.test_results_file_dir}{save_prefix}_{
             self.file_names[file_key].split('.')[0]
         }.txt"
@@ -92,8 +95,9 @@ class TestMathUtils(unittest.TestCase):
                     self.assertLess(percent, 100)
 
     def test_text_sameness_FILE_encoding(self):
-        file_lable = "vid"
-        # file_lable = "img"
+        # file_lable = "vid"
+        file_lable = "img"
+
         # test_text_sameness_FILE_encoding_rand
         self._test_file_encoding_sameness(
             file_lable, encode_bites_rand, self.seed, "results_rand"

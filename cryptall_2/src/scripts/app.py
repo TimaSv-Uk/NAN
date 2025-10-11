@@ -4,7 +4,7 @@ from PySide6.QtGui import QAction, QIntValidator, QFont, QTextCursor
 
 import sys
 
-from cryptall_2.helpers import encode_file, decode_file
+from cryptall_2.encode_decode import encode_file, decode_file
 
 
 class EncodeWorker(QtCore.QThread):

@@ -1,0 +1,7 @@
+encoded = encode_bites(bites, 256, 128, 42)
+
+File size in bites:1085210459
+Load Encoded 1gb file: 0.00023343500015471363
+Encoded 1gb file: 124.84610677299952
+File saved successfully: tests/test_files/Encoded_Audiobook_1gb.zip
+Save Encoded 1gb file: 6.338295065999773

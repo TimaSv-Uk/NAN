@@ -3,7 +3,7 @@ import numpy as np
 
 import wave
 
-from .helpers import encode_bites_rand
+from .encode_decode import encode_bites_rand
 
 
 def visualy_encode_image_file(

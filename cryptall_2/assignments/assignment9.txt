@@ -3,3 +3,7 @@ x1 -> x1 * (2x2 + 1) * (2x3+1) *  (2x4+1) *... (2xn+1)
 
 test sameness compere to original algorithm
 
+
+imlemented in functions
+	def change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
+	def encode_bites_full(bites: np.ndarray, mod: int, d_mod: int, seed: int) -> np.ndarray:

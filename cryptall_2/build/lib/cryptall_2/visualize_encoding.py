@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from .helpers import encode_bites_rand
+from .encode_decode import encode_bites_rand
 
 
 def visualy_encode_image_file(
