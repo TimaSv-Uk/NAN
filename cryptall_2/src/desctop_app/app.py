@@ -169,9 +169,12 @@ class MainPage(QtWidgets.QWidget):
         if file_path == "No file selected" or save_path == "No save path selected":
             return
 
-        # self.file_label.text, self.save_label.text = save_path, file_path
         self.file_label.setText(save_path)
         self.save_label.setText(file_path)
+
+        self.file_lineedit.setText(save_path)
+        self.save_lineedit.setText(file_path)
+
         self.update_status(f"[_] Swap file path: {save_path} <-> {file_path}")
 
     def update_status(self, message):
@@ -192,12 +195,7 @@ class MainPage(QtWidgets.QWidget):
 
         if not os.path.exists(file_path):
             QtWidgets.QMessageBox.warning(
-                self, "Invalid Input", f"File [{file_path}] doth not exist."
-            )
-            return None, None, None
-        if not os.path.exists(save_path):
-            QtWidgets.QMessageBox.warning(
-                self, "Invalid Input", f"File [{file_path}] doth not exist."
+                self, "Invalid Input", f"Input file [{file_path}] doth not exist."
             )
             return None, None, None
         if file_path == save_path:
