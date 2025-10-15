@@ -3,22 +3,26 @@ from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QVBoxLayout, QGroupBox
 from PySide6.QtGui import QAction, QIntValidator, QFont, QTextCursor
 
 import sys
+import os
 
 from cryptall_2.encode_decode import encode_file, decode_file
+
+DEFAULT_SEED = 0
 
 
 class EncodeWorker(QtCore.QThread):
     finished = QtCore.Signal(bool, str)
 
-    def __init__(self, file_path, save_path):
+    def __init__(self, file_path: str, save_path: str, number: int):
         super().__init__()
         self.file_path = file_path
         self.save_path = save_path
+        self.number = number
 
     def run(self):
         try:
-            encode_file(self.file_path, self.save_path)
-            self.finished.emit(True, "File encoded successfully!")
+            encode_file(self.file_path, self.save_path, self.number)
+            self.finished.emit(True, f"File encoded successfully! seed: {self.number}")
         except Exception as e:
             self.finished.emit(False, str(e))
 
@@ -26,15 +30,16 @@ class EncodeWorker(QtCore.QThread):
 class DecodeWorker(QtCore.QThread):
     finished = QtCore.Signal(bool, str)
 
-    def __init__(self, file_path, save_path):
+    def __init__(self, file_path: str, save_path: str, number: int):
         super().__init__()
         self.file_path = file_path
         self.save_path = save_path
+        self.number = number
 
     def run(self):
         try:
-            decode_file(self.file_path, self.save_path)
-            self.finished.emit(True, "File decoded successfully!")
+            decode_file(self.file_path, self.save_path, self.number)
+            self.finished.emit(True, f"File decoded successfully!. seed: {self.number}")
         except Exception as e:
             self.finished.emit(False, str(e))
 
@@ -62,28 +67,47 @@ class MainPage(QtWidgets.QWidget):
         self.file_label = QtWidgets.QLabel("No file selected")
         self.file_label.setWordWrap(True)
         self.file_button.clicked.connect(self.open_file_dialog)
+        self.file_lineedit = QtWidgets.QLineEdit()
+        self.file_lineedit.setPlaceholderText(
+            "Enter file path manually or use the button below"
+        )
+        self.file_lineedit.textChanged.connect(
+            lambda text: self.file_label.setText(text)
+        )
 
+        file_layout.addWidget(self.file_lineedit)
         file_layout.addWidget(self.file_button)
         file_layout.addWidget(self.file_label)
 
         # Number Input Group
-        number_group = QGroupBox("Configuration")
-        number_layout = QVBoxLayout(number_group)
+        seed_group = QGroupBox("Configuration")
+        seed_layout = QVBoxLayout(seed_group)
 
-        self.number_input = QtWidgets.QLineEdit()
-        self.number_input.setPlaceholderText("Enter a number (optional)")
-        self.number_input.setValidator(QIntValidator())
-        number_layout.addWidget(self.number_input)
+        self.seed_input = QtWidgets.QLineEdit()
+        self.seed_input.setPlaceholderText(
+            f"Enter a seed (optional default is {DEFAULT_SEED})"
+        )
+        self.seed_input.setValidator(QIntValidator())
+        seed_layout.addWidget(self.seed_input)
 
         # Save Path Group
         save_group = QGroupBox("Output Destination")
         save_layout = QVBoxLayout(save_group)
+
+        self.save_lineedit = QtWidgets.QLineEdit()
+        self.save_lineedit.setPlaceholderText(
+            "Enter save path manually or use the button below"
+        )
+        self.save_lineedit.textChanged.connect(
+            lambda text: self.save_label.setText(text)
+        )
 
         self.save_button = QtWidgets.QPushButton("Select Save Path")
         self.save_label = QtWidgets.QLabel("No save path selected")
         self.save_label.setWordWrap(True)
         self.save_button.clicked.connect(self.open_save_dialog)
 
+        save_layout.addWidget(self.save_lineedit)
         save_layout.addWidget(self.save_button)
         save_layout.addWidget(self.save_label)
 
@@ -93,12 +117,19 @@ class MainPage(QtWidgets.QWidget):
 
         self.encode_button = QtWidgets.QPushButton("[ENCODE] Encode File")
         self.decode_button = QtWidgets.QPushButton("[DECODE] Decode File")
+        self.swap_encode_decode_file_button = QtWidgets.QPushButton(
+            "Swap [ENCODE]<-> [DECODE] filepaths"
+        )
 
         self.encode_button.clicked.connect(self.encode_file_action)
         self.decode_button.clicked.connect(self.decode_file_action)
+        self.swap_encode_decode_file_button.clicked.connect(
+            self.swap_encode_decode_file
+        )
 
         action_layout.addWidget(self.encode_button)
         action_layout.addWidget(self.decode_button)
+        action_layout.addWidget(self.swap_encode_decode_file_button)
 
         # Status Display
         self.status_text = QtWidgets.QTextEdit()
@@ -108,7 +139,7 @@ class MainPage(QtWidgets.QWidget):
 
         # Add all groups to main layout
         layout.addWidget(file_group)
-        layout.addWidget(number_group)
+        layout.addWidget(seed_group)
         layout.addWidget(save_group)
         layout.addWidget(action_group)
         layout.addWidget(self.status_text)
@@ -119,6 +150,7 @@ class MainPage(QtWidgets.QWidget):
         )
         if filename:
             self.file_label.setText(filename)
+            self.file_lineedit.setText(filename)
             self.update_status(f"[+] Selected file: {filename}")
 
     def open_save_dialog(self):
@@ -127,7 +159,20 @@ class MainPage(QtWidgets.QWidget):
         )
         if save_path:
             self.save_label.setText(save_path)
+            self.save_lineedit.setText(save_path)
             self.update_status(f"[+] Save path set: {save_path}")
+
+    def swap_encode_decode_file(self):
+        file_path = self.file_label.text()
+        save_path = self.save_label.text()
+        print(file_path, save_path)
+        if file_path == "No file selected" or save_path == "No save path selected":
+            return
+
+        # self.file_label.text, self.save_label.text = save_path, file_path
+        self.file_label.setText(save_path)
+        self.save_label.setText(file_path)
+        self.update_status(f"[_] Swap file path: {save_path} <-> {file_path}")
 
     def update_status(self, message):
         current_text = self.status_text.toPlainText()
@@ -145,6 +190,24 @@ class MainPage(QtWidgets.QWidget):
         file_path = self.file_label.text()
         save_path = self.save_label.text()
 
+        if not os.path.exists(file_path):
+            QtWidgets.QMessageBox.warning(
+                self, "Invalid Input", f"File [{file_path}] doth not exist."
+            )
+            return None, None, None
+        if not os.path.exists(save_path):
+            QtWidgets.QMessageBox.warning(
+                self, "Invalid Input", f"File [{file_path}] doth not exist."
+            )
+            return None, None, None
+        if file_path == save_path:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Invalid Input",
+                "Can't encode file itself. Select new [Save path]",
+            )
+            return None, None, None
+
         if file_path == "No file selected":
             QtWidgets.QMessageBox.warning(
                 self, "Invalid Input", "Please select a file first."
@@ -157,13 +220,13 @@ class MainPage(QtWidgets.QWidget):
             )
             return None, None, None
 
-        number_text = self.number_input.text()
-        number = int(number_text) if number_text else 0
+        seed_input_text = self.seed_input.text()
+        seed = int(seed_input_text) if seed_input_text else DEFAULT_SEED
 
-        return file_path, save_path, number
+        return file_path, save_path, seed
 
     def encode_file_action(self):
-        file_path, save_path, number = self.validate_inputs()
+        file_path, save_path, seed = self.validate_inputs()
         if file_path is None:
             return
 
@@ -174,15 +237,15 @@ class MainPage(QtWidgets.QWidget):
             self.loader.setCancelButton(None)
             self.loader.show()
             # encode_file(file_path, save_path)
-            self.worker = EncodeWorker(file_path, save_path)
+            self.worker = EncodeWorker(file_path, save_path, seed)
             self.worker.finished.connect(self.on_done)
             self.worker.start()
 
             self.update_status(f"[ENCODED] File encoded successfully!")
             self.update_status(f"   Input: {file_path}")
             self.update_status(f"   Output: {save_path}")
-            if number:
-                self.update_status(f"   Number: {number}")
+            if seed:
+                self.update_status(f"   Number: {seed}")
 
         except Exception as e:
             self.update_status(f"[ERROR] Error encoding file: {str(e)}")
@@ -199,7 +262,7 @@ class MainPage(QtWidgets.QWidget):
             self.loader.setCancelButton(None)
             self.loader.show()
             # encode_file(file_path, save_path)
-            self.worker = DecodeWorker(file_path, save_path)
+            self.worker = DecodeWorker(file_path, save_path, number)
             self.worker.finished.connect(self.on_done)
             self.worker.start()
 

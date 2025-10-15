@@ -15,7 +15,7 @@ if __name__ == "__main__":
     visualy_encode_image_file(
         image_file_path, image_save_file_path, bite_ecncode_mod, d_mod, seed
     )
-    print(f"encoded {image_file_path} saved a}{image_save_file_path}")
+    print(f"encoded {image_file_path} saved a{image_save_file_path}")
 
     vid_name = "vid_31mb.mp4"
     vid_file_path = f"test_files/{vid_name}"
