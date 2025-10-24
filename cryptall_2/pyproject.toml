@@ -47,3 +47,8 @@ dependencies = [
 where = ["src"]
 include = ["cryptall_2*"]
 exclude = ["tests", "assignments", "test_files", "test_results"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]

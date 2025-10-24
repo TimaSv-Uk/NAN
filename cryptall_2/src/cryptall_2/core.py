@@ -12,7 +12,7 @@ import os
 
 
 def encode_assignment5(
-    chars: np.ndarray, char_ecncode_mod: int, d_mod_range: np.ndarray
+    chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray
 ) -> np.ndarray:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
@@ -35,7 +35,7 @@ def encode_assignment5(
     next_state = np.empty_like(current_state)
 
     for a in d_mod_range:
-        find_neighbors_assignment5(current_state, next_state, a, char_ecncode_mod)
+        find_neighbors_assignment5(current_state, next_state, a, char_encode_mod)
 
         current_state, next_state = next_state, current_state
 
@@ -43,7 +43,7 @@ def encode_assignment5(
 
 
 def decode_assignment5(
-    chars: np.ndarray, char_ecncode_mod: int, d_mod_range: np.ndarray
+    chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray
 ) -> np.ndarray:
     """
     # (х_х1, х_2,..., х_п) і [у_1,у_2,..., у_п) коли
@@ -72,7 +72,7 @@ def decode_assignment5(
     for i in range(len(d_mod_range) - 1, -1, -1):
         a = d_mod_range[i]
         reverse_find_neighbors_assignment5(
-            current_state, next_state, a, char_ecncode_mod
+            current_state, next_state, a, char_encode_mod
         )
         current_state, next_state = next_state, current_state  # Swap
 
@@ -149,7 +149,6 @@ def find_neighbors_assignment5(
 
     """
     n = len(point_in)
-    # point_out[0] = point_in[0] + a
     point_out[0] = (point_in[0] + a) % mod
     x0 = point_in[0]
 
@@ -246,11 +245,11 @@ def reverse_change_first_symbol_based_on_random_vector(
 def change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
     """
     Calculates a new value for the first character in 'text' based on a weighted sum
-    of all characters' modulo values, then applies 'char_ecncode_mod' to the result.
+    of all characters' modulo values, then applies 'char_encode_mod' to the result.
 
     Args:
         text (str): The input string.
-        char_ecncode_mod (int): The modulus for character encoding and final calculation.
+        char_encode_mod (int): The modulus for character encoding and final calculation.
 
     Returns:
         list[int]: A list of integers with the modified first character's value
@@ -269,9 +268,9 @@ def change_first_symbol_based_on_full_vector(chars: np.ndarray) -> np.ndarray:
 
     for char_val in new_chars[1:]:
         M *= 2 * char_val + 1
-        # M %= char_ecncode_mod
+        # M %= char_encode_mod
 
-    # original_first_char_val = (new_chars[0] * M) % char_ecncode_mod
+    # original_first_char_val = (new_chars[0] * M) % char_encode_mod
     original_first_char_val = new_chars[0] * M
     new_chars[0] = original_first_char_val
 
@@ -377,3 +376,105 @@ def randomize_d_mod(d_mod: int, seed: int) -> np.ndarray:
     range_d_mod[index_to_randomize] = random_val
 
     return range_d_mod
+
+
+@njit
+def encode_assignment10(
+    chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int
+) -> np.ndarray:
+    """
+    improved version
+    * from assighment5 graph algorithm
+
+     (x1 x2 x3) [y1 = x1^m + a1, y2 = *,y3 = *]
+
+     (y1 = x1 + a1 + a2, y2 = *,y3 = *)
+
+     [y1 = x1^m + a1 + a2 + a3]
+
+     (y1 = x1 + a1 + a2 + a3 + a4)
+    """
+    current_state = chars.astype(np.uint8).copy()
+    next_state = np.empty_like(current_state)
+
+    m = m % char_encode_mod
+
+    for index in range(len(d_mod_range)):
+        a = d_mod_range[index]
+        # print(a)
+        # print(d_mod_range[: index + 1])
+
+        n = len(current_state)
+        x0 = current_state[0]
+
+        if index % 2 == 0:
+            # y1 = x1^m
+            next_state[0] = np.uint8((x0**m) + np.sum(d_mod_range[: index + 1]))
+        else:
+            # y1 = x1 + a1 + a2 + ... a_index
+            next_state[0] = np.uint8(x0 + np.sum(d_mod_range[: index + 1]))
+
+        for i in range(1, n):
+            if i % 2 == 0:
+                next_state[i] = np.uint8(
+                    current_state[i] - next_state[0] * current_state[i - 1]
+                )
+            else:
+                next_state[i] = np.uint8(current_state[i] - x0 * next_state[i - 1])
+
+        current_state, next_state = next_state, current_state
+
+    return current_state
+
+
+@njit
+def decode_assignment10(
+    chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int
+) -> np.ndarray:
+    """
+    improved version
+    * from assighment5 graph algorithm
+
+     (x1 x2 x3)
+
+     [y1 = x1^m + a1, y2 = *,y3 = *]
+
+     (x1 = y1 + a1 + a2, x2 = *,x3 = *)
+
+     [y1 = x1^m + a1 + a2 + a3]
+
+     (x1 = y1 + a1 + a2 + a3 + a4)
+    """
+    current_state = chars.astype(np.uint8).copy()
+    next_state = np.empty_like(current_state)
+
+    m = m % char_encode_mod
+
+    current_state = chars.astype(np.uint8).copy()
+    next_state = np.empty_like(current_state)
+
+    for index in range(len(d_mod_range) - 1, -1, -1):
+        a = d_mod_range[index]
+        n = len(current_state)
+        y0 = current_state[0]
+
+        if index % 2 == 0:
+            # Reverse of: y0 = (x0**m + SUM) % mod
+            next_state[0] = np.uint8(
+                ((y0 ** (1 / m)) - np.sum(d_mod_range[: index + 1]))
+            )
+        else:
+            # y1 = x1 + a1 + a2 + ... a_index
+            next_state[0] = np.uint8(y0 - np.sum(d_mod_range[: index + 1]))
+
+        x0 = next_state[0]
+
+        for i in range(1, n):
+            if i % 2 == 0:
+                next_state[i] = np.uint8(current_state[i] + y0 * next_state[i - 1])
+            else:
+                next_state[i] = np.uint8(current_state[i] + x0 * current_state[i - 1])
+
+        current_state, next_state = next_state, current_state
+
+    return current_state

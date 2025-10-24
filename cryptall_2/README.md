@@ -102,3 +102,14 @@ First set up  project then:
      pyinstaller src/desctop_app/app.py
 
 To change buid executable option edit app.spec
+## Run tests 
+
+With pytest
+
+    uv run pytest tests/tests.py
+
+or 
+
+With unittest
+
+    uv run tests/tests.py

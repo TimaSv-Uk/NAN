@@ -6,6 +6,14 @@ from cryptall_2.encode_decode import (
     encode_bites_rand,
     encode_bites_full,
 )
+
+from cryptall_2.core import (
+    encode_assignment10,
+    decode_assignment10,
+    encode_assignment5,
+    decode_assignment5,
+    modInverse,
+)
 from cryptall_2.helpers import (
     bites_sameness_percentage,
     load_file_to_bites,
@@ -129,6 +137,33 @@ class TestMathUtils(unittest.TestCase):
             end_time = time.perf_counter()
             execution_time = end_time - start_time
             print(f"Decoded_vector execution_time: {execution_time}\n")
+
+    def test_encode_decode_10(self):
+        arr = np.array([1, 2, 3, 4, 5])
+        d_mod_range = np.arange(self.d_mod)
+        encode_10 = encode_assignment10(arr, self.char_mod, d_mod_range, self.seed)
+        encode_5 = encode_assignment5(arr, self.char_mod, d_mod_range)
+
+        print(f"encode_10: {encode_10}")
+        print(f"encode_5: {encode_5}\n")
+        self.assertFalse(np.array_equal(encode_10, encode_5))
+
+        decode_10 = decode_assignment10(
+            encode_10, self.char_mod, d_mod_range, self.seed
+        )
+        print(f"initial array: {arr}")
+        print(f"decoded_10: {decode_10}")
+        unit = np.uint8(10)
+        m = 3
+
+        m_pow = unit**m
+        print(1000 - 256 - 256 - 256)
+        print(m_pow)
+        
+        
+
+
+        self.assertTrue(np.array_equal(arr, decode_10))
 
 
 if __name__ == "__main__":
