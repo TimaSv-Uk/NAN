@@ -366,6 +366,9 @@ def modInverse(a: int, m: int) -> int:
 
 
 def randomize_d_mod(d_mod: int, seed: int) -> np.ndarray:
+    if d_mod == 0:
+        return np.arange(d_mod)
+
     np.random.seed(seed)
     index_to_randomize = np.random.randint(0, d_mod)
     random_val = np.random.randint(0, d_mod)
@@ -459,6 +462,7 @@ def decode_assignment10(
         y0 = current_state[0]
 
         if index % 2 == 0:
+            # TODO: need to fix decode
             # Reverse of: y0 = (x0**m + SUM) % mod
             next_state[0] = np.uint8(
                 ((y0 ** (1 / m)) - np.sum(d_mod_range[: index + 1]))

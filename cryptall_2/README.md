@@ -108,6 +108,10 @@ With pytest
 
     uv run pytest tests/tests.py
 
+    """
+       To run selected test
+       uv run pytest tests/tests.py::TestMathUtils::test_encode_decode_dmod1
+    """
 or 
 
 With unittest

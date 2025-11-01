@@ -26,6 +26,14 @@ import time
 
 
 class TestMathUtils(unittest.TestCase):
+    """
+    To run all test
+    uv run pytest tests/tests.py
+
+    To run selected test
+    uv run pytest -s tests/tests.py::TestMathUtils::test_encode_decode_dmod1
+    """
+
     def setUp(self):
         self.char_mod = 256
         self.d_mod = 128
@@ -46,6 +54,30 @@ class TestMathUtils(unittest.TestCase):
         file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
         encoded = encode_bites(file_bites, self.char_mod, self.d_mod, self.seed)
         decoded = decode_bites(encoded, self.char_mod, self.d_mod, self.seed)
+        self.assertTrue(np.array_equal(file_bites, decoded))
+
+    def test_encode_decode_dmod0(self):
+        """Test that encoding followed by decoding restores the original bites."""
+        file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
+
+        print(file_bites)
+        encoded = encode_bites(file_bites, self.char_mod, 0, self.seed)
+        print(encoded)
+        decoded = decode_bites(encoded, self.char_mod, 0, self.seed)
+
+        print(decoded)
+        self.assertTrue(np.array_equal(file_bites, decoded))
+
+    def test_encode_decode_dmod1(self):
+        """Test that encoding followed by decoding restores the original bites."""
+        file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
+
+        print(file_bites)
+        encoded = encode_bites(file_bites, self.char_mod, 1, self.seed)
+        print(encoded)
+        decoded = decode_bites(encoded, self.char_mod, 1, self.seed)
+
+        print(decoded)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
     def test_randomized_d_mod_changes_order(self):
@@ -153,17 +185,47 @@ class TestMathUtils(unittest.TestCase):
         )
         print(f"initial array: {arr}")
         print(f"decoded_10: {decode_10}")
+
         unit = np.uint8(10)
-        m = 3
+        m = 4
+        print(f"initial number: {unit}")
 
         m_pow = unit**m
-        print(1000 - 256 - 256 - 256)
         print(m_pow)
-        
-        
 
+        y = unit ^ m
+        x = y ^ m  # perfect inverse
+
+        print(y)
+        print(x)
+
+        num = 10
+        y = num**m
+
+        print("Non modular operations")
+        print(f"exponentiation y = {y}")
+        print(y ** (1 / m))
 
         self.assertTrue(np.array_equal(arr, decode_10))
+
+
+def invert_pow_mod256(y, m):
+    """
+    works only for sertain numbers
+
+    Modular exponentiation in mod 256 is not one-to-one — you can’t always uniquely invert x^m mod 256.
+
+    if m == 4 the function will return 2 even if y = 16 and we expect 6,10,14 or 18
+        2
+        6
+        10
+        14
+        18
+    """
+    for x in range(256):
+        if pow(x, m, 256) == y:
+            return x
+    return None  # no valid x found
 
 
 if __name__ == "__main__":

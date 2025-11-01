@@ -3,7 +3,7 @@ import numpy as np
 
 import wave
 
-from .encode_decode import encode_bites_rand
+from .encode_decode import encode_bites
 
 
 def visualy_encode_image_file(
@@ -22,7 +22,7 @@ def visualy_encode_image_file(
     pixels = np.array(img)
     pixels_vector = pixels.flatten()
 
-    pixels_vector = encode_bites_rand(pixels_vector, bite_ecncode_mod, d_mod, seed)
+    pixels_vector = encode_bites(pixels_vector, bite_ecncode_mod, d_mod, seed)
 
     encoded_pixels = pixels_vector.reshape(np.shape(pixels))
 
@@ -64,7 +64,7 @@ def visualy_encode_video_file(
             break
 
         frame_vector = frame.flatten()
-        encoded_vector = encode_bites_rand(frame_vector, bite_ecncode_mod, d_mod, seed)
+        encoded_vector = encode_bites(frame_vector, bite_ecncode_mod, d_mod, seed)
         encoded_frame = encoded_vector.reshape(frame.shape)
         out.write(encoded_frame)
         fc += 1
@@ -102,7 +102,7 @@ def visualy_encode_audio_wav_file(
     audio_array = np.frombuffer(frames, dtype=dtype_map[sampwidth])
 
     audio_vector = audio_array.flatten()
-    encoded_vector = encode_bites_rand(audio_vector, bite_ecncode_mod, d_mod, seed)
+    encoded_vector = encode_bites(audio_vector, bite_ecncode_mod, d_mod, seed)
     encoded_audio = encoded_vector.reshape(audio_array.shape)
 
     with wave.open(save_encoded_file_path, "wb") as wf:
