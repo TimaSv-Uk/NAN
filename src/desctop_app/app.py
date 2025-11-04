@@ -134,7 +134,8 @@ class MainPage(QtWidgets.QWidget):
         # Status Display
         self.status_text = QtWidgets.QTextEdit()
         self.status_text.setReadOnly(True)
-        self.status_text.setMaximumHeight(150)
+        self.status_text.setMinimumHeight(100)
+        self.status_text.setMaximumHeight(200)
         self.status_text.setPlaceholderText("Status messages will appear here...")
 
         # Add all groups to main layout
@@ -339,26 +340,53 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.setWindowTitle("File Encoder/Decoder - Professional Edition")
 
+        screen = QtWidgets.QApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+        screen_width = screen_geometry.width()
+
+        self.page_width = int(screen_width * 0.70)  # 70% of screen width
+
         # Create pages
         self.main_page = MainPage()
         self.page_one = PageOne()
         self.page_two = PageTwo()
-
         # Stacked widget
         self.stacked_widget = QtWidgets.QStackedWidget()
         self.stacked_widget.addWidget(self.main_page)  # index 0
         self.stacked_widget.addWidget(self.page_one)  # index 1
         self.stacked_widget.addWidget(self.page_two)  # index 2
-        self.setCentralWidget(self.stacked_widget)
+        self.stacked_widget.setMaximumSize(self.page_width, 1100)
 
-        # Menu bar
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+
+        scroll.setSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
+        )
+        scroll.setFixedWidth(self.page_width)
+
+        scroll.setWidget(self.stacked_widget)
+
+        central_container = QtWidgets.QWidget()
+        container_layout = QtWidgets.QVBoxLayout(central_container)
+        h_layout = QtWidgets.QHBoxLayout()
+        h_layout.addStretch(1)  # Left spacer
+        h_layout.addWidget(scroll)
+        h_layout.addStretch(1)  # Right spacer
+        container_layout.addLayout(h_layout)
+
+        self.setCentralWidget(central_container)
+
         menu_bar = self.menuBar()
-        navigate_menu = menu_bar.addMenu("Navigate")
+        navigate_menu = menu_bar.addMenu("Menu")
 
         main_action = QAction("Main Page", self)
         docs_action = QAction("Documentation", self)
-        about_action = QAction("About", self)
 
+        about_action = QAction("About", self)
         navigate_menu.addAction(main_action)
         navigate_menu.addAction(docs_action)
         navigate_menu.addAction(about_action)
@@ -372,12 +400,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def apply_styles(self):
         # Main application style - Black and White theme
         self.setStyleSheet("""
+            * { 
+                font-size: 20px;
+            }
             /* Main Window */
             QMainWindow {
                 background-color: #ffffff;
                 color: #000000;
+
             }
-            
             /* Stacked Widget */
             QStackedWidget {
                 background-color: #ffffff;
@@ -387,7 +418,6 @@ class MainWindow(QtWidgets.QMainWindow):
             /* Labels */
             QLabel {
                 color: #000000;
-                font-size: 15px;
                 padding: 5px;
             }
             #titleLabel {
@@ -397,7 +427,6 @@ class MainWindow(QtWidgets.QMainWindow):
             /* Group Boxes */
             QGroupBox {
                 font-weight: bold;
-                font-size: 16px;
                 border: 2px solid #000000;
                 border-radius: 8px;
                 margin: 10px 0px;
@@ -419,7 +448,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 color: #ffffff;
                 border: none;
                 padding: 12px 20px;
-                font-size: 14px;
+
                 font-weight: bold;
                 border-radius: 6px;
                 min-height: 20px;
@@ -443,7 +472,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 border: 2px solid #000000;
                 border-radius: 4px;
                 padding: 8px 12px;
-                font-size: 14px;
                 background-color: #ffffff;
                 color: #000000;
             }
@@ -460,7 +488,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 background-color: #fafafa;
                 color: #000000;
                 font-family: 'Courier New', monospace;
-                font-size: 12px;
+                font-size: 20px;
             }
             
             /* Menu Bar */
@@ -468,7 +496,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 background-color: #000000;
                 color: #ffffff;
                 font-weight: bold;
-                font-size: 14px;
                 border-bottom: 2px solid #333333;
             }
             

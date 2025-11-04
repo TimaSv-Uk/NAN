@@ -1,3 +1,5 @@
 ./venv
 /test_files
+/dist/
+/build/
 /src/cryptall_2.egg-info
