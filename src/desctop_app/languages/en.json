@@ -1,0 +1,74 @@
+{
+  "window_title": "Cryptall_2",
+  "language_menu": "Language",
+  "main_page": {
+    "title": "File Encoder/Decoder",
+    "file_selection": {
+      "group_title": "File Selection",
+      "button": "Select File",
+      "no_file": "No file selected",
+      "placeholder": "Enter file path manually or use the button below"
+    },
+    "configuration": {
+      "group_title": "Configuration",
+      "placeholder": "Enter a seed (optional default is {default})"
+    },
+    "output": {
+      "group_title": "Output Destination",
+      "placeholder": "Enter save path manually or use the button below",
+      "button": "Select Save Path",
+      "no_path": "No save path selected"
+    },
+    "actions": {
+      "group_title": "Actions",
+      "encode_button": "[ENCODE] Encode File",
+      "decode_button": "[DECODE] Decode File",
+      "swap_button": "Swap filepaths"
+    },
+    "status": {
+      "placeholder": "Status messages will appear here...",
+      "file_selected": "[+] Selected file: {path}",
+      "save_path_set": "[+] Save path set: {path}",
+      "swap": "[_] Swap file path: {path1} <-> {path2}",
+      "encoded": "[ENCODED] File encoded successfully!",
+      "decoded": "[DECODED] File decoded successfully!",
+      "input": "   Input: {path}",
+      "output": "   Output: {path}",
+      "number": "   Number: {number}",
+      "error": "[ERROR] Error encoding file: {error}"
+    },
+    "dialogs": {
+      "select_file": "Select a File",
+      "select_save": "Select Save Path",
+      "all_files": "All Files (*)",
+      "encoding": "Encoding...",
+      "decoding": "Decoding...",
+      "please_wait": "Please wait",
+      "success": "Success",
+      "error": "Error",
+      "file_encoded": "File encoded successfully! seed: {seed}",
+      "file_decoded": "File decoded successfully!. seed: {seed}"
+    },
+    "warnings": {
+      "invalid_input": "Invalid Input",
+      "file_not_exist": "Input file [{path}] doth not exist.",
+      "same_paths": "Can't encode file itself. Select new [Save path]",
+      "no_file_selected": "Please select a file first.",
+      "no_save_path": "Please select a save path."
+    }
+  },
+  "documentation_page": {
+    "title": "Documentation",
+    "content": "This application allows you to encode and decode files.\n\nFeatures:\n* Select any file for processing\n* Choose output destination\n* Encode files for security\n* Decode previously encoded files\n* Real-time status updates\n\nUse the main page to process your files."
+  },
+  "about_page": {
+    "title": "About",
+    "content": "File Encoder/Decoder Application\n\nVersion: 2.0\nBuilt with: PySide6\n\nThis application provides a simple and intuitive interface\nfor encoding and decoding files using custom algorithms.\n\nFeatures a clean black and white design for\nprofessional appearance and ease of use."
+  },
+  "menu": {
+    "menu": "Menu",
+    "main_page": "Main Page",
+    "documentation": "Documentation",
+    "about": "About"
+  }
+}

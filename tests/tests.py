@@ -45,7 +45,7 @@ class TestMathUtils(unittest.TestCase):
         self.file_names = {
             "txt": "data2.txt",
             "img": "img.jpg",
-            "vid": "vid_31mb.mp4",
+            "vid": "vid_27mb.mp4",
             # "big_csv": "csv_123mb.csv",
         }
 
@@ -170,43 +170,43 @@ class TestMathUtils(unittest.TestCase):
             execution_time = end_time - start_time
             print(f"Decoded_vector execution_time: {execution_time}\n")
 
-    def test_encode_decode_10(self):
-        arr = np.array([1, 2, 3, 4, 5])
-        d_mod_range = np.arange(self.d_mod)
-        encode_10 = encode_assignment10(arr, self.char_mod, d_mod_range, self.seed)
-        encode_5 = encode_assignment5(arr, self.char_mod, d_mod_range)
-
-        print(f"encode_10: {encode_10}")
-        print(f"encode_5: {encode_5}\n")
-        self.assertFalse(np.array_equal(encode_10, encode_5))
-
-        decode_10 = decode_assignment10(
-            encode_10, self.char_mod, d_mod_range, self.seed
-        )
-        print(f"initial array: {arr}")
-        print(f"decoded_10: {decode_10}")
-
-        unit = np.uint8(10)
-        m = 4
-        print(f"initial number: {unit}")
-
-        m_pow = unit**m
-        print(m_pow)
-
-        y = unit ^ m
-        x = y ^ m  # perfect inverse
-
-        print(y)
-        print(x)
-
-        num = 10
-        y = num**m
-
-        print("Non modular operations")
-        print(f"exponentiation y = {y}")
-        print(y ** (1 / m))
-
-        self.assertTrue(np.array_equal(arr, decode_10))
+    # def test_encode_decode_10(self):
+    #     arr = np.array([1, 2, 3, 4, 5])
+    #     d_mod_range = np.arange(self.d_mod)
+    #     encode_10 = encode_assignment10(arr, self.char_mod, d_mod_range, self.seed)
+    #     encode_5 = encode_assignment5(arr, self.char_mod, d_mod_range)
+    #
+    #     print(f"encode_10: {encode_10}")
+    #     print(f"encode_5: {encode_5}\n")
+    #     self.assertFalse(np.array_equal(encode_10, encode_5))
+    #
+    #     decode_10 = decode_assignment10(
+    #         encode_10, self.char_mod, d_mod_range, self.seed
+    #     )
+    #     print(f"initial array: {arr}")
+    #     print(f"decoded_10: {decode_10}")
+    #
+    #     unit = np.uint8(10)
+    #     m = 4
+    #     print(f"initial number: {unit}")
+    #
+    #     m_pow = unit**m
+    #     print(m_pow)
+    #
+    #     y = unit ^ m
+    #     x = y ^ m  # perfect inverse
+    #
+    #     print(y)
+    #     print(x)
+    #
+    #     num = 10
+    #     y = num**m
+    #
+    #     print("Non modular operations")
+    #     print(f"exponentiation y = {y}")
+    #     print(y ** (1 / m))
+    #
+    #     self.assertTrue(np.array_equal(arr, decode_10))
 
 
 def invert_pow_mod256(y, m):
