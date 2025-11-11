@@ -21,8 +21,8 @@
     },
     "actions": {
       "group_title": "Actions",
-      "encode_button": "[ENCODE] Encode File",
-      "decode_button": "[DECODE] Decode File",
+      "encode_button": "[ENCODE]",
+      "decode_button": "[DECODE]",
       "swap_button": "Swap filepaths"
     },
     "status": {
@@ -63,7 +63,7 @@
   },
   "about_page": {
     "title": "About",
-    "content": "File Encoder/Decoder Application\n\nVersion: 2.0\nBuilt with: PySide6\n\nThis application provides a simple and intuitive interface\nfor encoding and decoding files using custom algorithms.\n\nFeatures a clean black and white design for\nprofessional appearance and ease of use."
+    "content": "File Encoder/Decoder Application\n\nVersion: 2.0\nBuilt with: PySide6.\n"
   },
   "menu": {
     "menu": "Menu",

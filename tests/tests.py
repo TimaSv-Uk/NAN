@@ -10,8 +10,8 @@ from cryptall_2.encode_decode import (
 from cryptall_2.core import (
     encode_assignment10,
     decode_assignment10,
-    encode_assignment5,
-    decode_assignment5,
+    encode_v5,
+    decode_v5,
     modInverse,
 )
 from cryptall_2.helpers import (

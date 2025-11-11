@@ -10,7 +10,7 @@ from cryptall_2.helpers import (
     save_file_from_bites,
 )
 from cryptall_2.core import (
-    encode_assignment5_with_table,
+    encode_v5_with_table,
     encode_assignment5,
     decode_assignment5,
 )
@@ -20,7 +20,7 @@ from cryptall_2.encode_decode import encode_bites
 def main():
     # === File paths ===
     # file_path = "tests/test_files/Audiobook_1gb.zip"
-    file_path = "tests/test_files/csv_123mb.csv"
+    file_path = "tests/test_files/csv_100mb.csv"
     # save_path = "tests/test_files/Encoded_Audiobook_1gb.zip"
 
     print("Mod: 128")

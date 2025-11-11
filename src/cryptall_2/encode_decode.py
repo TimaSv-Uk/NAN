@@ -4,8 +4,8 @@ from typing import Callable
 
 from .helpers import save_file_from_bites, load_file_to_bites
 from .core import (
-    encode_assignment5,
-    decode_assignment5,
+    encode_v5,
+    decode_v5,
     change_first_symbol_based_on_full_vector,
     reverse_change_first_symbol_based_on_full_vector,
     change_first_symbol_based_on_random_vector,
@@ -19,7 +19,7 @@ def encode_bites(
 ) -> np.ndarray:
     random_d_mod_range = np.arange(d_mod)
     file_bites = change_first_symbol_based_on_random_vector(bites, seed)
-    encoded_bites = encode_assignment5(file_bites, char_ecncode_mod, random_d_mod_range)
+    encoded_bites = encode_v5(file_bites, char_ecncode_mod, random_d_mod_range)
     return encoded_bites
 
 
@@ -27,7 +27,7 @@ def decode_bites(
     bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
 ) -> np.ndarray:
     random_d_mod_range = np.arange(d_mod)
-    decoded_bites = decode_assignment5(bites, char_ecncode_mod, random_d_mod_range)
+    decoded_bites = decode_v5(bites, char_ecncode_mod, random_d_mod_range)
     decoded_bites = reverse_change_first_symbol_based_on_random_vector(
         decoded_bites, seed
     )
@@ -40,7 +40,7 @@ def encode_bites_rand(
     """Encode using random first-symbol modification."""
     d_range = randomize_d_mod(d_mod, seed)
     bites_mod = change_first_symbol_based_on_random_vector(bites, seed)
-    return encode_assignment5(bites_mod, char_ecncode_mod, d_range)
+    return encode_v5(bites_mod, char_ecncode_mod, d_range)
 
 
 def decode_bites_rand(
@@ -48,7 +48,7 @@ def decode_bites_rand(
 ) -> np.ndarray:
     """Decode using random first-symbol modification."""
     d_range = randomize_d_mod(d_mod, seed)
-    bites_dec = decode_assignment5(bites, char_ecncode_mod, d_range)
+    bites_dec = decode_v5(bites, char_ecncode_mod, d_range)
     return reverse_change_first_symbol_based_on_random_vector(bites_dec, seed)
 
 
@@ -58,7 +58,7 @@ def encode_bites_full(
     """Encode using full-vector first-symbol modification."""
     d_range = randomize_d_mod(d_mod, seed)
     bites_mod = change_first_symbol_based_on_full_vector(bites)
-    return encode_assignment5(bites_mod, char_ecncode_mod, d_range)
+    return encode_v5(bites_mod, char_ecncode_mod, d_range)
 
 
 def decode_bites_full(
@@ -66,7 +66,7 @@ def decode_bites_full(
 ) -> np.ndarray:
     """Decode using full-vector first-symbol modification."""
     d_range = randomize_d_mod(d_mod, seed)
-    bites_dec = decode_assignment5(bites, char_ecncode_mod, d_range)
+    bites_dec = decode_v5(bites, char_ecncode_mod, d_range)
     return reverse_change_first_symbol_based_on_full_vector(bites_dec)
 
 
@@ -79,7 +79,7 @@ def encode_bites_select_func(
 ) -> np.ndarray:
     """Encode using full-vector/first-symbol modification."""
     bites_mod = modify_vector_func(bites)
-    return encode_assignment5(bites_mod, char_ecncode_mod, d_mod_range)
+    return encode_v5(bites_mod, char_ecncode_mod, d_mod_range)
 
 
 def decode_bites_select_func(
@@ -90,7 +90,7 @@ def decode_bites_select_func(
     modify_vector_func: Callable[[np.ndarray], np.ndarray],
 ) -> np.ndarray:
     """Decode using full-vector/first-symbol modification."""
-    bites_dec = encode_assignment5(bites, char_ecncode_mod, d_mod_range)
+    bites_dec = encode_v5(bites, char_ecncode_mod, d_mod_range)
     return modify_vector_func(bites_dec)
 
 

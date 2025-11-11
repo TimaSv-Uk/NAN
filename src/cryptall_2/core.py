@@ -11,7 +11,7 @@ import os
 # only works if your modulus is a power of two
 
 
-def encode_assignment5(
+def encode_v5(
     chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray
 ) -> np.ndarray:
     """
@@ -35,14 +35,14 @@ def encode_assignment5(
     next_state = np.empty_like(current_state)
 
     for a in d_mod_range:
-        find_neighbors_assignment5(current_state, next_state, a, char_encode_mod)
+        find_neighbors_v5(current_state, next_state, a, char_encode_mod)
 
         current_state, next_state = next_state, current_state
 
     return current_state
 
 
-def decode_assignment5(
+def decode_v5(
     chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray
 ) -> np.ndarray:
     """
@@ -71,15 +71,13 @@ def decode_assignment5(
 
     for i in range(len(d_mod_range) - 1, -1, -1):
         a = d_mod_range[i]
-        reverse_find_neighbors_assignment5(
-            current_state, next_state, a, char_encode_mod
-        )
+        reverse_find_neighbors_v5(current_state, next_state, a, char_encode_mod)
         current_state, next_state = next_state, current_state  # Swap
 
     return current_state
 
 
-def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
+def encode_v5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod: int):
     BASE_DIR = os.path.dirname(__file__)
     mul_table_path = os.path.join(
         BASE_DIR, "multiplication_table", f"mul_mod_{char_encode_mod}.npy"
@@ -90,7 +88,7 @@ def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod
     current_state = chars.copy()
     next_state = np.empty_like(current_state)
     for a in range(d_mod):
-        find_neighbors_assignment5_with_table(
+        find_neighbors_v5_with_table(
             current_state, next_state, a, char_encode_mod, mul_table
         )
         current_state, next_state = next_state, current_state
@@ -98,7 +96,7 @@ def encode_assignment5_with_table(chars: np.ndarray, char_encode_mod: int, d_mod
 
 
 @njit
-def find_neighbors_assignment5_with_table(
+def find_neighbors_v5_with_table(
     point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int, mul_table
 ) -> None:
     """
@@ -136,7 +134,7 @@ def find_neighbors_assignment5_with_table(
 
 
 @njit
-def find_neighbors_assignment5(
+def find_neighbors_v5(
     point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
 ) -> None:
     """
@@ -170,7 +168,7 @@ def find_neighbors_assignment5(
 
 
 @njit
-def reverse_find_neighbors_assignment5(
+def reverse_find_neighbors_v5(
     point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
 ) -> None:
     """

@@ -4,9 +4,9 @@ import time
 
 from cryptall_2.helpers import load_file_to_bites
 from cryptall_2.core import (
-    encode_assignment5_with_table,
-    encode_assignment5,
-    decode_assignment5,
+    encode_v5_with_table,
+    encode_v5,
+    decode_v5,
 )
 
 
@@ -22,20 +22,20 @@ def main():
     print(f"Generated array of size: {text.shape} bytes\n")
 
     start_time = time.perf_counter()
-    encoded = encode_assignment5_with_table(text, char_ecncode_mod, d_mod)
+    encoded = encode_v5_with_table(text, char_ecncode_mod, d_mod)
     end_time = time.perf_counter()
     execution_time = end_time - start_time
     print(f"WITH TABLE Encoded_vector execution_time: {execution_time}")
 
     start_time = time.perf_counter()
-    encoded = encode_assignment5(text, char_ecncode_mod, d_mod_range)
+    encoded = encode_v5(text, char_ecncode_mod, d_mod_range)
     end_time = time.perf_counter()
     execution_time = end_time - start_time
     print(f"Encoded_vector execution_time: {execution_time}")
     print(f"Encoded_vector: {encoded}")
 
     start_time = time.perf_counter()
-    decoded_vector = decode_assignment5(encoded, char_ecncode_mod, d_mod_range)
+    decoded_vector = decode_v5(encoded, char_ecncode_mod, d_mod_range)
     end_time = time.perf_counter()
     execution_time = end_time - start_time
     print(f"Decoded_vector execution_time: {execution_time}\n")

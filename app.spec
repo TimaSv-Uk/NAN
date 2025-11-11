@@ -1,11 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+import os
 
+python_dll = os.path.join(sys.base_prefix, f'python{sys.version_info.major}{sys.version_info.minor}.dll')
 
 a = Analysis(
-    ['src\\desctop_app\\app.py'],
+    ['src/desctop_app/app.py'],
     pathex=[],
-    binaries=[],
-    datas=[],
+    binaries=[
+        (python_dll, '.'),  
+    ],
+    datas=[
+        ('src/desctop_app/languages', 'languages'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -33,6 +40,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
@@ -40,5 +48,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='app',
+    name='Cryptall_2',
 )

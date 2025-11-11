@@ -56,17 +56,17 @@ class UILanguageManager:
 class EncodeWorker(QtCore.QThread):
     finished = QtCore.Signal(bool, str)
 
-    def __init__(self, file_path: str, save_path: str, number: int, tr):
+    def __init__(self, file_path: str, save_path: str, seed: int, tr):
         super().__init__()
         self.file_path = file_path
         self.save_path = save_path
-        self.number = number
+        self.seed = seed
         self.tr = tr
 
     def run(self):
         try:
-            encode_file(self.file_path, self.save_path, self.number)
-            msg = self.tr.get("main_page.dialogs.file_encoded", seed=self.number)
+            encode_file(self.file_path, self.save_path, self.seed)
+            msg = self.tr.get("main_page.dialogs.file_encoded", seed=self.seed)
             self.finished.emit(True, msg)
         except Exception as e:
             self.finished.emit(False, str(e))
@@ -75,17 +75,17 @@ class EncodeWorker(QtCore.QThread):
 class DecodeWorker(QtCore.QThread):
     finished = QtCore.Signal(bool, str)
 
-    def __init__(self, file_path: str, save_path: str, number: int, tr):
+    def __init__(self, file_path: str, save_path: str, seed: int, tr):
         super().__init__()
         self.file_path = file_path
         self.save_path = save_path
-        self.number = number
+        self.seed = seed
         self.tr = tr
 
     def run(self):
         try:
-            decode_file(self.file_path, self.save_path, self.number)
-            msg = self.tr.get("main_page.dialogs.file_decoded", seed=self.number)
+            decode_file(self.file_path, self.save_path, self.seed)
+            msg = self.tr.get("main_page.dialogs.file_decoded", seed=self.seed)
             self.finished.emit(True, msg)
         except Exception as e:
             self.finished.emit(False, str(e))
@@ -610,6 +610,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setStyleSheet("""
             * {
                 font-size: 20px;
+
+                font-family: monospace;
             }
             QMainWindow {
                 background-color: #ffffff;
@@ -694,6 +696,9 @@ class MainWindow(QtWidgets.QMainWindow):
             QMenuBar::item:selected {
                 background: #333333;
                 border-radius: 4px;
+            }
+            QProgressDialog{
+            background-color: white;
             }
             QMenu {
                 background-color: #ffffff;
