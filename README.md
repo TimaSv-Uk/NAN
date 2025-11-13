@@ -99,8 +99,9 @@ task2.py — реалізація всіх функцій для кодуван�
 ## Build project:
 First set up  project then:
 
-     pyinstaller src/desctop_app/app.py
+     pyinstaller app.spec
 
+After comilation one can find .exe file in dist/Cryptall_2/
 To change buid executable option edit app.spec
 ## Run tests 
 

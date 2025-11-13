@@ -1,6 +1,6 @@
 # NOTE: old version of core encryption algorithm
 
-def encode_assignment2(
+def encode_v2(
     encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
     chars = encoded_text_int.copy()
@@ -12,7 +12,7 @@ def encode_assignment2(
     return chars
 
 
-def decode_assignment2(
+def decode_v2(
     encoded_text_int: list[int], char_ecncode_mod: int, d_mod: int
 ) -> list[int]:
     chars = encoded_text_int.copy()
