@@ -17,6 +17,7 @@ from cryptall_2.core import (
 from cryptall_2.helpers import (
     bites_sameness_percentage,
     load_file_to_bites,
+    sudo_random_array,
 )
 from cryptall_2.core import randomize_d_mod
 
@@ -169,6 +170,16 @@ class TestMathUtils(unittest.TestCase):
             end_time = time.perf_counter()
             execution_time = end_time - start_time
             print(f"Decoded_vector execution_time: {execution_time}\n")
+
+    def test_isert_rand_array(self):
+        random_array_length = 3
+        random_array = sudo_random_array(random_array_length, 256, self.seed, np.uint8)
+        original_arr = [1, 2, 4]
+        new_arr = np.append(random_array, original_arr)
+
+        self.assertEqual(len(new_arr) - 3, random_array_length)
+        self.assertEqual(len(new_arr) - 3, random_array_length)
+        self.assertTrue(np.array_equal(original_arr, new_arr[random_array_length:]))
 
     # def test_encode_decode_10(self):
     #     arr = np.array([1, 2, 3, 4, 5])

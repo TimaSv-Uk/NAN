@@ -2,7 +2,7 @@ import numpy as np
 
 from typing import Callable
 
-from .helpers import save_file_from_bites, load_file_to_bites
+from .helpers import save_file_from_bites, load_file_to_bites, sudo_random_array
 from .core import (
     encode_v5,
     decode_v5,
@@ -15,8 +15,19 @@ from .core import (
 
 
 def encode_bites(
-    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.05,
 ) -> np.ndarray:
+    # append vector of random bites 10% lenght of original bites
+    rand_arr_len = int(len(bites) * noise_ratio)
+    # rand_arr_len = 100
+    bites = np.append(
+        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
+    )
+
     random_d_mod_range = np.arange(d_mod)
     file_bites = change_first_symbol_based_on_random_vector(bites, seed)
     encoded_bites = encode_v5(file_bites, char_ecncode_mod, random_d_mod_range)
@@ -24,13 +35,23 @@ def encode_bites(
 
 
 def decode_bites(
-    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.05,
 ) -> np.ndarray:
     random_d_mod_range = np.arange(d_mod)
     decoded_bites = decode_v5(bites, char_ecncode_mod, random_d_mod_range)
     decoded_bites = reverse_change_first_symbol_based_on_random_vector(
         decoded_bites, seed
     )
+
+    # remove appended vector of random bites 10% lenght of original bites
+    original_bites_len = int(len(decoded_bites) / (1 + noise_ratio))
+    rand_arr_len = int(original_bites_len * noise_ratio)
+
+    decoded_bites = decoded_bites[rand_arr_len:]
     return decoded_bites
 
 

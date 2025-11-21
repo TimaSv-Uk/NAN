@@ -3,6 +3,18 @@ import numpy as np
 import os
 
 
+def sudo_random_array(length: int, d_mod: int, seed: int, dtype=int) -> np.ndarray:
+    if length <= 0:
+        return np.array([])
+    rand_arr = np.empty([length], dtype=dtype)
+    np.random.seed(seed)
+    for i in range(length):
+        random_val = np.random.randint(0, d_mod)
+        rand_arr[i] = random_val
+
+    return rand_arr
+
+
 def get_unique_filename(base_name, suffix, extension):
     i = 1
     while True:

@@ -379,6 +379,8 @@ def randomize_d_mod(d_mod: int, seed: int) -> np.ndarray:
     return range_d_mod
 
 
+
+
 @njit
 def encode_assignment10(
     chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int

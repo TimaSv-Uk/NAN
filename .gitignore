@@ -1,7 +1,16 @@
-./venv
+# Test files
 /tests/test_files/
 /tests/test_results/decoded/
 /tests/test_results/encoded/
-/dist/
-/build/
-/src/cryptall_2.egg-info
+/Презентація
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv

@@ -111,7 +111,7 @@ With pytest
 
     """
        To run selected test
-       uv run pytest tests/tests.py::TestMathUtils::test_encode_decode_dmod1
+       uv run pytest tests/tests.py::TestMathUtils::test_encode_decode_dmod1 -s
     """
 or 
 
