@@ -15,6 +15,20 @@ from .core import (
 )
 
 
+def save_file_digests(
+    digest_size: int,
+    input_file_path: str,
+    save_digests_dir_path: str,
+):
+    file_bites = load_file_to_bites(input_file_path)
+    digests = np.array_split(file_bites, digest_size)
+    for i, digest in enumerate(digests):
+        os.makedirs(save_digests_dir_path, exist_ok=True)
+
+        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
+            file.write(digest.tobytes())
+
+
 def add_noise(
     bites: np.ndarray,
     char_ecncode_mod: int,
@@ -33,7 +47,7 @@ def remove_noise(
     bites: np.ndarray,
     char_ecncode_mod: int,
     seed: int,
-    noise_ratio: float = 0.05,
+    noise_ratio: float = 0.00,
 ):
     """remove vector of random bites from start of array; noise_ratio% lenght of original bites"""
     original_bites_len = int(len(bites) / (1 + noise_ratio))
@@ -48,7 +62,7 @@ def encode_bites(
     char_ecncode_mod: int,
     d_mod: int,
     seed: int,
-    noise_ratio: float = 0.05,
+    noise_ratio: float = 0.00,
 ) -> np.ndarray:
     bites = add_noise(bites, char_ecncode_mod, seed, noise_ratio)
     random_d_mod_range = np.arange(d_mod)
@@ -62,7 +76,7 @@ def decode_bites(
     char_ecncode_mod: int,
     d_mod: int,
     seed: int,
-    noise_ratio: float = 0.05,
+    noise_ratio: float = 0.00,
 ) -> np.ndarray:
     random_d_mod_range = np.arange(d_mod)
     decoded_bites = decode_v5(bites, char_ecncode_mod, random_d_mod_range)
@@ -110,30 +124,6 @@ def decode_bites_full(
     return reverse_change_first_symbol_based_on_full_vector(bites_dec)
 
 
-def encode_bites_select_func(
-    bites: np.ndarray,
-    char_ecncode_mod: int,
-    seed: int,
-    d_mod_range: np.ndarray,
-    modify_vector_func: Callable[[np.ndarray], np.ndarray],
-) -> np.ndarray:
-    """Encode using full-vector/first-symbol modification."""
-    bites_mod = modify_vector_func(bites)
-    return encode_v5(bites_mod, char_ecncode_mod, d_mod_range)
-
-
-def decode_bites_select_func(
-    bites: np.ndarray,
-    char_ecncode_mod: int,
-    seed: int,
-    d_mod_range: np.ndarray,
-    modify_vector_func: Callable[[np.ndarray], np.ndarray],
-) -> np.ndarray:
-    """Decode using full-vector/first-symbol modification."""
-    bites_dec = encode_v5(bites, char_ecncode_mod, d_mod_range)
-    return modify_vector_func(bites_dec)
-
-
 def encode_file(
     file_path: str,
     save_encoded_file_path: str,
@@ -162,19 +152,14 @@ def decode_file(
 
     save_file_from_bites(save_decoded_file_path, decoded_bites)
 
+    number_of_digests = 4
 
-def save_file_digests(
-    digest_size: int,
-    input_file_path: str,
-    save_digests_dir_path: str,
-):
-    file_bites = load_file_to_bites(input_file_path)
-    digests = np.array_split(file_bites, digest_size)
-    for i, digest in enumerate(digests):
-        os.makedirs(save_digests_dir_path, exist_ok=True)
+    file_path = "tests/test_results/encoded/img_encoded.jpg"
+    save_file_path = "tests/digests/img_encoded/"
 
-        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
-            file.write(digest.tobytes())
+    save_file_digests(number_of_digests, file_path, save_file_path)
+
+    print(f"{number_of_digests} digests of {file_path}; Saved at {save_file_path}")
 
 
 if __name__ == "__main__":

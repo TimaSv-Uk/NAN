@@ -5,6 +5,7 @@ from cryptall_2.encode_decode import (
     decode_bites,
     encode_bites_rand,
     encode_bites_full,
+    remove_noise,
 )
 
 from cryptall_2.core import (
@@ -47,7 +48,7 @@ class TestMathUtils(unittest.TestCase):
             "txt": "data2.txt",
             "img": "img.jpg",
             "vid": "vid_27mb.mp4",
-            # "big_csv": "csv_123mb.csv",
+            "big_csv": "csv_100mb.csv",
         }
 
     def test_encode_decode_consistency(self):
@@ -181,62 +182,40 @@ class TestMathUtils(unittest.TestCase):
         self.assertEqual(len(new_arr) - 3, random_array_length)
         self.assertTrue(np.array_equal(original_arr, new_arr[random_array_length:]))
 
-    # def test_encode_decode_10(self):
-    #     arr = np.array([1, 2, 3, 4, 5])
-    #     d_mod_range = np.arange(self.d_mod)
-    #     encode_10 = encode_assignment10(arr, self.char_mod, d_mod_range, self.seed)
-    #     encode_5 = encode_assignment5(arr, self.char_mod, d_mod_range)
-    #
-    #     print(f"encode_10: {encode_10}")
-    #     print(f"encode_5: {encode_5}\n")
-    #     self.assertFalse(np.array_equal(encode_10, encode_5))
-    #
-    #     decode_10 = decode_assignment10(
-    #         encode_10, self.char_mod, d_mod_range, self.seed
-    #     )
-    #     print(f"initial array: {arr}")
-    #     print(f"decoded_10: {decode_10}")
-    #
-    #     unit = np.uint8(10)
-    #     m = 4
-    #     print(f"initial number: {unit}")
-    #
-    #     m_pow = unit**m
-    #     print(m_pow)
-    #
-    #     y = unit ^ m
-    #     x = y ^ m  # perfect inverse
-    #
-    #     print(y)
-    #     print(x)
-    #
-    #     num = 10
-    #     y = num**m
-    #
-    #     print("Non modular operations")
-    #     print(f"exponentiation y = {y}")
-    #     print(y ** (1 / m))
-    #
-    #     self.assertTrue(np.array_equal(arr, decode_10))
+    def test_digest_with_no_noise(self):
+        file_path = f"{self.test_file_dir}{self.file_names['big_csv']}"
+        file_bites = load_file_to_bites(file_path)
+        number_of_digests = 10
+        noise_ratio = 0.05
 
+        encode_no_noise = encode_bites(file_bites, self.char_mod, self.d_mod, self.seed)
 
-def invert_pow_mod256(y, m):
-    """
-    works only for sertain numbers
+        encode_with_noise = encode_bites(
+            file_bites, self.char_mod, self.d_mod, self.seed, noise_ratio
+        )
+        encode_with_noise = remove_noise(
+            encode_with_noise, self.char_mod, self.seed, noise_ratio
+        )
+        self.assertFalse(np.array_equal(encode_no_noise, encode_with_noise))
 
-    Modular exponentiation in mod 256 is not one-to-one — you can’t always uniquely invert x^m mod 256.
+        digests_no_noise = np.array_split(encode_no_noise, number_of_digests)
+        digests_with_noise = np.array_split(encode_with_noise, number_of_digests)
+        comparison_lines = []
+        for i, (d1, d2) in enumerate(zip(digests_no_noise, digests_with_noise)):
+            equal = np.array_equal(d1, d2)
 
-    if m == 4 the function will return 2 even if y = 16 and we expect 6,10,14 or 18
-        2
-        6
-        10
-        14
-        18
-    """
-    for x in range(256):
-        if pow(x, m, 256) == y:
-            return x
-    return None  # no valid x found
+            if equal:
+                comparison_lines.append(f"Digest {i}: IDENTICAL\n")
+            else:
+                diff_count = bites_sameness_percentage(d1, d2)
+                comparison_lines.append(
+                    f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
+                )
+
+        report_path = f"{self.test_file_dir}_digest_comparison_report.txt"
+
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.writelines(comparison_lines)
 
 
 if __name__ == "__main__":
