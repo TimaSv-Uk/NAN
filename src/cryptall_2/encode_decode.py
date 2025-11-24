@@ -1,5 +1,6 @@
 import numpy as np
 
+import os
 from typing import Callable
 
 from .helpers import save_file_from_bites, load_file_to_bites, sudo_random_array
@@ -14,6 +15,34 @@ from .core import (
 )
 
 
+def add_noise(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    seed: int,
+    noise_ratio: float = 0.05,
+) -> np.ndarray:
+    """append vector of random bites to start of array; noise_ratio% lenght of original bites"""
+    rand_arr_len = int(len(bites) * noise_ratio)
+    bites_with_noise = np.append(
+        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
+    )
+    return bites_with_noise
+
+
+def remove_noise(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    seed: int,
+    noise_ratio: float = 0.05,
+):
+    """remove vector of random bites from start of array; noise_ratio% lenght of original bites"""
+    original_bites_len = int(len(bites) / (1 + noise_ratio))
+    rand_arr_len = int(original_bites_len * noise_ratio)
+
+    no_noise_bites = bites[rand_arr_len:]
+    return no_noise_bites
+
+
 def encode_bites(
     bites: np.ndarray,
     char_ecncode_mod: int,
@@ -21,13 +50,7 @@ def encode_bites(
     seed: int,
     noise_ratio: float = 0.05,
 ) -> np.ndarray:
-    # append vector of random bites 10% lenght of original bites
-    rand_arr_len = int(len(bites) * noise_ratio)
-    # rand_arr_len = 100
-    bites = np.append(
-        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
-    )
-
+    bites = add_noise(bites, char_ecncode_mod, seed, noise_ratio)
     random_d_mod_range = np.arange(d_mod)
     file_bites = change_first_symbol_based_on_random_vector(bites, seed)
     encoded_bites = encode_v5(file_bites, char_ecncode_mod, random_d_mod_range)
@@ -47,11 +70,7 @@ def decode_bites(
         decoded_bites, seed
     )
 
-    # remove appended vector of random bites 10% lenght of original bites
-    original_bites_len = int(len(decoded_bites) / (1 + noise_ratio))
-    rand_arr_len = int(original_bites_len * noise_ratio)
-
-    decoded_bites = decoded_bites[rand_arr_len:]
+    decoded_bites = remove_noise(decoded_bites, char_ecncode_mod, seed, noise_ratio)
     return decoded_bites
 
 
@@ -116,8 +135,8 @@ def decode_bites_select_func(
 
 
 def encode_file(
-    file_path: str = "test_files/data2.txt",
-    save_encoded_file_path: str = "test_files/data2_encoded.txt",
+    file_path: str,
+    save_encoded_file_path: str,
     seed: int = 42,
 ):
     char_ecncode_mod = 256
@@ -131,8 +150,8 @@ def encode_file(
 
 
 def decode_file(
-    encoded_file_path: str = "test_files/data2_encoded.txt",
-    save_decoded_file_path: str = "test_files/data2_decoded.txt",
+    encoded_file_path: str,
+    save_decoded_file_path: str,
     seed: int = 42,
 ):
     char_ecncode_mod = 256
@@ -144,10 +163,23 @@ def decode_file(
     save_file_from_bites(save_decoded_file_path, decoded_bites)
 
 
+def save_file_digests(
+    digest_size: int,
+    input_file_path: str,
+    save_digests_dir_path: str,
+):
+    file_bites = load_file_to_bites(input_file_path)
+    digests = np.array_split(file_bites, digest_size)
+    for i, digest in enumerate(digests):
+        os.makedirs(save_digests_dir_path, exist_ok=True)
+
+        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
+            file.write(digest.tobytes())
+
+
 if __name__ == "__main__":
     image_name = "img.jpg"
-
+    # "C:\Users\Timofii\code\python\cryptall_2\tests\test_results\encoded\img_encoded.jpg"
     file_path = f"test_files/{image_name}"
     save_file_path = f"test_files/222_visual_encoded_{image_name}"
-
-    encode_file(file_path, save_file_path)
+    save_file_digests(file_path, save_file_path)

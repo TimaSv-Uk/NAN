@@ -10,7 +10,7 @@ from cryptall_2.helpers import (
     save_file_from_bites,
 )
 from cryptall_2.core import (
-    encode_v5_with_table,
+    encode_assignment5_with_table,
     encode_assignment5,
     decode_assignment5,
 )
