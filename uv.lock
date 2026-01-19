@@ -123,6 +123,7 @@ dependencies = [
     { name = "asttokens" },
     { name = "colorama" },
     { name = "executing" },
+    { name = "galois" },
     { name = "icecream" },
     { name = "llvmlite" },
     { name = "mpmath" },
@@ -160,6 +161,7 @@ requires-dist = [
     { name = "asttokens", specifier = "==3.0.0" },
     { name = "colorama", specifier = "==0.4.6" },
     { name = "executing", specifier = "==2.2.0" },
+    { name = "galois", specifier = ">=0.4.10" },
     { name = "icecream", specifier = "==2.1.5" },
     { name = "llvmlite", specifier = ">=0.44.0" },
     { name = "mpmath", specifier = "==1.3.0" },
@@ -250,6 +252,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a5/84/51a69ee89ff8d1fea0c6997e946657e25a3f08513de8435fe124929f3eef/fonttools-4.59.0-cp313-cp313-win32.whl", hash = "sha256:70d6b3ceaa9cc5a6ac52884f3b3d9544e8e231e95b23f138bdb78e6d4dc0eae3", size = 2199688, upload-time = "2025-07-16T12:04:34.444Z" },
     { url = "https://files.pythonhosted.org/packages/a0/ee/f626cd372932d828508137a79b85167fdcf3adab2e3bed433f295c596c6a/fonttools-4.59.0-cp313-cp313-win_amd64.whl", hash = "sha256:26731739daa23b872643f0e4072d5939960237d540c35c14e6a06d47d71ca8fe", size = 2248560, upload-time = "2025-07-16T12:04:36.034Z" },
     { url = "https://files.pythonhosted.org/packages/d0/9c/df0ef2c51845a13043e5088f7bb988ca6cd5bb82d5d4203d6a158aa58cf2/fonttools-4.59.0-py3-none-any.whl", hash = "sha256:241313683afd3baacb32a6bd124d0bce7404bc5280e12e291bae1b9bba28711d", size = 1128050, upload-time = "2025-07-16T12:04:52.687Z" },
+]
+
+[[package]]
+name = "galois"
+version = "0.4.10"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numba" },
+    { name = "numpy" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/54/ede3562049f1bb7f9546cbd86af8794b49733a835b0d1c40fedfbbcdbcc5/galois-0.4.10.tar.gz", hash = "sha256:94a371c995193a66798fceb079320dff154c21a0e3e0de388c06ba26f8eb574a", size = 7401288, upload-time = "2026-01-02T02:59:04.569Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/16/91e376aa4cad58203448510c907c267cce524d1fd2dd7f9f875f75b8584e/galois-0.4.10-py3-none-any.whl", hash = "sha256:9badf669915c92d9f298c7799cadad112baa21f53d816f427f55c4ec6ee9a2dc", size = 4196886, upload-time = "2026-01-02T02:59:02.332Z" },
 ]
 
 [[package]]
@@ -900,6 +916,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517", size = 7793921, upload-time = "2025-04-27T18:05:01.611Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl", hash = "sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5", size = 6299353, upload-time = "2025-04-27T18:04:59.103Z" },
+]
+
+[[package]]
+name = "typing-extensions"
+version = "4.15.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466", size = 109391, upload-time = "2025-08-25T13:49:26.313Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548", size = 44614, upload-time = "2025-08-25T13:49:24.86Z" },
 ]
 
 [[package]]
