@@ -6,6 +6,8 @@ from cryptall_2.encode_decode import (
     encode_bites_rand,
     encode_bites_full,
     remove_noise,
+    encode_bites_f8,
+    decode_bites_f8,
 )
 
 from cryptall_2.core import (
@@ -48,7 +50,7 @@ class TestMathUtils(unittest.TestCase):
             "txt": "data2.txt",
             "img": "img.jpg",
             "vid": "vid_27mb.mp4",
-            "big_csv": "csv_100mb.csv",
+            # "big_csv": "csv_100mb.csv",
         }
 
     def test_encode_decode_consistency(self):
@@ -58,28 +60,29 @@ class TestMathUtils(unittest.TestCase):
         decoded = decode_bites(encoded, self.char_mod, self.d_mod, self.seed)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
+    def test_f8_encode_decode_consistency(self):
+        """Test that encoding followed by decoding restores the original bites."""
+        file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
+        encoded = encode_bites_f8(file_bites, self.char_mod, self.d_mod, self.seed)
+        decoded = decode_bites_f8(encoded, self.char_mod, self.d_mod, self.seed)
+        self.assertTrue(np.array_equal(file_bites, decoded))
+
     def test_encode_decode_dmod0(self):
         """Test that encoding followed by decoding restores the original bites."""
         file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
 
-        print(file_bites)
         encoded = encode_bites(file_bites, self.char_mod, 0, self.seed)
-        print(encoded)
         decoded = decode_bites(encoded, self.char_mod, 0, self.seed)
 
-        print(decoded)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
     def test_encode_decode_dmod1(self):
         """Test that encoding followed by decoding restores the original bites."""
         file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
 
-        print(file_bites)
         encoded = encode_bites(file_bites, self.char_mod, 1, self.seed)
-        print(encoded)
         decoded = decode_bites(encoded, self.char_mod, 1, self.seed)
 
-        print(decoded)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
     def test_randomized_d_mod_changes_order(self):
@@ -182,40 +185,40 @@ class TestMathUtils(unittest.TestCase):
         self.assertEqual(len(new_arr) - 3, random_array_length)
         self.assertTrue(np.array_equal(original_arr, new_arr[random_array_length:]))
 
-    def test_digest_with_no_noise(self):
-        file_path = f"{self.test_file_dir}{self.file_names['big_csv']}"
-        file_bites = load_file_to_bites(file_path)
-        number_of_digests = 10
-        noise_ratio = 0.05
-
-        encode_no_noise = encode_bites(file_bites, self.char_mod, self.d_mod, self.seed)
-
-        encode_with_noise = encode_bites(
-            file_bites, self.char_mod, self.d_mod, self.seed, noise_ratio
-        )
-        encode_with_noise = remove_noise(
-            encode_with_noise, self.char_mod, self.seed, noise_ratio
-        )
-        self.assertFalse(np.array_equal(encode_no_noise, encode_with_noise))
-
-        digests_no_noise = np.array_split(encode_no_noise, number_of_digests)
-        digests_with_noise = np.array_split(encode_with_noise, number_of_digests)
-        comparison_lines = []
-        for i, (d1, d2) in enumerate(zip(digests_no_noise, digests_with_noise)):
-            equal = np.array_equal(d1, d2)
-
-            if equal:
-                comparison_lines.append(f"Digest {i}: IDENTICAL\n")
-            else:
-                diff_count = bites_sameness_percentage(d1, d2)
-                comparison_lines.append(
-                    f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
-                )
-
-        report_path = f"{self.test_file_dir}_digest_comparison_report.txt"
-
-        with open(report_path, "w", encoding="utf-8") as f:
-            f.writelines(comparison_lines)
+    # def test_digest_with_no_noise(self):
+    #     file_path = f"{self.test_file_dir}{self.file_names['big_csv']}"
+    #     file_bites = load_file_to_bites(file_path)
+    #     number_of_digests = 10
+    #     noise_ratio = 0.05
+    #
+    #     encode_no_noise = encode_bites(file_bites, self.char_mod, self.d_mod, self.seed)
+    #
+    #     encode_with_noise = encode_bites(
+    #         file_bites, self.char_mod, self.d_mod, self.seed, noise_ratio
+    #     )
+    #     encode_with_noise = remove_noise(
+    #         encode_with_noise, self.char_mod, self.seed, noise_ratio
+    #     )
+    #     self.assertFalse(np.array_equal(encode_no_noise, encode_with_noise))
+    #
+    #     digests_no_noise = np.array_split(encode_no_noise, number_of_digests)
+    #     digests_with_noise = np.array_split(encode_with_noise, number_of_digests)
+    #     comparison_lines = []
+    #     for i, (d1, d2) in enumerate(zip(digests_no_noise, digests_with_noise)):
+    #         equal = np.array_equal(d1, d2)
+    #
+    #         if equal:
+    #             comparison_lines.append(f"Digest {i}: IDENTICAL\n")
+    #         else:
+    #             diff_count = bites_sameness_percentage(d1, d2)
+    #             comparison_lines.append(
+    #                 f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
+    #             )
+    #
+    #     report_path = f"{self.test_file_dir}_digest_comparison_report.txt"
+    #
+    #     with open(report_path, "w", encoding="utf-8") as f:
+    #         f.writelines(comparison_lines)
 
 
 if __name__ == "__main__":

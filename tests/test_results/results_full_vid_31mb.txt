@@ -3,9 +3,9 @@ Original byte: 0, Modified byte: 213
 Sameness %: 0.9999996313641296%
 --------------------------------------------------
 Quarter 2 change at index 16276224
-Original byte: 78, Modified byte: 94
 Sameness %: 0.9999999692803442%
 --------------------------------------------------
+Original byte: 78, Modified byte: 94
 Quarter 3 change at index 24414336
 Original byte: 0, Modified byte: 49
 Sameness %: 0.9999996313641296%

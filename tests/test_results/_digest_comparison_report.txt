@@ -1,0 +1,15 @@
+File name: ./tests/test_files/csv_100mb.csv
+File size: 104957620
+number_of_digests: 10
+noise_ratio: 0.05
+
+Digest 0: DIFFERENT — 0.12307224573118179 bytes differ
+Digest 1: DIFFERENT — 0.12316399704947578 bytes differ
+Digest 2: DIFFERENT — 0.12332644356836597 bytes differ
+Digest 3: DIFFERENT — 0.12320696677382738 bytes differ
+Digest 4: DIFFERENT — 0.12323088118804523 bytes differ
+Digest 5: DIFFERENT — 0.12326956346761674 bytes differ
+Digest 6: DIFFERENT — 0.12320553762556735 bytes differ
+Digest 7: DIFFERENT — 0.12332196557048454 bytes differ
+Digest 8: DIFFERENT — 0.1233778929057271 bytes differ
+Digest 9: DIFFERENT — 0.12325060343403366 bytes differ

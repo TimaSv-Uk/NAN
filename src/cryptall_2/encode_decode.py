@@ -13,48 +13,7 @@ from .core import (
     reverse_change_first_symbol_based_on_random_vector,
     randomize_d_mod,
 )
-
-
-def save_file_digests(
-    digest_size: int,
-    input_file_path: str,
-    save_digests_dir_path: str,
-):
-    file_bites = load_file_to_bites(input_file_path)
-    digests = np.array_split(file_bites, digest_size)
-    for i, digest in enumerate(digests):
-        os.makedirs(save_digests_dir_path, exist_ok=True)
-
-        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
-            file.write(digest.tobytes())
-
-
-def add_noise(
-    bites: np.ndarray,
-    char_ecncode_mod: int,
-    seed: int,
-    noise_ratio: float = 0.05,
-) -> np.ndarray:
-    """append vector of random bites to start of array; noise_ratio% lenght of original bites"""
-    rand_arr_len = int(len(bites) * noise_ratio)
-    bites_with_noise = np.append(
-        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
-    )
-    return bites_with_noise
-
-
-def remove_noise(
-    bites: np.ndarray,
-    char_ecncode_mod: int,
-    seed: int,
-    noise_ratio: float = 0.00,
-):
-    """remove vector of random bites from start of array; noise_ratio% lenght of original bites"""
-    original_bites_len = int(len(bites) / (1 + noise_ratio))
-    rand_arr_len = int(original_bites_len * noise_ratio)
-
-    no_noise_bites = bites[rand_arr_len:]
-    return no_noise_bites
+from .finite_field import encode_f8, decode_f8
 
 
 def encode_bites(
@@ -65,7 +24,7 @@ def encode_bites(
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
     bites = add_noise(bites, char_ecncode_mod, seed, noise_ratio)
-    random_d_mod_range = np.arange(d_mod)
+    random_d_mod_range = randomize_d_mod(d_mod, seed)
     file_bites = change_first_symbol_based_on_random_vector(bites, seed)
     encoded_bites = encode_v5(file_bites, char_ecncode_mod, random_d_mod_range)
     return encoded_bites
@@ -78,7 +37,7 @@ def decode_bites(
     seed: int,
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
-    random_d_mod_range = np.arange(d_mod)
+    random_d_mod_range = randomize_d_mod(d_mod, seed)
     decoded_bites = decode_v5(bites, char_ecncode_mod, random_d_mod_range)
     decoded_bites = reverse_change_first_symbol_based_on_random_vector(
         decoded_bites, seed
@@ -87,6 +46,37 @@ def decode_bites(
     decoded_bites = remove_noise(decoded_bites, char_ecncode_mod, seed, noise_ratio)
     return decoded_bites
 
+
+
+def encode_bites_f8(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    bites = add_noise(bites, char_ecncode_mod, seed, noise_ratio)
+    random_d_mod_range = randomize_d_mod(d_mod, seed)
+    file_bites = change_first_symbol_based_on_random_vector(bites, seed)
+    encoded_bites = encode_f8(file_bites, random_d_mod_range)
+    return encoded_bites
+
+
+def decode_bites_f8(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    random_d_mod_range = randomize_d_mod(d_mod, seed)
+    decoded_bites = decode_f8(bites, random_d_mod_range)
+    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
+        decoded_bites, seed
+    )
+
+    decoded_bites = remove_noise(decoded_bites, char_ecncode_mod, seed, noise_ratio)
+    return decoded_bites
 
 def encode_bites_rand(
     bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
@@ -160,6 +150,48 @@ def decode_file(
     save_file_digests(number_of_digests, file_path, save_file_path)
 
     print(f"{number_of_digests} digests of {file_path}; Saved at {save_file_path}")
+
+
+def save_file_digests(
+    digest_size: int,
+    input_file_path: str,
+    save_digests_dir_path: str,
+):
+    file_bites = load_file_to_bites(input_file_path)
+    digests = np.array_split(file_bites, digest_size)
+    for i, digest in enumerate(digests):
+        os.makedirs(save_digests_dir_path, exist_ok=True)
+
+        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
+            file.write(digest.tobytes())
+
+
+def add_noise(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    seed: int,
+    noise_ratio: float = 0.05,
+) -> np.ndarray:
+    """append vector of random bites to start of array; noise_ratio% lenght of original bites"""
+    rand_arr_len = int(len(bites) * noise_ratio)
+    bites_with_noise = np.append(
+        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
+    )
+    return bites_with_noise
+
+
+def remove_noise(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+):
+    """remove vector of random bites from start of array; noise_ratio% lenght of original bites"""
+    original_bites_len = int(len(bites) / (1 + noise_ratio))
+    rand_arr_len = int(original_bites_len * noise_ratio)
+
+    no_noise_bites = bites[rand_arr_len:]
+    return no_noise_bites
 
 
 if __name__ == "__main__":

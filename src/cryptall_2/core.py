@@ -205,8 +205,6 @@ def reverse_find_neighbors_v5(
 
 # NOTE:
 # change_first_bite functions, if i put this in difirent file njit becomes realy slow and probsbly dont work
-
-
 @njit
 def change_first_symbol_based_on_random_vector(
     chars: np.ndarray, seed: int
@@ -363,22 +361,21 @@ def modInverse(a: int, m: int) -> int:
     return x1
 
 
+@njit
 def randomize_d_mod(d_mod: int, seed: int) -> np.ndarray:
-    if d_mod == 0:
-        return np.arange(d_mod)
-
-    np.random.seed(seed)
-    index_to_randomize = np.random.randint(0, d_mod)
-    random_val = np.random.randint(0, d_mod)
     range_d_mod = np.arange(d_mod, dtype=np.int64)
 
-    while range_d_mod[index_to_randomize] == random_val:
-        random_val = np.random.randint(0, d_mod)
-    range_d_mod[index_to_randomize] = random_val
+    if d_mod == 0:
+        return range_d_mod
 
+    index = seed % d_mod
+    new_val = (seed * 1664525 + 1013904223) % d_mod  # LCG hash
+
+    if new_val == index:
+        new_val = (new_val + 1) % d_mod
+
+    range_d_mod[index] = new_val
     return range_d_mod
-
-
 
 
 @njit
