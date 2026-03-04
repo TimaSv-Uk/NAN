@@ -16,102 +16,168 @@ from .core import (
 from .finite_field import encode_f8, decode_f8
 
 
+def _encode_pipeline(
+    bites: np.ndarray,
+    d_mod: int,
+    seed: int,
+    modifier_func: Callable[[np.ndarray], np.ndarray],
+    encoder_func: Callable[[np.ndarray, np.ndarray], np.ndarray],
+    noise_ratio: float = 0.00,
+    char_encode_mod: int = 256,
+) -> np.ndarray:
+    """Generic encoding pipeline to eliminate repeated boilerplate."""
+    if noise_ratio > 0.0:
+        bites = add_noise(bites, char_encode_mod, seed, noise_ratio)
+
+    d_mod_range = randomize_d_mod(d_mod, seed)
+    bites_mod = modifier_func(bites)
+    return encoder_func(bites_mod, d_mod_range)
+
+
+def _decode_pipeline(
+    bites: np.ndarray,
+    d_mod: int,
+    seed: int,
+    decoder_func: Callable[[np.ndarray, np.ndarray], np.ndarray],
+    reverser_func: Callable[[np.ndarray], np.ndarray],
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    """Generic decoding pipeline to eliminate repeated boilerplate."""
+    d_mod_range = randomize_d_mod(d_mod, seed)
+
+    decoded_bites = decoder_func(bites, d_mod_range)
+    decoded_bites = reverser_func(decoded_bites)
+
+    if noise_ratio > 0.0:
+        decoded_bites = remove_noise(decoded_bites, noise_ratio)
+
+    return decoded_bites
+
+
+# --- IMPLEMENTATIONS ---
+
 def encode_bites(
     bites: np.ndarray,
-    char_ecncode_mod: int,
+    char_encode_mod: int,
     d_mod: int,
     seed: int,
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
-    bites = add_noise(bites, char_ecncode_mod, seed, noise_ratio)
-    random_d_mod_range = randomize_d_mod(d_mod, seed)
-    file_bites = change_first_symbol_based_on_random_vector(bites, seed)
-    encoded_bites = encode_v5(file_bites, char_ecncode_mod, random_d_mod_range)
-    return encoded_bites
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        encoder_func=lambda b, d_range: encode_v5(b, char_encode_mod, d_range),
+        noise_ratio=noise_ratio,
+        char_encode_mod=char_encode_mod,
+    )
 
 
 def decode_bites(
     bites: np.ndarray,
-    char_ecncode_mod: int,
+    char_encode_mod: int,
     d_mod: int,
     seed: int,
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
-    random_d_mod_range = randomize_d_mod(d_mod, seed)
-    decoded_bites = decode_v5(bites, char_ecncode_mod, random_d_mod_range)
-    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
-        decoded_bites, seed
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+        noise_ratio=noise_ratio,
     )
-
-    decoded_bites = remove_noise(decoded_bites, char_ecncode_mod, seed, noise_ratio)
-    return decoded_bites
-
 
 
 def encode_bites_f8(
     bites: np.ndarray,
-    char_ecncode_mod: int,
+    char_encode_mod: int,
     d_mod: int,
     seed: int,
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
-    bites = add_noise(bites, char_ecncode_mod, seed, noise_ratio)
-    random_d_mod_range = randomize_d_mod(d_mod, seed)
-    file_bites = change_first_symbol_based_on_random_vector(bites, seed)
-    encoded_bites = encode_f8(file_bites, random_d_mod_range)
-    return encoded_bites
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        encoder_func=lambda b, d_range: encode_f8(b, d_range),
+        noise_ratio=noise_ratio,
+        char_encode_mod=char_encode_mod,
+    )
 
 
 def decode_bites_f8(
     bites: np.ndarray,
-    char_ecncode_mod: int,
+    char_encode_mod: int,
     d_mod: int,
     seed: int,
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
-    random_d_mod_range = randomize_d_mod(d_mod, seed)
-    decoded_bites = decode_f8(bites, random_d_mod_range)
-    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
-        decoded_bites, seed
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        decoder_func=lambda b, d_range: decode_f8(b, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+        noise_ratio=noise_ratio,
     )
 
-    decoded_bites = remove_noise(decoded_bites, char_ecncode_mod, seed, noise_ratio)
-    return decoded_bites
 
 def encode_bites_rand(
-    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+    bites: np.ndarray, char_encode_mod: int, d_mod: int, seed: int
 ) -> np.ndarray:
-    """Encode using random first-symbol modification."""
-    d_range = randomize_d_mod(d_mod, seed)
-    bites_mod = change_first_symbol_based_on_random_vector(bites, seed)
-    return encode_v5(bites_mod, char_ecncode_mod, d_range)
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        encoder_func=lambda b, d_range: encode_v5(b, char_encode_mod, d_range),
+    )
 
 
 def decode_bites_rand(
-    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+    bites: np.ndarray, char_encode_mod: int, d_mod: int, seed: int
 ) -> np.ndarray:
-    """Decode using random first-symbol modification."""
-    d_range = randomize_d_mod(d_mod, seed)
-    bites_dec = decode_v5(bites, char_ecncode_mod, d_range)
-    return reverse_change_first_symbol_based_on_random_vector(bites_dec, seed)
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+    )
 
 
 def encode_bites_full(
-    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+    bites: np.ndarray, char_encode_mod: int, d_mod: int, seed: int
 ) -> np.ndarray:
-    """Encode using full-vector first-symbol modification."""
-    d_range = randomize_d_mod(d_mod, seed)
-    bites_mod = change_first_symbol_based_on_full_vector(bites)
-    return encode_v5(bites_mod, char_ecncode_mod, d_range)
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_full_vector(b),
+        encoder_func=lambda b, d_range: encode_v5(b, char_encode_mod, d_range),
+    )
 
 
 def decode_bites_full(
-    bites: np.ndarray, char_ecncode_mod: int, d_mod: int, seed: int
+    bites: np.ndarray, char_encode_mod: int, d_mod: int, seed: int
 ) -> np.ndarray:
-    """Decode using full-vector first-symbol modification."""
-    d_range = randomize_d_mod(d_mod, seed)
-    bites_dec = decode_v5(bites, char_ecncode_mod, d_range)
-    return reverse_change_first_symbol_based_on_full_vector(bites_dec)
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_full_vector(b),
+    )
 
 
 def encode_file(
