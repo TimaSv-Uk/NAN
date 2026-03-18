@@ -13,7 +13,9 @@ from .core import (
     reverse_change_first_symbol_based_on_random_vector,
     randomize_d_mod,
 )
-from .finite_field import encode_f8, decode_f8
+from .core_finite_field.finite_field import encode_f8, decode_f8
+# too slow
+# from .core_finite_field.finite_field_lib import encode_f8, decode_f8
 
 
 def _encode_pipeline(
@@ -55,6 +57,7 @@ def _decode_pipeline(
 
 
 # --- IMPLEMENTATIONS ---
+
 
 def encode_bites(
     bites: np.ndarray,
