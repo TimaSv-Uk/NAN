@@ -2,6 +2,9 @@ import numpy as np
 import galois
 from numba import njit
 
+# I need to save results of  galois.GF(2**8) into a table and reuse them with no objects at runtime so that program wont be so slow
+
+
 @njit
 def g_mul(a, b):
     """Galois Field GF(2^8) multiplication."""
