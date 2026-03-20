@@ -141,42 +141,42 @@ class BaseEncodeDecodeTest:
             print(f"Decoded execution_time: {execution_time:.4f}s")
 
     # NOTE: takes to long to run, need to fix or uncomment when needs to be run
-    # def test_digest_with_no_noise(self):
-    #     file_path = f"{self.test_file_dir}{self.file_names['vid']}"
-    #     file_bites = load_file_to_bites(file_path)
-    #     number_of_digests = 10
-    #     noise_ratio = 0.05
-    #
-    #     encode_no_noise = self.encode_func(
-    #         file_bites, self.char_mod, self.d_mod, self.seed
-    #     )
-    #
-    #     encode_with_noise = self.encode_func(
-    #         file_bites, self.char_mod, self.d_mod, self.seed, noise_ratio
-    #     )
-    #     encode_with_noise = remove_noise(
-    #         encode_with_noise, self.char_mod, self.seed, noise_ratio
-    #     )
-    #     self.assertFalse(np.array_equal(encode_no_noise, encode_with_noise))
-    #
-    #     digests_no_noise = np.array_split(encode_no_noise, number_of_digests)
-    #     digests_with_noise = np.array_split(encode_with_noise, number_of_digests)
-    #     comparison_lines = []
-    #     for i, (d1, d2) in enumerate(zip(digests_no_noise, digests_with_noise)):
-    #         equal = np.array_equal(d1, d2)
-    #
-    #         if equal:
-    #             comparison_lines.append(f"Digest {i}: IDENTICAL\n")
-    #         else:
-    #             diff_count = bites_sameness_percentage(d1, d2)
-    #             comparison_lines.append(
-    #                 f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
-    #             )
-    #
-    #     report_path = f"{self.test_file_dir}_digest_comparison_report.txt"
-    #
-    #     with open(report_path, "w", encoding="utf-8") as f:
-    #         f.writelines(comparison_lines)
+    def test_digest_with_no_noise(self):
+        file_path = f"{self.test_file_dir}{self.file_names['vid']}"
+        file_bites = load_file_to_bites(file_path)
+        number_of_digests = 10
+        noise_ratio = 0.05
+
+        encode_no_noise = self.encode_func(
+            file_bites, self.char_mod, self.d_mod, self.seed
+        )
+
+        encode_with_noise = self.encode_func(
+            file_bites, self.char_mod, self.d_mod, self.seed, noise_ratio
+        )
+        encode_with_noise = remove_noise(
+            encode_with_noise, self.char_mod, self.seed, noise_ratio
+        )
+        self.assertFalse(np.array_equal(encode_no_noise, encode_with_noise))
+
+        digests_no_noise = np.array_split(encode_no_noise, number_of_digests)
+        digests_with_noise = np.array_split(encode_with_noise, number_of_digests)
+        comparison_lines = []
+        for i, (d1, d2) in enumerate(zip(digests_no_noise, digests_with_noise)):
+            equal = np.array_equal(d1, d2)
+
+            if equal:
+                comparison_lines.append(f"Digest {i}: IDENTICAL\n")
+            else:
+                diff_count = bites_sameness_percentage(d1, d2)
+                comparison_lines.append(
+                    f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
+                )
+
+        report_path = f"{self.test_file_dir}_digest_comparison_report.txt"
+
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.writelines(comparison_lines)
 
 
 # NOTE: ALGORITHM IMPLEMENTATIONS (These are actually run by pytest)

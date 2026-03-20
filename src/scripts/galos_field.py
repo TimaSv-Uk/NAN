@@ -27,4 +27,5 @@ if __name__ == "__main__":
     x = GF2([2, 3])
     y = GF2([2, 1])
     print(x + y)
-    print(x[0] + y[0])
+    print(x[0] - y[0])
+    print(x[0] + y[0], x[0] ^ y[0])

@@ -2,8 +2,38 @@ import os
 import time
 import numpy as np
 import pickle
+import galois
 
 DIR = "multiplication_table"
+
+
+def precompute_gf256_multiplication(filepath: str = "mul_gf256.npy"):
+    """
+    Generates the GF(2^8) multiplication table and saves it as a .npy file.
+    """
+    print("Precomputing GF(2^8) LUT...")
+    GF256 = galois.GF(2**8)
+
+    elements = GF256(np.arange(256, dtype=np.uint8))
+
+    # Create the 256x256 multiplication lookup table
+    x_grid, y_grid = np.meshgrid(elements, elements, indexing="ij")
+    mul_lut = np.array(x_grid * y_grid, dtype=np.uint8)
+
+    # Ensure the directory exists if you are using a path like "multiplication_table/..."
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    np.save(filepath, mul_lut)
+    print(f"Saved to {filepath}")
+
+
+def load_gf256(filepath: str = "mul_gf256.npy") -> np.ndarray:
+    """
+    Loads the multiplication table, creating it first if it doesn't exist.
+    """
+    if not os.path.exists(filepath):
+        precompute_gf256_multiplication(filepath)
+
+    return np.load(filepath)
 
 
 def precompute_multiplication(mod: int):
@@ -64,6 +94,7 @@ if __name__ == "__main__":
     execution_time = end_time - start_time
     print(f"SET pkl read_precompute_multiplication_set: {execution_time}")
 
+    precompute_gf256_multiplication()
     # start_time = time.perf_counter()
     # end_time = time.perf_counter()
     # print(read_precompute_multiplication(257, 257, mod))

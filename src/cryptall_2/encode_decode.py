@@ -103,6 +103,7 @@ def encode_bites_f8(
     seed: int,
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
+
     return _encode_pipeline(
         bites,
         d_mod,
