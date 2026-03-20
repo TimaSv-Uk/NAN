@@ -1,7 +1,9 @@
+from pathlib import Path
 import unittest
-import numpy as np
 import random
 import time
+
+import numpy as np
 
 from cryptall_2.encode_decode import (
     encode_bites,
@@ -114,12 +116,13 @@ class BaseEncodeDecodeTest:
 
     def test_text_sameness_FILE_encoding(self):
         """Dynamically tests the current algorithm injected by the child class."""
-        file_label = "img"
+        file_label = "vid"
         self._test_file_encoding_sameness(
             file_label,
             self.encode_func,
             self.seed,
-            f"results_{self.alg_name}",  # Uses the child's algorithm name
+            # Uses the child's algorithm name
+            f"sameness_with_changed_bite_{self.alg_name}",
         )
 
     def test_execution_time(self):
@@ -173,7 +176,9 @@ class BaseEncodeDecodeTest:
                     f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
                 )
 
-        report_path = f"{self.test_file_dir}_digest_comparison_report.txt"
+        report_path = (
+            f"{self.test_results_file_dir}{self.alg_name.upper()}_digest_comparison_report.txt"
+        )
 
         with open(report_path, "w", encoding="utf-8") as f:
             f.writelines(comparison_lines)
@@ -187,6 +192,9 @@ class TestStandardAlgorithm(BaseEncodeDecodeTest, unittest.TestCase):
         super().setUp()
         self.encode_func = encode_bites
         self.decode_func = decode_bites
+
+        self.test_results_file_dir = "./tests/test_results_standard/"
+        Path(self.test_results_file_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "original_d_mod"
 
 
@@ -195,6 +203,9 @@ class TestF8Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         super().setUp()
         self.encode_func = encode_bites_f8
         self.decode_func = decode_bites_f8
+
+        self.test_results_file_dir = "./tests/test_results_f8/"
+        Path(self.test_results_file_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod"
 
 
