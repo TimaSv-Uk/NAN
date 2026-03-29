@@ -11,6 +11,7 @@ from cryptall_2.encode_decode import (
     load_file_to_bites,
     encode_file,
     decode_file,
+
 )
 
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -76,9 +77,6 @@ def get_encode_file_data(file_paths: list[str]):
         encoded_file_path = (
             SAVE_FILES_DIR / "encoded" / f"{path.stem}_encoded{path.suffix}"
         )
-        # decoded_file_path = (
-        #     SAVE_FILES_DIR / "decoded" / f"{path.stem}_decoded{path.suffix}"
-        # )
         file_bites: np.ndarray = load_file_to_bites(path)
         text_len = len(file_bites)
         print(text_len)

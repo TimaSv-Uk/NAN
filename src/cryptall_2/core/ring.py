@@ -6,7 +6,7 @@ from ..precompute_multiplication import load_gf256
 MUL_GF256 = load_gf256("multiplication_table/mul_gf256.npy")
 
 @njit
-def encode_f8(
+def encode_ring(
     chars: np.ndarray, d_mod_range: np.ndarray, mul_lut: np.ndarray = MUL_GF256
 ) -> np.ndarray:
     # Use standard uint8 arrays
@@ -14,7 +14,7 @@ def encode_f8(
     next_state = np.zeros_like(current_state)
 
     for a in d_mod_range:
-        find_neighbors_f8(current_state, next_state, np.uint8(a), mul_lut)
+        find_neighbors_ring(current_state, next_state, np.uint8(a), mul_lut)
 
         temp = current_state
         current_state = next_state
@@ -24,7 +24,7 @@ def encode_f8(
 
 
 @njit
-def decode_f8(
+def decode_ring(
     chars: np.ndarray, d_mod_range: np.ndarray, mul_lut: np.ndarray = MUL_GF256
 ) -> np.ndarray:
     current_state = chars.astype(np.uint8)
@@ -32,7 +32,7 @@ def decode_f8(
 
     for i in range(len(d_mod_range) - 1, -1, -1):
         a = np.uint8(d_mod_range[i])
-        reverse_find_neighbors_f8(current_state, next_state, a, mul_lut)
+        reverse_find_neighbors_ring(current_state, next_state, a, mul_lut)
 
         temp = current_state
         current_state = next_state
@@ -41,7 +41,7 @@ def decode_f8(
     return current_state
 
 @njit
-def find_neighbors_f8(
+def find_neighbors_ring(
     point_in: np.ndarray, point_out: np.ndarray, a: int, mul_lut: np.ndarray
 ) -> None:
     n = len(point_in)
@@ -63,7 +63,7 @@ def find_neighbors_f8(
 
 
 @njit
-def reverse_find_neighbors_f8(
+def reverse_find_neighbors_ring(
     point_in: np.ndarray, point_out: np.ndarray, a: int, mul_lut: np.ndarray
 ) -> None:
     n = len(point_in)

@@ -4,7 +4,7 @@ import os
 from typing import Callable
 
 from .helpers import save_file_from_bites, load_file_to_bites, sudo_random_array
-from .core import (
+from .core.main_modulo import (
     encode_v5,
     decode_v5,
     change_first_symbol_based_on_full_vector,
@@ -13,7 +13,8 @@ from .core import (
     reverse_change_first_symbol_based_on_random_vector,
     randomize_d_mod,
 )
-from .core_finite_field.finite_field import encode_f8, decode_f8
+from .core.finite_field import encode_f8, decode_f8
+from .core.ring import encode_ring, decode_ring
 # too slow
 # from .core_finite_field.finite_field_lib import encode_f8, decode_f8
 
@@ -127,6 +128,44 @@ def decode_bites_f8(
         d_mod,
         seed,
         decoder_func=lambda b, d_range: decode_f8(b, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+        noise_ratio=noise_ratio,
+    )
+
+
+def encode_bites_ring(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        encoder_func=lambda b, d_range: encode_ring(b, d_range),
+        noise_ratio=noise_ratio,
+        char_encode_mod=char_encode_mod,
+    )
+
+
+def decode_bites_ring(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        decoder_func=lambda b, d_range: decode_ring(b, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),

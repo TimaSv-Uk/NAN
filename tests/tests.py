@@ -4,17 +4,22 @@ import random
 import time
 
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 from cryptall_2.encode_decode import (
     encode_bites,
     decode_bites,
     encode_bites_rand,
     encode_bites_full,
+    encode_bites_ring,
+    decode_bites_ring,
     remove_noise,
     encode_bites_f8,
     decode_bites_f8,
 )
-from cryptall_2.core import randomize_d_mod
+from cryptall_2.core.main_modulo import randomize_d_mod
 from cryptall_2.helpers import (
     bites_sameness_percentage,
     load_file_to_bites,
@@ -32,14 +37,16 @@ class BaseEncodeDecodeTest:
         self.char_mod = 256
         self.d_mod = 128
         self.seed = 50
-        self.test_file_dir = "./tests/test_files/"
-        self.test_results_file_dir = "./tests/test_results/"
+        self.test_file_dir = Path("./tests/test_files/")
+        self.test_results_dir = Path("./tests/test_results/")
         self.file_names = {
             "txt": "data2.txt",
             "img": "img.jpg",
             "vid": "vid_27mb.mp4",
+            "csv": "csv_100mb.csv",
         }
-
+        # To store data for the graph
+        self.perf_results = []
         # NOTE: Child classes MUST define:
         # self.encode_func
         # self.decode_func
@@ -47,21 +54,95 @@ class BaseEncodeDecodeTest:
 
     def test_encode_decode_consistency(self):
         """Test that encoding followed by decoding restores the original bites."""
-        file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
+        file_bites = load_file_to_bites(
+            f"{self.test_file_dir}/{self.file_names['txt']}"
+        )
         encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
         decoded = self.decode_func(encoded, self.char_mod, self.d_mod, self.seed)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
+    def _record_perf(self, file_name, bite_len, exec_time, operation):
+        self.perf_results.append(
+            {
+                "algorithm": self.alg_name,
+                "file": file_name,
+                "bite_len_MB": bite_len / 1_000_000,
+                "execution_time": exec_time,
+                "operation": operation,
+            }
+        )
+
+    def test_execution_performance(self):
+        """Measures time and stores data for plotting."""
+        for label, file_name in self.file_names.items():
+            path = self.test_file_dir / file_name
+            if not path.exists():
+                continue
+
+            file_bites = load_file_to_bites(str(path))
+            bite_len = len(file_bites)
+
+            # Measure Encoding
+            start = time.perf_counter()
+            encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
+            self._record_perf(
+                file_name, bite_len, time.perf_counter() - start, "Encode"
+            )
+
+            # Measure Decoding
+            start = time.perf_counter()
+            self.decode_func(encoded, self.char_mod, self.d_mod, self.seed)
+            self._record_perf(
+                file_name, bite_len, time.perf_counter() - start, "Decode"
+            )
+
+        # Trigger plot generation after collecting data
+        self.plot_complexity_graphs()
+
+    def plot_complexity_graphs(self):
+        """Generates regression plots for the specific algorithm."""
+        if not self.perf_results:
+            return
+
+        df = pd.DataFrame(self.perf_results)
+        sns.set_theme(style="whitegrid")
+
+        for op in ["Encode", "Decode"]:
+            subset = df[df["operation"] == op]
+
+            plt.figure(figsize=(10, 6))
+            g = sns.lmplot(
+                data=subset,
+                x="bite_len_MB",
+                y="execution_time",
+                ci=None,
+                markers="o",
+                scatter_kws={"s": 150, "alpha": 0.7},
+                line_kws={"linewidth": 2, "color": "red" if op == "Encode" else "blue"},
+            )
+
+            plt.title(f"{self.alg_name.upper()} - {op} Complexity Analysis")
+            plt.xlabel("File Size (MB)")
+            plt.ylabel("Time (seconds)")
+
+            save_path = self.test_results_dir / f"{self.alg_name}_{op}_complexity.pdf"
+            plt.savefig(save_path, format="pdf", bbox_inches="tight")
+            plt.close()
+
     def test_encode_decode_dmod0(self):
         """Test that encoding followed by decoding restores the original bites with dmod 0."""
-        file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
+        file_bites = load_file_to_bites(
+            f"{self.test_file_dir}/{self.file_names['txt']}"
+        )
         encoded = self.encode_func(file_bites, self.char_mod, 0, self.seed)
         decoded = self.decode_func(encoded, self.char_mod, 0, self.seed)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
     def test_encode_decode_dmod1(self):
         """Test that encoding followed by decoding restores the original bites with dmod 1."""
-        file_bites = load_file_to_bites(f"{self.test_file_dir}{self.file_names['txt']}")
+        file_bites = load_file_to_bites(
+            f"{self.test_file_dir}/{self.file_names['txt']}"
+        )
         encoded = self.encode_func(file_bites, self.char_mod, 1, self.seed)
         decoded = self.decode_func(encoded, self.char_mod, 1, self.seed)
         self.assertTrue(np.array_equal(file_bites, decoded))
@@ -70,8 +151,8 @@ class BaseEncodeDecodeTest:
         self, file_key: str, encode_func, seed: int, save_prefix: str
     ):
         """Helper to test file encoding sameness and save results to a file."""
-        file_path = f"{self.test_file_dir}{self.file_names[file_key]}"
-        save_path = f"{self.test_results_file_dir}{save_prefix}_{
+        file_path = f"{self.test_file_dir}/{self.file_names[file_key]}"
+        save_path = f"{self.test_results_dir}{save_prefix}_{
             self.file_names[file_key].split('.')[0]
         }.txt"
 
@@ -116,19 +197,20 @@ class BaseEncodeDecodeTest:
 
     def test_text_sameness_FILE_encoding(self):
         """Dynamically tests the current algorithm injected by the child class."""
-        file_label = "vid"
-        self._test_file_encoding_sameness(
-            file_label,
-            self.encode_func,
-            self.seed,
-            # Uses the child's algorithm name
-            f"sameness_with_changed_bite_{self.alg_name}",
-        )
+
+        for file_label, _ in self.file_names.items():
+            self._test_file_encoding_sameness(
+                file_label,
+                self.encode_func,
+                self.seed,
+                # Uses the child's algorithm name
+                f"sameness_with_changed_bite_{self.alg_name}_{file_label}",
+            )
 
     def test_execution_time(self):
         """Dynamically tests execution time for the injected algorithm."""
         for file_name in self.file_names.values():
-            file_bites = load_file_to_bites(f"{self.test_file_dir}{file_name}")
+            file_bites = load_file_to_bites(f"{self.test_file_dir}/{file_name}")
             print(f"\n--- Testing Algorithm: {self.alg_name.upper()} ---")
             print(f"File name: {file_name}")
             print(f"Generated array of size: {file_bites.shape} bytes")
@@ -145,7 +227,7 @@ class BaseEncodeDecodeTest:
 
     # NOTE: takes to long to run, need to fix or uncomment when needs to be run
     def test_digest_with_no_noise(self):
-        file_path = f"{self.test_file_dir}{self.file_names['vid']}"
+        file_path = f"{self.test_file_dir}/{self.file_names['vid']}"
         file_bites = load_file_to_bites(file_path)
         number_of_digests = 10
         noise_ratio = 0.05
@@ -176,12 +258,83 @@ class BaseEncodeDecodeTest:
                     f"Digest {i}: DIFFERENT — {diff_count} bytes differ\n"
                 )
 
-        report_path = (
-            f"{self.test_results_file_dir}{self.alg_name.upper()}_digest_comparison_report.txt"
-        )
+        report_path = f"{self.test_results_dir}{
+            self.alg_name.upper()
+        }_digest_comparison_report.txt"
 
         with open(report_path, "w", encoding="utf-8") as f:
             f.writelines(comparison_lines)
+
+    def _record_perf(self, file_name, bite_len, exec_time, operation):
+        self.perf_results.append(
+            {
+                "algorithm": self.alg_name,
+                "file": file_name,
+                "bite_len_MB": bite_len / 1_000_000,
+                "execution_time": exec_time,
+                "operation": operation,
+            }
+        )
+
+    def test_execution_performance(self):
+        """Measures time and stores data for plotting."""
+        for label, file_name in self.file_names.items():
+            path = self.test_file_dir / file_name
+            if not path.exists():
+                continue
+
+            file_bites = load_file_to_bites(str(path))
+            bite_len = len(file_bites)
+
+            # Measure Encoding
+            start = time.perf_counter()
+            encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
+            self._record_perf(
+                file_name, bite_len, time.perf_counter() - start, "Encode"
+            )
+
+            # Measure Decoding
+            start = time.perf_counter()
+            self.decode_func(encoded, self.char_mod, self.d_mod, self.seed)
+            self._record_perf(
+                file_name, bite_len, time.perf_counter() - start, "Decode"
+            )
+
+        # Trigger plot generation after collecting data
+        self.plot_complexity_graphs()
+
+    def plot_complexity_graphs(self):
+        """Generates regression plots for the specific algorithm."""
+        if not self.perf_results:
+            return
+
+        df = pd.DataFrame(self.perf_results)
+        sns.set_theme(style="whitegrid")
+
+        for op in ["Encode", "Decode"]:
+            subset = df[df["operation"] == op]
+
+            plt.figure(figsize=(10, 6))
+            g = sns.lmplot(
+                data=subset,
+                x="bite_len_MB",
+                y="execution_time",
+                ci=None,
+                markers="o",
+                scatter_kws={"s": 150, "alpha": 0.7},
+                line_kws={"linewidth": 2, "color": "red" if op == "Encode" else "blue"},
+            )
+
+            plt.title(f"{self.alg_name.upper()} - {op} Complexity Analysis")
+            plt.xlabel("File Size (MB)")
+            plt.ylabel("Time (seconds)")
+
+            save_path = (
+                Path(self.test_results_dir) / f"{self.alg_name}_{op}_complexity.pdf"
+            )
+
+            plt.savefig(save_path, format="pdf", bbox_inches="tight")
+            plt.close()
 
 
 # NOTE: ALGORITHM IMPLEMENTATIONS (These are actually run by pytest)
@@ -193,8 +346,8 @@ class TestStandardAlgorithm(BaseEncodeDecodeTest, unittest.TestCase):
         self.encode_func = encode_bites
         self.decode_func = decode_bites
 
-        self.test_results_file_dir = "./tests/test_results_standard/"
-        Path(self.test_results_file_dir).mkdir(parents=True, exist_ok=True)
+        self.test_results_dir = "./tests/test_results_standard/"
+        Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "original_d_mod"
 
 
@@ -204,9 +357,21 @@ class TestF8Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         self.encode_func = encode_bites_f8
         self.decode_func = decode_bites_f8
 
-        self.test_results_file_dir = "./tests/test_results_f8/"
-        Path(self.test_results_file_dir).mkdir(parents=True, exist_ok=True)
+        self.test_results_dir = "./tests/test_results_f8/"
+        Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod"
+
+
+#
+# class TestRingAlgorithm(BaseEncodeDecodeTest, unittest.TestCase):
+#     def setUp(self):
+#         super().setUp()
+#         self.encode_func = encode_bites_ring
+#         self.decode_func = decode_bites_ring
+#
+#         self.test_results_dir = "./tests/test_results_ring/"
+#         Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
+#         self.alg_name = "ring"
 
 
 # NOTE: HELPER / MATH TESTS (Completely separated from encoding tests)
