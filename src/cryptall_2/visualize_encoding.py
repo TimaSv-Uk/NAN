@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+from typing import Callable
 import wave
 
 from .encode_decode import encode_bites
@@ -12,6 +12,7 @@ def visualy_encode_image_file(
     bite_ecncode_mod: int = 256,
     d_mod: int = 128,
     seed: int = 42,
+    encode_func: Callable = encode_bites,
 ):
     """
     Saves encoded file that can be read and visualy encryption algirithm
@@ -22,7 +23,7 @@ def visualy_encode_image_file(
     pixels = np.array(img)
     pixels_vector = pixels.flatten()
 
-    pixels_vector = encode_bites(pixels_vector, bite_ecncode_mod, d_mod, seed)
+    pixels_vector = encode_func(pixels_vector, bite_ecncode_mod, d_mod, seed)
 
     encoded_pixels = pixels_vector.reshape(np.shape(pixels))
 
@@ -35,6 +36,7 @@ def visualy_encode_video_file(
     bite_ecncode_mod: int = 256,
     d_mod: int = 128,
     seed: int = 42,
+    encode_func: Callable = encode_bites,
 ):
     """
     Saves encoded file that can be read and visualy encryption algirithm
@@ -64,7 +66,7 @@ def visualy_encode_video_file(
             break
 
         frame_vector = frame.flatten()
-        encoded_vector = encode_bites(frame_vector, bite_ecncode_mod, d_mod, seed)
+        encoded_vector = encode_func(frame_vector, bite_ecncode_mod, d_mod, seed)
         encoded_frame = encoded_vector.reshape(frame.shape)
         out.write(encoded_frame)
         fc += 1
@@ -82,6 +84,7 @@ def visualy_encode_audio_wav_file(
     bite_ecncode_mod: int = 256,
     d_mod: int = 128,
     seed: int = 42,
+    encode_func: Callable = encode_bites,
 ):
     """
     Reads WAV file, encodes it with a visual-like encoding algorithm,
@@ -102,7 +105,7 @@ def visualy_encode_audio_wav_file(
     audio_array = np.frombuffer(frames, dtype=dtype_map[sampwidth])
 
     audio_vector = audio_array.flatten()
-    encoded_vector = encode_bites(audio_vector, bite_ecncode_mod, d_mod, seed)
+    encoded_vector = encode_func(audio_vector, bite_ecncode_mod, d_mod, seed)
     encoded_audio = encoded_vector.reshape(audio_array.shape)
 
     with wave.open(save_encoded_file_path, "wb") as wf:

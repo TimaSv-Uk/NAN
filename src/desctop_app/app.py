@@ -3,8 +3,8 @@ from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QVBoxLayout, QGroupBox
 from PySide6.QtGui import QAction, QIntValidator, QFont, QTextCursor
 
 import sys
-import os
 import json
+from pathlib import Path
 
 from cryptall_2.encode_decode import encode_file, decode_file
 
@@ -20,11 +20,11 @@ class UILanguageManager:
 
     def load_language(self, lang_file):
         """Loads translations from a JSON file and updates the current_lang_file path."""
-        abs_lang_file = os.path.abspath(lang_file)
+        abs_lang_file = Path(lang_file).resolve()
         try:
             with open(abs_lang_file, "r", encoding="utf-8") as f:
                 self.translations = json.load(f)
-                self.current_lang_file = abs_lang_file
+                self.current_lang_file = str(abs_lang_file)
         except FileNotFoundError:
             print(
                 f"Warning: Translation file {
@@ -107,7 +107,7 @@ class MainPage(QtWidgets.QWidget):
         self.title.setObjectName("titleLabel")
         layout.addWidget(self.title)
 
-        # File Selection Group (Store reference for refresh)
+        # File Selection Group
         self.file_group = QGroupBox(self.tr.get("main_page.file_selection.group_title"))
         file_layout = QVBoxLayout(self.file_group)
 
@@ -131,7 +131,7 @@ class MainPage(QtWidgets.QWidget):
         file_layout.addWidget(self.file_button)
         file_layout.addWidget(self.file_label)
 
-        # Number Input Group (Store reference for refresh)
+        # Number Input Group
         self.seed_group = QGroupBox(self.tr.get("main_page.configuration.group_title"))
         seed_layout = QVBoxLayout(self.seed_group)
 
@@ -142,7 +142,7 @@ class MainPage(QtWidgets.QWidget):
         self.seed_input.setValidator(QIntValidator())
         seed_layout.addWidget(self.seed_input)
 
-        # Save Path Group (Store reference for refresh)
+        # Save Path Group
         self.save_group = QGroupBox(self.tr.get("main_page.output.group_title"))
         save_layout = QVBoxLayout(self.save_group)
 
@@ -163,7 +163,7 @@ class MainPage(QtWidgets.QWidget):
         save_layout.addWidget(self.save_button)
         save_layout.addWidget(self.save_label)
 
-        # Action Buttons Group (Store reference for refresh)
+        # Action Buttons Group
         self.action_group = QGroupBox(self.tr.get("main_page.actions.group_title"))
         action_layout = QHBoxLayout(self.action_group)
 
@@ -205,28 +205,32 @@ class MainPage(QtWidgets.QWidget):
         filename, _ = QFileDialog.getOpenFileName(
             self,
             self.tr.get("main_page.dialogs.select_file"),
-            ".",
+            str(Path.home()),  # Default to user's home directory safely
             self.tr.get("main_page.dialogs.all_files"),
         )
         if filename:
-            self.file_label.setText(filename)
-            self.file_lineedit.setText(filename)
+            # Normalize path slashes for the current OS
+            norm_path = str(Path(filename).resolve())
+            self.file_label.setText(norm_path)
+            self.file_lineedit.setText(norm_path)
             self.update_status(
-                self.tr.get("main_page.status.file_selected", path=filename)
+                self.tr.get("main_page.status.file_selected", path=norm_path)
             )
 
     def open_save_dialog(self):
         save_path, _ = QFileDialog.getSaveFileName(
             self,
             self.tr.get("main_page.dialogs.select_save"),
-            ".",
+            str(Path.home()),  # Default to user's home directory safely
             self.tr.get("main_page.dialogs.all_files"),
         )
         if save_path:
-            self.save_label.setText(save_path)
-            self.save_lineedit.setText(save_path)
+            # Normalize path slashes for the current OS
+            norm_path = str(Path(save_path).resolve())
+            self.save_label.setText(norm_path)
+            self.save_lineedit.setText(norm_path)
             self.update_status(
-                self.tr.get("main_page.status.save_path_set", path=save_path)
+                self.tr.get("main_page.status.save_path_set", path=norm_path)
             )
 
     def swap_encode_decode_file(self):
@@ -236,9 +240,7 @@ class MainPage(QtWidgets.QWidget):
         no_file = self.tr.get("main_page.file_selection.no_file")
         no_path = self.tr.get("main_page.output.no_path")
 
-        # Use the raw line edit text to handle cases where the label text is localized but the line edit holds the path
         if self.file_lineedit.text() == "" or self.save_lineedit.text() == "":
-            # Check if the labels contain the default translated text
             if file_path == no_file or save_path == no_path:
                 return
 
@@ -267,10 +269,6 @@ class MainPage(QtWidgets.QWidget):
         file_path = self.file_label.text()
         save_path = self.save_label.text()
 
-        no_file = self.tr.get("main_page.file_selection.no_file")
-        no_path = self.tr.get("main_page.output.no_path")
-
-        # Check raw line edit content for better reliability
         if self.file_lineedit.text() == "":
             QtWidgets.QMessageBox.warning(
                 self,
@@ -279,7 +277,8 @@ class MainPage(QtWidgets.QWidget):
             )
             return None, None, None
 
-        if not os.path.exists(file_path):
+        # Robust cross-platform existence check
+        if not Path(file_path).exists():
             QtWidgets.QMessageBox.warning(
                 self,
                 self.tr.get("main_page.warnings.invalid_input"),
@@ -377,14 +376,11 @@ class MainPage(QtWidgets.QWidget):
 
     def refresh_ui(self):
         self.title.setText(self.tr.get("main_page.title"))
-
-        # 1. Update GroupBox titles explicitly
         self.file_group.setTitle(self.tr.get("main_page.file_selection.group_title"))
         self.seed_group.setTitle(self.tr.get("main_page.configuration.group_title"))
         self.save_group.setTitle(self.tr.get("main_page.output.group_title"))
         self.action_group.setTitle(self.tr.get("main_page.actions.group_title"))
 
-        # 2. Update Buttons
         self.file_button.setText(self.tr.get("main_page.file_selection.button"))
         self.save_button.setText(self.tr.get("main_page.output.button"))
         self.encode_button.setText(self.tr.get("main_page.actions.encode_button"))
@@ -393,7 +389,6 @@ class MainPage(QtWidgets.QWidget):
             self.tr.get("main_page.actions.swap_button")
         )
 
-        # 3. Update Placeholders
         self.file_lineedit.setPlaceholderText(
             self.tr.get("main_page.file_selection.placeholder")
         )
@@ -405,7 +400,6 @@ class MainPage(QtWidgets.QWidget):
         )
         self.status_text.setPlaceholderText(self.tr.get("main_page.status.placeholder"))
 
-        # 4. Update Labels if they contain the default placeholder text (i.e., no file selected yet)
         if not self.file_lineedit.text():
             self.file_label.setText(self.tr.get("main_page.file_selection.no_file"))
         if not self.save_lineedit.text():
@@ -436,7 +430,6 @@ class PageOne(QtWidgets.QWidget):
 
     def refresh_ui(self):
         self.label.setText(self.tr.get("documentation_page.title"))
-        # Note: Newlines stored as \n in JSON need to be treated as such.
         self.content.setText(
             self.tr.get("documentation_page.content").replace("\\n", "\n")
         )
@@ -466,7 +459,6 @@ class PageTwo(QtWidgets.QWidget):
 
     def refresh_ui(self):
         self.label.setText(self.tr.get("about_page.title"))
-        # Note: Newlines stored as \n in JSON need to be treated as such.
         self.content.setText(self.tr.get("about_page.content").replace("\\n", "\n"))
 
 
@@ -474,7 +466,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, tr, lang_dir):
         super().__init__()
         self.tr = tr
-        self.lang_dir = lang_dir
+        self.lang_dir = Path(lang_dir)
         self.setWindowTitle(self.tr.get("window_title"))
 
         screen = QtWidgets.QApplication.primaryScreen()
@@ -483,12 +475,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.page_width = int(screen_width * 0.70)
 
-        # Create pages
         self.main_page = MainPage(tr)
         self.page_one = PageOne(tr)
         self.page_two = PageTwo(tr)
 
-        # Stacked widget
         self.stacked_widget = QtWidgets.QStackedWidget()
         self.stacked_widget.addWidget(self.main_page)
         self.stacked_widget.addWidget(self.page_one)
@@ -539,9 +529,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.stacked_widget.setCurrentIndex(2)
         )
 
-        self.language_menu = menu_bar.addMenu(
-            self.tr.get("language_menu")
-        )  # Language menu label is fixed
+        self.language_menu = menu_bar.addMenu(self.tr.get("language_menu"))
         self.create_language_menu()
 
         self.apply_styles()
@@ -549,13 +537,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_language_menu(self):
         self.language_menu.clear()
 
-        if not os.path.exists(self.lang_dir):
+        if not self.lang_dir.exists():
             no_lang_action = QAction("No languages folder found", self)
             no_lang_action.setEnabled(False)
             self.language_menu.addAction(no_lang_action)
             return
 
-        lang_files = [f for f in os.listdir(self.lang_dir) if f.endswith(".json")]
+        lang_files = [
+            f for f in self.lang_dir.iterdir() if f.is_file() and f.suffix == ".json"
+        ]
 
         if not lang_files:
             no_lang_action = QAction("No language files found", self)
@@ -563,11 +553,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.language_menu.addAction(no_lang_action)
             return
 
-        # Create action for each language file
-        for lang_file in sorted(lang_files):
-            lang_name = os.path.splitext(lang_file)[0].upper()
-            lang_path = os.path.join(self.lang_dir, lang_file)
-            abs_lang_path = os.path.abspath(lang_path)
+        for lang_path in sorted(lang_files):
+            lang_name = lang_path.stem.upper()
+            abs_lang_path = str(lang_path.resolve())
 
             lang_action = QAction(lang_name, self)
             lang_action.setCheckable(True)
@@ -591,17 +579,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 self, "Error", f"Failed to load language file:\n{str(e)}"
             )
 
-    # "language_menu": "Мова",
     def refresh_all_ui(self):
         self.setWindowTitle(self.tr.get("window_title"))
 
-        # Refresh main navigation menu titles
         self.navigate_menu.setTitle(self.tr.get("menu.menu"))
         self.main_action.setText(self.tr.get("menu.main_page"))
         self.docs_action.setText(self.tr.get("menu.documentation"))
         self.about_action.setText(self.tr.get("menu.about"))
         self.language_menu.setTitle(self.tr.get("language_menu"))
-        # Refresh all pages
+
         self.main_page.refresh_ui()
         self.page_one.refresh_ui()
         self.page_two.refresh_ui()
@@ -724,18 +710,25 @@ class MainWindow(QtWidgets.QMainWindow):
             }
         """)
 
-
+# NOTE:  to build this into .exe run
+# uv run pyinstaller --name=app --add-data "src/desctop_app/languages:languages" src/desctop_app/app.py
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    BASE_DIR = (
-        os.path.dirname(os.path.abspath(__file__))
-        if "__file__" in locals()
-        else os.getcwd()
-    )
-    LANG_DIR = os.path.join(BASE_DIR, "languages")
 
-    initial_lang_path = os.path.join(LANG_DIR, "uk.json")
-    tr = UILanguageManager(initial_lang_path)
+    # PyInstaller creates a temporary folder and stores path in _MEIPASS
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        BASE_DIR = Path(sys._MEIPASS)
+    elif "__file__" in locals():
+        BASE_DIR = Path(__file__).resolve().parent
+    else:
+        BASE_DIR = Path.cwd()
+
+    LANG_DIR = BASE_DIR / "languages"
+
+    # Check if the uk.json exists, otherwise fallback gracefully or handle error
+    initial_lang_path = LANG_DIR / "uk.json"
+
+    tr = UILanguageManager(str(initial_lang_path))
 
     window = MainWindow(tr, LANG_DIR)
     window.resize(900, 700)

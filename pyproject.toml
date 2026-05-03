@@ -27,6 +27,7 @@ dependencies = [
     "mpmath==1.3.0",
     "scipy==1.16.0",
     "galois>=0.4.10",
+    "pyside6>=6.11.0",
 ]
 
 [tool.setuptools.packages.find]

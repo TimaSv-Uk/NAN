@@ -7,6 +7,32 @@ import galois
 DIR = "multiplication_table"
 
 
+def precompute_256_sudo512(filepath: str = "multiplication_table/mod_256_sudo512.npy"):
+    """
+    Creates a multiplication table where elements are transformed
+    via the 'Odd/No Pair' mapping from the 512 space.
+    """
+    print("Precomputing Sudo512 GF(2^8) LUT...")
+
+    # Define your 'Half Elements' mapping
+    # This takes the odd numbers from 0-511 and maps them to 0-255
+    # Result: [1, 3, 5, ..., 255, 1, 3, 5, ..., 255]
+    # We take the first 256 unique entries or a specific slice
+    mapping = np.array([x % 256 for x in range(512) if x % 2 != 0], dtype=np.uint8)
+    # Initialize Galois Field
+    GF256 = galois.GF(2**8)
+    # Apply the transformation to the elements before multiplication
+    # Instead of [0, 1, 2...], we use your [1, 3, 5...]
+    elements = GF256(mapping)
+    x_grid, y_grid = np.meshgrid(elements, elements, indexing="ij")
+    # Perform GF multiplication on 'odd' elements from mod512
+    mul_lut = np.array(x_grid * y_grid, dtype=np.uint8)
+    print(mul_lut)
+    os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
+    np.save(filepath, mul_lut)
+    print(f"Saved sudo512 table to {filepath}")
+
+
 def precompute_gf256_multiplication(filepath: str = "mul_gf256.npy"):
     """
     Generates the GF(2^8) multiplication table and saves it as a .npy file.
@@ -77,6 +103,8 @@ def read_precompute_multiplication_set(x: int, y: int, mod: int) -> int:
 
 
 if __name__ == "__main__":
+    precompute_256_sudo512
+
     mod = 256
 
     precompute_multiplication(mod)

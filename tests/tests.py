@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+from cryptall_2.precompute_multiplication import precompute_256_sudo512
 from cryptall_2.encode_decode import (
     encode_bites,
     decode_bites,
@@ -396,6 +397,9 @@ class TestMathAndHelpers(unittest.TestCase):
 
         self.assertEqual(len(new_arr) - 3, random_array_length)
         self.assertTrue(np.array_equal(original_arr, new_arr[random_array_length:]))
+
+    def test_precompute_256_sudo512(self):
+        precompute_256_sudo512()
 
 
 if __name__ == "__main__":

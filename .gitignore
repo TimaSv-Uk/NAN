@@ -1,4 +1,5 @@
 # Test files
+/tests/
 /tests/test_files/
 /tests/test_results/decoded/
 /tests/test_results/encoded/
