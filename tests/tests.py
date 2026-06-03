@@ -19,6 +19,8 @@ from cryptall_2.encode_decode import (
     remove_noise,
     encode_bites_f8,
     decode_bites_f8,
+    encode_bites_sudo512_mod,
+    decode_bites_sudo512_mod
 )
 from cryptall_2.core.main_modulo import randomize_d_mod
 from cryptall_2.helpers import (
@@ -361,6 +363,17 @@ class TestF8Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         self.test_results_dir = "./tests/test_results_f8/"
         Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod"
+
+
+class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.encode_func = encode_bites_sudo512_mod
+        self.decode_func = decode_bites_sudo512_mod
+
+        self.test_results_dir = "./tests/test_results_sudo521_mod/"
+        Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
+        self.alg_name = "sudo521_mod"
 
 
 #

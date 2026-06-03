@@ -13,6 +13,8 @@ from .core.main_modulo import (
     reverse_change_first_symbol_based_on_random_vector,
     randomize_d_mod,
 )
+
+from .core.sudo512_modulo import encode_sudo512_mod, decode_sudo512_mod
 from .core.finite_field import encode_f8, decode_f8
 from .core.ring import encode_ring, decode_ring
 # too slow
@@ -90,6 +92,44 @@ def decode_bites(
         d_mod,
         seed,
         decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+        noise_ratio=noise_ratio,
+    )
+
+
+def encode_bites_sudo512_mod(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        encoder_func=lambda b, d_range: encode_bites_sudo512_mod(b, d_range),
+        noise_ratio=noise_ratio,
+        char_encode_mod=char_encode_mod,
+    )
+
+
+def decode_bites_sudo512_mod(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        decoder_func=lambda b, d_range: encode_bites_sudo512_mod(b, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),

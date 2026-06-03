@@ -7,7 +7,7 @@ import galois
 DIR = "multiplication_table"
 
 
-def precompute_256_sudo512(filepath: str = "multiplication_table/mod_256_sudo512.npy"):
+def precompute_sudo512_mod(filepath: str = "multiplication_table/mod_256_sudo512.npy"):
     """
     Creates a multiplication table where elements are transformed
     via the 'Odd/No Pair' mapping from the 512 space.
@@ -62,6 +62,16 @@ def load_gf256(filepath: str = "mul_gf256.npy") -> np.ndarray:
     return np.load(filepath)
 
 
+def load_sudo512_mod(filepath: str = "mod_256_sudo512.npy") -> np.ndarray:
+    """
+    Loads the multiplication table, creating it first if it doesn't exist.
+    """
+    if not os.path.exists(filepath):
+        precompute_sudo512_mod(filepath)
+
+    return np.load(filepath)
+
+
 def precompute_multiplication(mod: int):
     arr = np.zeros((mod, mod), dtype=int)
     for i in range(mod):
@@ -103,7 +113,7 @@ def read_precompute_multiplication_set(x: int, y: int, mod: int) -> int:
 
 
 if __name__ == "__main__":
-    precompute_256_sudo512
+    precompute_sudo512_mod
 
     mod = 256
 
