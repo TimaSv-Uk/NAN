@@ -11,25 +11,24 @@ def precompute_sudo512_mod(filepath: str = "multiplication_table/mod_256_sudo512
     """
     Creates a multiplication table where elements are transformed
     via the 'Odd/No Pair' mapping from the 512 space.
+
+
+    Reverse Mapping (Modulo 512 to Byte):When decoding, you take your odd number
+    y and map it back to the original byte **x = (y - 1) / 2**
+
+    Forward Mapping (Byte to Modulo 512): You take your 8-bit input
+    x (where x in [0, 255]) and map it to an odd number **y = (2x + 1)mod{512}**
+    NOTE: if array is not converted to larger int type you wont exact mapping up to 511
+
     """
     print("Precomputing Sudo512 GF(2^8) LUT...")
 
-    # Define your 'Half Elements' mapping
-    # This takes the odd numbers from 0-511 and maps them to 0-255
-    # Result: [1, 3, 5, ..., 255, 1, 3, 5, ..., 255]
-    # We take the first 256 unique entries or a specific slice
-    mapping = np.array([x % 256 for x in range(512) if x % 2 != 0], dtype=np.uint8)
-    # Initialize Galois Field
-    GF256 = galois.GF(2**8)
-    # Apply the transformation to the elements before multiplication
-    # Instead of [0, 1, 2...], we use your [1, 3, 5...]
-    elements = GF256(mapping)
-    x_grid, y_grid = np.meshgrid(elements, elements, indexing="ij")
-    # Perform GF multiplication on 'odd' elements from mod512
-    mul_lut = np.array(x_grid * y_grid, dtype=np.uint8)
-    print(mul_lut)
+    mapping = np.array([(x - 1) / 2 for x in range(512) if x % 2 != 0], dtype=np.uint8)
+    # EXAMPLE: Forward Mapping
+    # ran = [(x * 2 + 1) for x in mapping]
+    # print(ran)
     os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
-    np.save(filepath, mul_lut)
+    np.save(filepath, mapping)
     print(f"Saved sudo512 table to {filepath}")
 
 
@@ -113,7 +112,7 @@ def read_precompute_multiplication_set(x: int, y: int, mod: int) -> int:
 
 
 if __name__ == "__main__":
-    precompute_sudo512_mod
+    precompute_sudo512_mod()
 
     mod = 256
 

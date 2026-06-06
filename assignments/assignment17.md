@@ -50,7 +50,7 @@ x1 ^ a1(alpha) where a1 mod 256
 Take paired length vencor a1...ak
 
 x1,x2,xn
-neigbors woth color x1^a1
+neigbors with color x1^a1
 
 
 a1 diffirent from a3, a5 diff from a7

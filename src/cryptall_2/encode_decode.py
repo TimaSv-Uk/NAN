@@ -112,7 +112,7 @@ def encode_bites_sudo512_mod(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
-        encoder_func=lambda b, d_range: encode_bites_sudo512_mod(b, d_range),
+        encoder_func=lambda b, d_range: encode_sudo512_mod(b, d_range),
         noise_ratio=noise_ratio,
         char_encode_mod=char_encode_mod,
     )

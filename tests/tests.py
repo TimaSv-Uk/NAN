@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-from cryptall_2.precompute_multiplication import precompute_256_sudo512
+from cryptall_2.precompute_multiplication import precompute_sudo512_mod
 from cryptall_2.encode_decode import (
     encode_bites,
     decode_bites,
@@ -391,7 +391,7 @@ class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
 # NOTE: HELPER / MATH TESTS (Completely separated from encoding tests)
 
 
-class TestMathAndHelpers(unittest.TestCase):
+class TestHelpers(unittest.TestCase):
     def setUp(self):
         self.d_mod = 128
         self.seed = 50
@@ -412,7 +412,7 @@ class TestMathAndHelpers(unittest.TestCase):
         self.assertTrue(np.array_equal(original_arr, new_arr[random_array_length:]))
 
     def test_precompute_256_sudo512(self):
-        precompute_256_sudo512()
+        precompute_sudo512_mod()
 
 
 if __name__ == "__main__":
