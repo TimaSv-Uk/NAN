@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-from cryptall_2.precompute_multiplication import precompute_sudo512_mod
+from cryptall_2.precompute_multiplication import precompute_sudo512_mod, load_sudo512_mod
 from cryptall_2.encode_decode import (
     encode_bites,
     decode_bites,
@@ -413,6 +413,7 @@ class TestHelpers(unittest.TestCase):
 
     def test_precompute_256_sudo512(self):
         precompute_sudo512_mod()
+        print(load_sudo512_mod())
 
 
 if __name__ == "__main__":

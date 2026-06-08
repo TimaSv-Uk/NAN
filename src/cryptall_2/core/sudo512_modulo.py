@@ -12,16 +12,21 @@ def encode_sudo512_mod(
     chars: np.ndarray, d_mod_range: np.ndarray, mul_lut: np.ndarray = MUL_SUDO512_MOD
 ) -> np.ndarray:
     # Use standard uint8 arrays
-    current_state = chars.astype(np.uint8)
+
+    current_state = (chars.astype(np.uint16) * 2) + 1
+
     next_state = np.zeros_like(current_state)
 
     for a in d_mod_range:
-        find_neighbors_sudo512_mod(current_state, next_state, np.uint8(a), mul_lut)
+        a = np.uint16((2 * a) + 1)
+        find_neighbors_sudo512_mod(current_state, next_state, a, mul_lut)
 
         temp = current_state
         current_state = next_state
         next_state = temp
 
+    # Reverse Mapping (Modulo 512 to Byte)
+    current_state = ((current_state - 1) // 2).astype(np.uint8)
     return current_state
 
 
@@ -29,16 +34,22 @@ def encode_sudo512_mod(
 def decode_sudo512_mod(
     chars: np.ndarray, d_mod_range: np.ndarray, mul_lut: np.ndarray = MUL_SUDO512_MOD
 ) -> np.ndarray:
-    current_state = chars.astype(np.uint8)
+
+    current_state = (chars.astype(np.uint16) * 2) + 1
+
     next_state = np.zeros_like(current_state)
 
     for i in range(len(d_mod_range) - 1, -1, -1):
-        a = np.uint8(d_mod_range[i])
+        a = np.uint16((2 * d_mod_range[i]) + 1)
+
         reverse_find_neighbors_sudo512_mod(current_state, next_state, a, mul_lut)
 
         temp = current_state
         current_state = next_state
         next_state = temp
+
+    # Reverse Mapping (Modulo 512 to Byte)
+    current_state = ((current_state - 1) // 2).astype(np.uint8)
 
     return current_state
 

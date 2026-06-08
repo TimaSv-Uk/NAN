@@ -4,10 +4,11 @@ import numpy as np
 import pickle
 import galois
 
-DIR = "multiplication_table"
+DIR = "multiplication_table/"
+SUDO512_MOD = f"{DIR}mod_256_sudo512.npy"
 
 
-def precompute_sudo512_mod(filepath: str = "multiplication_table/mod_256_sudo512.npy"):
+def precompute_sudo512_mod(filepath: str = SUDO512_MOD):
     """
     Creates a multiplication table where elements are transformed
     via the 'Odd/No Pair' mapping from the 512 space.
@@ -21,9 +22,10 @@ def precompute_sudo512_mod(filepath: str = "multiplication_table/mod_256_sudo512
     NOTE: if array is not converted to larger int type you wont exact mapping up to 511
 
     """
-    print("Precomputing Sudo512 GF(2^8) LUT...")
 
-    mapping = np.array([(x - 1) / 2 for x in range(512) if x % 2 != 0], dtype=np.uint8)
+    mapping = np.array([x for x in range(512) if x % 2 != 0], dtype=np.uint16)
+    # EXAMPLE: Forward Mapping
+    # mapping = np.array([(x - 1) / 2 for x in range(512) if x % 2 != 0], dtype=np.uint8)
     # EXAMPLE: Forward Mapping
     # ran = [(x * 2 + 1) for x in mapping]
     # print(ran)
@@ -61,7 +63,7 @@ def load_gf256(filepath: str = "mul_gf256.npy") -> np.ndarray:
     return np.load(filepath)
 
 
-def load_sudo512_mod(filepath: str = "mod_256_sudo512.npy") -> np.ndarray:
+def load_sudo512_mod(filepath: str = SUDO512_MOD) -> np.ndarray:
     """
     Loads the multiplication table, creating it first if it doesn't exist.
     """
