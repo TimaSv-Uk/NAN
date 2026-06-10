@@ -129,7 +129,7 @@ def decode_bites_sudo512_mod(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: encode_bites_sudo512_mod(b, d_range),
+        decoder_func=lambda b, d_range: decode_sudo512_mod(b, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),

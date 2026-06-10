@@ -10,27 +10,27 @@ SUDO512_MOD = f"{DIR}mod_256_sudo512.npy"
 
 def precompute_sudo512_mod(filepath: str = SUDO512_MOD):
     """
-    Creates a multiplication table where elements are transformed
-    via the 'Odd/No Pair' mapping from the 512 space.
+    Saves a (256, 256) uint16 multiplication table where
+    indices are bytes [0..255], but all arithmetic happens
+    in Z512 using odd representatives: F(x) = 2x + 1.
 
-
-    Reverse Mapping (Modulo 512 to Byte):When decoding, you take your odd number
-    y and map it back to the original byte **x = (y - 1) / 2**
-
-    Forward Mapping (Byte to Modulo 512): You take your 8-bit input
-    x (where x in [0, 255]) and map it to an odd number **y = (2x + 1)mod{512}**
-    NOTE: if array is not converted to larger int type you wont exact mapping up to 511
-
+    mul_table[a, b] = F(a) * F(b) mod 512
+                    = (2a+1) * (2b+1) mod 512
+    The result is always odd, fits uint16.
     """
 
-    mapping = np.array([x for x in range(512) if x % 2 != 0], dtype=np.uint16)
-    # EXAMPLE: Forward Mapping
-    # mapping = np.array([(x - 1) / 2 for x in range(512) if x % 2 != 0], dtype=np.uint8)
-    # EXAMPLE: Forward Mapping
-    # ran = [(x * 2 + 1) for x in mapping]
-    # print(ran)
+    size = 256
+    table = np.zeros((size, size), dtype=np.uint16)
+    for a in range(size):
+        a_odd = np.uint16(2 * a + 1)
+        # print(f"{10 * '-'} a: {a_odd} \n")
+        for b in range(size):
+            b_odd = np.uint16(2 * b + 1)
+            table[a, b] = (a_odd * b_odd) % 512
+            # print(f"b: {b_odd}\n")
+            # print(f"table: {table[a, b]}\n\n")
     os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
-    np.save(filepath, mapping)
+    np.save(filepath, table)
     print(f"Saved sudo512 table to {filepath}")
 
 
