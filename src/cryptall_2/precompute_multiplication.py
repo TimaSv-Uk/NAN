@@ -18,16 +18,13 @@ def precompute_sudo512_mod(filepath: str = SUDO512_MOD):
                     = (2a+1) * (2b+1) mod 512
     The result is always odd, fits uint16.
     """
-
     size = 256
     table = np.zeros((size, size), dtype=np.uint16)
     for a in range(size):
-        a_odd = np.uint16(2 * a + 1)
-        # print(f"{10 * '-'} a: {a_odd} \n")
+        a_odd = np.uint32(2 * a + 1)
         for b in range(size):
-            b_odd = np.uint16(2 * b + 1)
+            b_odd = np.uint32(2 * b + 1)
             table[a, b] = (a_odd * b_odd) % 512
-            # print(f"b: {b_odd}\n")
             # print(f"table: {table[a, b]}\n\n")
     os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
     np.save(filepath, table)
