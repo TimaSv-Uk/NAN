@@ -6,8 +6,6 @@ from ..precompute_multiplication import load_gf256
 from . import BaseEncodeDecodeAlgorithm
 
 class Ring(BaseEncodeDecodeAlgorithm):
-
-
     def __init__(
         self,
         chars: np.ndarray,
