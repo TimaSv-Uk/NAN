@@ -16,15 +16,15 @@ class BaseEncodeDecodeAlgorithm(ABC):
     ) -> np.ndarray:
         raise NotImplementedError()
 
+    @staticmethod
     @abstractmethod
-    def __find_neighbors(
-        self,
+    def _find_neighbors(
     ) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def __reverse_find_neighbors(
-        self,
+    @staticmethod
+    def _reverse_find_neighbors(
     ) -> None:
         raise NotImplementedError()
 

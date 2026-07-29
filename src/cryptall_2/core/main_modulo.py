@@ -12,12 +12,11 @@ from . import BaseEncodeDecodeAlgorithm
 # only works if your modulus is a power of two
 
 
-"""
-First algorithm that was implemented, initialy called v5
-"""
-
-
 class V5(BaseEncodeDecodeAlgorithm):
+    """
+    First algorithm that was implemented, initialy called v5
+    """
+
     def __init__(
         self, chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray
     ):
@@ -47,7 +46,7 @@ class V5(BaseEncodeDecodeAlgorithm):
         next_state = np.empty_like(current_state)
 
         for a in self.d_mod_range:
-            self.__find_neighbors(current_state, next_state, a, self.char_encode_mod)
+            self._find_neighbors(current_state, next_state, a, self.char_encode_mod)
 
             current_state, next_state = next_state, current_state
 
@@ -80,16 +79,17 @@ class V5(BaseEncodeDecodeAlgorithm):
 
         for i in range(len(self.d_mod_range) - 1, -1, -1):
             a = self.d_mod_range[i]
-            self.__reverse_find_neighbors(
+            self._reverse_find_neighbors(
                 current_state, next_state, a, self.char_encode_mod
             )
             current_state, next_state = next_state, current_state  # Swap
 
         return current_state
 
+    @staticmethod
     @njit
-    def __find_neighbors(
-        self, point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
+    def _find_neighbors(
+        point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
     ) -> None:
         """
         point_in = (x1, x2, x3, ...)
@@ -120,9 +120,10 @@ class V5(BaseEncodeDecodeAlgorithm):
                 # point_out[i] = temp & mod
         return None
 
+    @staticmethod
     @njit
-    def __reverse_find_neighbors(
-        self, point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
+    def _reverse_find_neighbors(
+        point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int
     ) -> None:
         """
         point_in = [y1, y2, y3, ...]
@@ -156,12 +157,11 @@ class V5(BaseEncodeDecodeAlgorithm):
         return None
 
 
-"""
-This is the version of First algorithm(v5),
-"""
-
-
 class V5_WITH_TABLE(BaseEncodeDecodeAlgorithm):
+    """
+    This is the version of First algorithm(v5),
+    """
+
     def __init__(self, chars: np.ndarray, char_encode_mod: int, d_mod: int):
         self.chars = chars
         self.char_encode_mod = char_encode_mod
@@ -178,15 +178,16 @@ class V5_WITH_TABLE(BaseEncodeDecodeAlgorithm):
         current_state = self.chars.copy()
         next_state = np.empty_like(current_state)
         for a in range(self.d_mod):
-            self.__find_neighbors(
+            self._find_neighbors(
                 current_state, next_state, a, self.char_encode_mod, mul_table
             )
             current_state, next_state = next_state, current_state
         return current_state
 
+    @staticmethod
     @njit
-    def __find_neighbors(
-        self, point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int, mul_table
+    def _find_neighbors(
+        point_in: np.ndarray, point_out: np.ndarray, a: int, mod: int, mul_table
     ) -> None:
         """
         Calculates the next state and writes it into the pre-allocated
@@ -226,28 +227,32 @@ class V5_WITH_TABLE(BaseEncodeDecodeAlgorithm):
     ) -> np.ndarray:
         raise NotImplementedError()
 
-    def __reverse_find_neighbors(
-        self,
-    ) -> None:
+    @staticmethod
+    def _reverse_find_neighbors() -> None:
         raise NotImplementedError()
 
 
-"""
-Second algorithm that was implemented, initialy called v10
-"""
-
-
 class V10(BaseEncodeDecodeAlgorithm):
-    def __init__(
-        self, chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int
-    ):
-        self.chars = chars
-        self.char_encode_mod = char_encode_mod
-        self.d_mod_range = d_mod_range
-        self.m = m
+    """
+    UNFINISHED
 
+    Second algorithm that was implemented, initialy called v10
+    This one does not have seperation of encode and find _find_neighbors functions, and is unfinished
+    """
+
+    #  def __init__(
+    #      self, chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int
+    #  ):
+    #      self.chars = chars
+    #      self.char_encode_mod = char_encode_mod
+    #      self.d_mod_range = d_mod_range
+    #      self.m = m
+
+    @staticmethod
     @njit
-    def encode(self) -> np.ndarray:
+    def encode(
+        chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int
+    ) -> np.ndarray:
         """
         improved version
         * from assighment5 graph algorithm
@@ -260,13 +265,13 @@ class V10(BaseEncodeDecodeAlgorithm):
 
          (y1 = x1 + a1 + a2 + a3 + a4)
         """
-        current_state = self.chars.astype(np.uint8).copy()
+        current_state = chars.astype(np.uint8).copy()
         next_state = np.empty_like(current_state)
 
-        m = self.m % self.char_encode_mod
+        m = m % char_encode_mod
 
-        for index in range(len(self.d_mod_range)):
-            a = self.d_mod_range[index]
+        for index in range(len(d_mod_range)):
+            a = d_mod_range[index]
             # print(a)
             # print(d_mod_range[: index + 1])
 
@@ -275,12 +280,10 @@ class V10(BaseEncodeDecodeAlgorithm):
 
             if index % 2 == 0:
                 # y1 = x1^m
-                next_state[0] = np.uint8(
-                    (x0**m) + np.sum(self.d_mod_range[: index + 1])
-                )
+                next_state[0] = np.uint8((x0**m) + np.sum(d_mod_range[: index + 1]))
             else:
                 # y1 = x1 + a1 + a2 + ... a_index
-                next_state[0] = np.uint8(x0 + np.sum(self.d_mod_range[: index + 1]))
+                next_state[0] = np.uint8(x0 + np.sum(d_mod_range[: index + 1]))
 
             for i in range(1, n):
                 if i % 2 == 0:
@@ -294,8 +297,11 @@ class V10(BaseEncodeDecodeAlgorithm):
 
         return current_state
 
+    @staticmethod
     @njit
-    def decode(self) -> np.ndarray:
+    def decode(
+        chars: np.ndarray, char_encode_mod: int, d_mod_range: np.ndarray, m: int
+    ) -> np.ndarray:
         """
         improved version
         * from assighment5 graph algorithm
@@ -310,16 +316,16 @@ class V10(BaseEncodeDecodeAlgorithm):
 
          (x1 = y1 + a1 + a2 + a3 + a4)
         """
-        current_state = self.chars.astype(np.uint8).copy()
+        current_state = chars.astype(np.uint8).copy()
         next_state = np.empty_like(current_state)
 
-        m = self.m % self.char_encode_mod
+        m = m % char_encode_mod
 
-        current_state = self.chars.astype(np.uint8).copy()
+        current_state = chars.astype(np.uint8).copy()
         next_state = np.empty_like(current_state)
 
-        for index in range(len(self.d_mod_range) - 1, -1, -1):
-            a = self.d_mod_range[index]
+        for index in range(len(d_mod_range) - 1, -1, -1):
+            a = d_mod_range[index]
             n = len(current_state)
             y0 = current_state[0]
 
@@ -327,11 +333,11 @@ class V10(BaseEncodeDecodeAlgorithm):
                 # TODO: need to fix decode
                 # Reverse of: y0 = (x0**m + SUM) % mod
                 next_state[0] = np.uint8(
-                    ((y0 ** (1 / m)) - np.sum(self.d_mod_range[: index + 1]))
+                    ((y0 ** (1 / m)) - np.sum(d_mod_range[: index + 1]))
                 )
             else:
                 # y1 = x1 + a1 + a2 + ... a_index
-                next_state[0] = np.uint8(y0 - np.sum(self.d_mod_range[: index + 1]))
+                next_state[0] = np.uint8(y0 - np.sum(d_mod_range[: index + 1]))
 
             x0 = next_state[0]
 
