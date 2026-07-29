@@ -3,15 +3,19 @@ import numpy as np
 import os
 from typing import Callable
 
-from .helpers import save_file_from_bites, load_file_to_bites, sudo_random_array
-from .core.main_modulo import (
-    encode_v5,
-    decode_v5,
+from .helpers import (
+    save_file_from_bites,
+    load_file_to_bites,
+    sudo_random_array,
     change_first_symbol_based_on_full_vector,
     reverse_change_first_symbol_based_on_full_vector,
     change_first_symbol_based_on_random_vector,
     reverse_change_first_symbol_based_on_random_vector,
     randomize_d_mod,
+)
+from .core.main_modulo import (
+    encode_v5,
+    decode_v5,
 )
 
 from .core.sudo512_modulo import encode_sudo512_mod, decode_sudo512_mod

@@ -1,4 +1,18 @@
 
+
+
+
+
+
+# TODO:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::TODAY
+
+
+
+## in addintion to new algorithsms and tests
+- refactor encode,decode algorithsms **to class based** approach
+
+## new algorithsms and tests
+
 - to +, or - to *, group of 255 with no 0
 
 
