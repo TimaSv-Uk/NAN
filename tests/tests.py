@@ -12,6 +12,14 @@ from cryptall_2.precompute_multiplication import (
     precompute_sudo512_mod,
     load_sudo512_mod,
 )
+
+from cryptall_2.core.base import BaseEncodeDecodeAlgorithm
+
+from cryptall_2.core.main_modulo import V5
+from cryptall_2.core.sudo512_modulo import SUDO512_MOD
+from cryptall_2.core.finite_field import F8
+from cryptall_2.core.ring import RING
+
 from cryptall_2.encode_decode import (
     encode_bites,
     decode_bites,
@@ -25,11 +33,11 @@ from cryptall_2.encode_decode import (
     encode_bites_sudo512_mod,
     decode_bites_sudo512_mod,
 )
-from cryptall_2.core.main_modulo import randomize_d_mod
 from cryptall_2.helpers import (
     bites_sameness_percentage,
     load_file_to_bites,
     sudo_random_array,
+    randomize_d_mod
 )
 
 
@@ -53,6 +61,7 @@ class BaseEncodeDecodeTest:
         }
         # To store data for the graph
         self.perf_results = []
+
         # NOTE: Child classes MUST define:
         # self.encode_func
         # self.decode_func
@@ -67,6 +76,9 @@ class BaseEncodeDecodeTest:
             file_bites, self.char_mod, self.d_mod, self.seed)
         decoded = self.decode_func(
             encoded, self.char_mod, self.d_mod, self.seed)
+        print(file_bites)
+        print(encoded)
+        print(decoded)
         self.assertTrue(np.array_equal(file_bites, decoded))
 
     def _record_perf(self, file_name, bite_len, exec_time, operation):
@@ -400,6 +412,7 @@ class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
             "vid": "vid_27mb.mp4",
         }
 
+
     @unittest.skip("This specific test is not applicable for SUDO512MOD")
     def test_encode_decode_dmod0():
         pass
@@ -436,6 +449,7 @@ class TestHelpers(unittest.TestCase):
     def setUp(self):
         self.d_mod = 128
         self.seed = 50
+
 
     def test_randomized_d_mod_changes_order(self):
         """Check that randomize_d_mod changes the default sequence."""

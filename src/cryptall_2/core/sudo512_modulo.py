@@ -3,7 +3,7 @@ from numba import njit
 
 from ..precompute_multiplication import load_sudo512_mod
 
-from . import BaseEncodeDecodeAlgorithm
+from .base import BaseEncodeDecodeAlgorithm
 
 
 class SUDO512_MOD(BaseEncodeDecodeAlgorithm):
@@ -12,7 +12,6 @@ class SUDO512_MOD(BaseEncodeDecodeAlgorithm):
         self.d_mod_range = d_mod_range
         self.mul_lut = load_sudo512_mod("multiplication_table/mod_256_sudo512.npy")
 
-    @njit
     def encode(
         self,
     ) -> np.ndarray:
@@ -34,8 +33,7 @@ class SUDO512_MOD(BaseEncodeDecodeAlgorithm):
         current_state = ((current_state - 1) // 2).astype(np.uint8)
         return current_state
 
-    @njit
-    def decode_sudo512_mod(
+    def decode(
             self
     ) -> np.ndarray:
 
@@ -46,7 +44,7 @@ class SUDO512_MOD(BaseEncodeDecodeAlgorithm):
         for i in range(len(self.d_mod_range) - 1, -1, -1):
             a = np.uint16((2 * self.d_mod_range[i]) + 1)
 
-            self._find_neighbors(current_state, next_state, a, self.mul_lut)
+            self._reverse_find_neighbors(current_state, next_state, a, self.mul_lut)
 
             temp = current_state
             current_state = next_state

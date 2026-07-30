@@ -3,9 +3,9 @@ from numba import njit
 
 from ..precompute_multiplication import load_gf256
 
-from . import BaseEncodeDecodeAlgorithm
+from .base import BaseEncodeDecodeAlgorithm
 
-class Ring(BaseEncodeDecodeAlgorithm):
+class RING(BaseEncodeDecodeAlgorithm):
     def __init__(
         self,
         chars: np.ndarray,
@@ -15,8 +15,7 @@ class Ring(BaseEncodeDecodeAlgorithm):
         self.d_mod_range = d_mod_range
         self.mul_lut = load_gf256("multiplication_table/mul_gf256.npy")
 
-    @njit
-    def encode_ring(
+    def encode(
         self
     ) -> np.ndarray:
         # Use standard uint8 arrays
@@ -33,7 +32,6 @@ class Ring(BaseEncodeDecodeAlgorithm):
         return current_state
 
 
-    @njit
     def decode(
             self
     ) -> np.ndarray:

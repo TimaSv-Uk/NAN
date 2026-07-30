@@ -9,7 +9,12 @@
 
 
 ## in addintion to new algorithsms and tests
-- refactor encode,decode algorithsms **to class based** approach
+**DONE**
+- refactor encode,decode algorithsms **to class based** approach 
+**TODO**
+- refactor **encode_decode.py** so it fits class based algorithsms
+- refactor **tests** so it fits class based algorithsms
+
 
 ## new algorithsms and tests
 

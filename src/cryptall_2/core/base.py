@@ -22,8 +22,8 @@ class BaseEncodeDecodeAlgorithm(ABC):
     ) -> None:
         raise NotImplementedError()
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def _reverse_find_neighbors(
     ) -> None:
         raise NotImplementedError()

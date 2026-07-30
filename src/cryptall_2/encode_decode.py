@@ -13,16 +13,11 @@ from .helpers import (
     reverse_change_first_symbol_based_on_random_vector,
     randomize_d_mod,
 )
-from .core.main_modulo import (
-    encode_v5,
-    decode_v5,
-)
-
-from .core.sudo512_modulo import encode_sudo512_mod, decode_sudo512_mod
-from .core.finite_field import encode_f8, decode_f8
-from .core.ring import encode_ring, decode_ring
-# too slow
-# from .core_finite_field.finite_field_lib import encode_f8, decode_f8
+from .core.main_modulo import V5
+from .core.sudo512_modulo import SUDO512_MOD
+from .core.finite_field import F8
+from .core.ring import RING
+from .core.base import BaseEncodeDecodeAlgorithm
 
 
 def _encode_pipeline(
@@ -30,7 +25,7 @@ def _encode_pipeline(
     d_mod: int,
     seed: int,
     modifier_func: Callable[[np.ndarray], np.ndarray],
-    encoder_func: Callable[[np.ndarray, np.ndarray], np.ndarray],
+    algorithm_factory: Callable[[np.ndarray, np.ndarray], BaseEncodeDecodeAlgorithm],
     noise_ratio: float = 0.00,
     char_encode_mod: int = 256,
 ) -> np.ndarray:
@@ -40,21 +35,23 @@ def _encode_pipeline(
 
     d_mod_range = randomize_d_mod(d_mod, seed)
     bites_mod = modifier_func(bites)
-    return encoder_func(bites_mod, d_mod_range)
+    algorithm = algorithm_factory(bites_mod, d_mod_range)
+    return algorithm.encode()
 
 
 def _decode_pipeline(
     bites: np.ndarray,
     d_mod: int,
     seed: int,
-    decoder_func: Callable[[np.ndarray, np.ndarray], np.ndarray],
+    algorithm_factory: Callable[[np.ndarray, np.ndarray], BaseEncodeDecodeAlgorithm],
     reverser_func: Callable[[np.ndarray], np.ndarray],
     noise_ratio: float = 0.00,
 ) -> np.ndarray:
     """Generic decoding pipeline to eliminate repeated boilerplate."""
     d_mod_range = randomize_d_mod(d_mod, seed)
 
-    decoded_bites = decoder_func(bites, d_mod_range)
+    algorithm = algorithm_factory(bites, d_mod_range)
+    decoded_bites = algorithm.decode()
     decoded_bites = reverser_func(decoded_bites)
 
     if noise_ratio > 0.0:
@@ -78,7 +75,7 @@ def encode_bites(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
-        encoder_func=lambda b, d_range: encode_v5(b, char_encode_mod, d_range),
+        algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
         noise_ratio=noise_ratio,
         char_encode_mod=char_encode_mod,
     )
@@ -95,7 +92,7 @@ def decode_bites(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),
@@ -116,7 +113,7 @@ def encode_bites_sudo512_mod(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
-        encoder_func=lambda b, d_range: encode_sudo512_mod(b, d_range),
+        algorithm_factory=lambda b, d_range: SUDO512_MOD(b, d_range),
         noise_ratio=noise_ratio,
         char_encode_mod=char_encode_mod,
     )
@@ -133,7 +130,7 @@ def decode_bites_sudo512_mod(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: decode_sudo512_mod(b, d_range),
+        algorithm_factory=lambda b, d_range: SUDO512_MOD(b, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),
@@ -154,7 +151,7 @@ def encode_bites_f8(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
-        encoder_func=lambda b, d_range: encode_f8(b, d_range),
+        algorithm_factory=lambda b, d_range: F8(b, d_range),
         noise_ratio=noise_ratio,
         char_encode_mod=char_encode_mod,
     )
@@ -171,7 +168,7 @@ def decode_bites_f8(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: decode_f8(b, d_range),
+        algorithm_factory=lambda b, d_range: F8(b, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),
@@ -192,7 +189,7 @@ def encode_bites_ring(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
-        encoder_func=lambda b, d_range: encode_ring(b, d_range),
+        algorithm_factory=lambda b, d_range: RING(b, d_range),
         noise_ratio=noise_ratio,
         char_encode_mod=char_encode_mod,
     )
@@ -209,7 +206,7 @@ def decode_bites_ring(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: decode_ring(b, d_range),
+        algorithm_factory=lambda b, d_range: RING(b, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),
@@ -225,7 +222,7 @@ def encode_bites_rand(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
-        encoder_func=lambda b, d_range: encode_v5(b, char_encode_mod, d_range),
+        algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
     )
 
 
@@ -236,7 +233,7 @@ def decode_bites_rand(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
             b, seed
         ),
@@ -251,7 +248,7 @@ def encode_bites_full(
         d_mod,
         seed,
         modifier_func=lambda b: change_first_symbol_based_on_full_vector(b),
-        encoder_func=lambda b, d_range: encode_v5(b, char_encode_mod, d_range),
+        algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
     )
 
 
@@ -262,11 +259,11 @@ def decode_bites_full(
         bites,
         d_mod,
         seed,
-        decoder_func=lambda b, d_range: decode_v5(b, char_encode_mod, d_range),
+        algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_full_vector(b),
     )
 
-
+# NOTE: old needs to be removed, and replaces in app to chose option of an algorithm
 def encode_file(
     file_path: str,
     save_encoded_file_path: str,

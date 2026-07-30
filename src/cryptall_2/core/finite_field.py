@@ -4,7 +4,7 @@ from numba import njit
 
 from ..precompute_multiplication import load_gf256
 
-from . import BaseEncodeDecodeAlgorithm
+from .base import BaseEncodeDecodeAlgorithm
 
 
 class F8(BaseEncodeDecodeAlgorithm):
@@ -17,8 +17,7 @@ class F8(BaseEncodeDecodeAlgorithm):
         self.d_mod_range = d_mod_range
         self.mul_lut = load_gf256("multiplication_table/mul_gf256.npy")
 
-    @njit
-    def encode_f8(self) -> np.ndarray:
+    def encode(self) -> np.ndarray:
         # Use standard uint8 arrays
         current_state = self.chars.astype(np.uint8)
         next_state = np.zeros_like(current_state)
@@ -32,8 +31,7 @@ class F8(BaseEncodeDecodeAlgorithm):
 
         return current_state
 
-    @njit
-    def decode_f8(self) -> np.ndarray:
+    def decode(self) -> np.ndarray:
         current_state = self.chars.astype(np.uint8)
         next_state = np.zeros_like(current_state)
 
