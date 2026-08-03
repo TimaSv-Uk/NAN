@@ -16,6 +16,8 @@ from .helpers import (
 from .core.main_modulo import V5
 from .core.sudo512_modulo import SUDO512_MOD
 from .core.finite_field import F8
+from .core.mutations.finite_field_mult_based import F8_MULT_BASED
+from .core.mutations.finite_field_addition_based import F8_ADDITION_BASED
 from .core.ring import RING
 from .core.base import BaseEncodeDecodeAlgorithm
 
@@ -175,6 +177,83 @@ def decode_bites_f8(
         noise_ratio=noise_ratio,
     )
 
+def encode_bites_f8_addition_based(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        algorithm_factory=lambda b, d_range: F8_ADDITION_BASED(b, d_range),
+        noise_ratio=noise_ratio,
+        char_encode_mod=char_encode_mod,
+    )
+
+def decode_bites_f8_addition_based(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        algorithm_factory=lambda b, d_range: F8_ADDITION_BASED(b, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+        noise_ratio=noise_ratio,
+    )
+
+
+def encode_bites_f8_mult_based(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+
+    return _encode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        modifier_func=lambda b: change_first_symbol_based_on_random_vector(b, seed),
+        algorithm_factory=lambda b, d_range: F8_MULT_BASED(b, d_range),
+        noise_ratio=noise_ratio,
+        char_encode_mod=char_encode_mod,
+    )
+
+#
+
+def decode_bites_f8_mult_based(
+    bites: np.ndarray,
+    char_encode_mod: int,
+    d_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+) -> np.ndarray:
+    return _decode_pipeline(
+        bites,
+        d_mod,
+        seed,
+        algorithm_factory=lambda b, d_range: F8_MULT_BASED(b, d_range),
+        reverser_func=lambda b: reverse_change_first_symbol_based_on_random_vector(
+            b, seed
+        ),
+        noise_ratio=noise_ratio,
+    )
+
+
+
 
 def encode_bites_ring(
     bites: np.ndarray,
@@ -262,6 +341,7 @@ def decode_bites_full(
         algorithm_factory=lambda b, d_range: V5(b, char_encode_mod, d_range),
         reverser_func=lambda b: reverse_change_first_symbol_based_on_full_vector(b),
     )
+
 
 # NOTE: old needs to be removed, and replaces in app to chose option of an algorithm
 def encode_file(

@@ -32,6 +32,10 @@ from cryptall_2.encode_decode import (
     decode_bites_f8,
     encode_bites_sudo512_mod,
     decode_bites_sudo512_mod,
+    encode_bites_f8_addition_based,
+    decode_bites_f8_addition_based,
+    encode_bites_f8_mult_based,
+    decode_bites_f8_mult_based
 )
 from cryptall_2.helpers import (
     bites_sameness_percentage,
@@ -395,6 +399,25 @@ class TestF8Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod"
 
+class Test_F8MULT_BASED_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.encode_func = encode_bites_f8_mult_based
+        self.decode_func = decode_bites_f8_mult_based
+
+        self.test_results_dir = "./tests/test_results_f8_mult_based/"
+        Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
+        self.alg_name = "f8_mod_mult_based"
+
+class Test_F8_ADDITION_BASED_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.encode_func = encode_bites_f8_addition_based
+        self.decode_func = decode_bites_f8_addition_based
+
+        self.test_results_dir = "./tests/test_results_f8_addition_based/"
+        Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
+        self.alg_name = "f8_mod_addition_based"
 
 class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
     def setUp(self):
