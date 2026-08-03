@@ -2,9 +2,9 @@ import numpy as np
 from numba import njit
 
 
-from ..precompute_multiplication import load_gf256
+from ...precompute_multiplication import load_gf256
 
-from .base import BaseEncodeDecodeAlgorithm
+from ..base import BaseEncodeDecodeAlgorithm
 
 
 class F8(BaseEncodeDecodeAlgorithm):

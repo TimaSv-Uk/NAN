@@ -468,9 +468,6 @@ class TestHelpers(unittest.TestCase):
         self.assertTrue(np.array_equal(
             original_arr, new_arr[random_array_length:]))
 
-    def test_precompute_256_sudo512(self):
-        precompute_sudo512_mod()
-        print(load_sudo512_mod())
 
 
 if __name__ == "__main__":

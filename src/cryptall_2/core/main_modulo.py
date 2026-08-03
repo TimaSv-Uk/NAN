@@ -4,7 +4,6 @@ from numba import njit
 import os
 
 from .base import BaseEncodeDecodeAlgorithm
-
 # NOTE:
 # np.uint8 used inted of  modulo operation only works with  mod 256
 
