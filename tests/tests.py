@@ -11,6 +11,9 @@ import pandas as pd
 from cryptall_2.precompute_multiplication import (
     precompute_sudo512_mod,
     load_sudo512_mod,
+    load_gf256_explicit_poly,
+    load_gf256
+
 )
 
 from cryptall_2.core.base import BaseEncodeDecodeAlgorithm
@@ -491,6 +494,13 @@ class TestHelpers(unittest.TestCase):
         self.assertTrue(np.array_equal(
             original_arr, new_arr[random_array_length:]))
 
+
+    def test_compera_precompute_functions_gf256(self):
+        gf256_explicit_poly = load_gf256_explicit_poly()
+        gf256 = load_gf256()
+        print(gf256_explicit_poly)
+        print(gf256)
+        self.assertTrue(np.array_equal(load_gf256_explicit_poly(),load_gf256()))
 
 
 if __name__ == "__main__":

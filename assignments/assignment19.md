@@ -6,4 +6,6 @@ Graph coordinats, ring
 x1,x2,x3  | c1,c2,c3 => get polinomial after SageMath calculations
 
 
+TODO:
 
+- F8_MULT_BASED redo with SageMath library (polinomial part of the lib)
