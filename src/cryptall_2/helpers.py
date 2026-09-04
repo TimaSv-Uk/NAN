@@ -5,6 +5,46 @@ import os
 # TODO: clean up, seperate d_mod_range,d_mod and change first_symbol groups of functions to seperate files
 
 
+def save_file_digests(
+    digest_size: int,
+    input_file_path: str,
+    save_digests_dir_path: str,
+):
+    file_bites = load_file_to_bites(input_file_path)
+    digests = np.array_split(file_bites, digest_size)
+    for i, digest in enumerate(digests):
+        os.makedirs(save_digests_dir_path, exist_ok=True)
+
+        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
+            file.write(digest.tobytes())
+
+
+def add_noise(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    seed: int,
+    noise_ratio: float = 0.05,
+) -> np.ndarray:
+    """append vector of random bites to start of array; noise_ratio% lenght of original bites"""
+    rand_arr_len = int(len(bites) * noise_ratio)
+    bites_with_noise = np.append(
+        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
+    )
+    return bites_with_noise
+
+
+def remove_noise(
+    bites: np.ndarray,
+    char_ecncode_mod: int,
+    seed: int,
+    noise_ratio: float = 0.00,
+):
+    """remove vector of random bites from start of array; noise_ratio% lenght of original bites"""
+    original_bites_len = int(len(bites) / (1 + noise_ratio))
+    rand_arr_len = int(original_bites_len * noise_ratio)
+
+    no_noise_bites = bites[rand_arr_len:]
+    return no_noise_bites
 def sudo_random_array(length: int, d_mod: int, seed: int, dtype=int) -> np.ndarray:
     if length <= 0:
         return np.array([])

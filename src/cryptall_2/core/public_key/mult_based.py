@@ -8,7 +8,7 @@ from ..base import BaseEncodeDecodeAlgorithm
 from ..finite_field import F8
 
 
-class F8_MULT_BASED(F8):
+class PUBLICKEY_F8_MULT_BASED(F8):
     """
     Based on finite_field algorithm. Main deviation from the base F8 algorithm
     is the initialization step, which uses Galois Field GF(2^8) multiplication:
@@ -39,10 +39,6 @@ class F8_MULT_BASED(F8):
         return current_state
 
     def decode(self, precomputed_inverses: np.ndarray | None = None) -> np.ndarray:
-        """
-        precomputed_inverses: if user decoder has a puclic_key
-        """
-
         current_state = self.chars.astype(np.uint8)
         next_state = np.zeros_like(current_state)
 
@@ -53,17 +49,7 @@ class F8_MULT_BASED(F8):
             else:
                 # Original symmetric path: derive inverse from a shared seed
                 a_raw = self.d_mod_range[i]
-
-                # Catch 0 and force it to 1 for consistency with encoding
                 a = np.uint8(1) if a_raw == 0 else np.uint8(a_raw)
-
-                # Calculate the multiplicative inverse of 'a' using the lookup table.
-                # We find the index where multiplying 'a' by that index equals 1.
-                # NOTE:
-                # The mathematical number 0 does not have a multiplicative inverse in GF(2^8).
-                # If a is 0, the line np.where(self.mul_lut[a] == 1)[0][0]
-                # will throw an IndexError because there is no value in row 0 that equals 1.
-                # Make sure your d_mod_range only generates bytes from 1 to 255.
                 a_inv = np.where(self.mul_lut[a] == 1)[0][0]
 
             self._reverse_find_neighbors(current_state, next_state, a_inv, self.mul_lut)

@@ -6,6 +6,9 @@ from typing import Callable
 from .helpers import (
     save_file_from_bites,
     load_file_to_bites,
+    save_file_digests,
+    add_noise,
+    remove_noise,
     sudo_random_array,
     change_first_symbol_based_on_full_vector,
     reverse_change_first_symbol_based_on_full_vector,
@@ -177,6 +180,7 @@ def decode_bites_f8(
         noise_ratio=noise_ratio,
     )
 
+
 def encode_bites_f8_addition_based(
     bites: np.ndarray,
     char_encode_mod: int,
@@ -194,6 +198,7 @@ def encode_bites_f8_addition_based(
         noise_ratio=noise_ratio,
         char_encode_mod=char_encode_mod,
     )
+
 
 def decode_bites_f8_addition_based(
     bites: np.ndarray,
@@ -232,7 +237,9 @@ def encode_bites_f8_mult_based(
         char_encode_mod=char_encode_mod,
     )
 
+
 #
+
 
 def decode_bites_f8_mult_based(
     bites: np.ndarray,
@@ -251,8 +258,6 @@ def decode_bites_f8_mult_based(
         ),
         noise_ratio=noise_ratio,
     )
-
-
 
 
 def encode_bites_ring(
@@ -380,48 +385,6 @@ def decode_file(
     save_file_digests(number_of_digests, file_path, save_file_path)
 
     print(f"{number_of_digests} digests of {file_path}; Saved at {save_file_path}")
-
-
-def save_file_digests(
-    digest_size: int,
-    input_file_path: str,
-    save_digests_dir_path: str,
-):
-    file_bites = load_file_to_bites(input_file_path)
-    digests = np.array_split(file_bites, digest_size)
-    for i, digest in enumerate(digests):
-        os.makedirs(save_digests_dir_path, exist_ok=True)
-
-        with open(f"{save_digests_dir_path}/{i}", "wb") as file:
-            file.write(digest.tobytes())
-
-
-def add_noise(
-    bites: np.ndarray,
-    char_ecncode_mod: int,
-    seed: int,
-    noise_ratio: float = 0.05,
-) -> np.ndarray:
-    """append vector of random bites to start of array; noise_ratio% lenght of original bites"""
-    rand_arr_len = int(len(bites) * noise_ratio)
-    bites_with_noise = np.append(
-        sudo_random_array(rand_arr_len, char_ecncode_mod, seed, np.uint8), bites
-    )
-    return bites_with_noise
-
-
-def remove_noise(
-    bites: np.ndarray,
-    char_ecncode_mod: int,
-    seed: int,
-    noise_ratio: float = 0.00,
-):
-    """remove vector of random bites from start of array; noise_ratio% lenght of original bites"""
-    original_bites_len = int(len(bites) / (1 + noise_ratio))
-    rand_arr_len = int(original_bites_len * noise_ratio)
-
-    no_noise_bites = bites[rand_arr_len:]
-    return no_noise_bites
 
 
 if __name__ == "__main__":
