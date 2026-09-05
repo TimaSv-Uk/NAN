@@ -19,18 +19,16 @@ from .precompute_multiplication import load_gf256
 
 def encode_bites_f8_mult_based_publickey(
     bites: np.ndarray,
-    char_encode_mod: int,
     d_mod: int,
-    seed: int,
     encode_key: int,
     noise_ratio: float = 0.00,
 ):
     d_mod_range = randomize_d_mod(d_mod, encode_key)  # PRIVATE, never shared
     mul_lut = load_gf256()
 
-    bites_mod = change_first_symbol_based_on_random_vector(bites, seed)
+    bites_mod = bites
     if noise_ratio > 0.0:
-        bites_mod = add_noise(bites_mod, char_encode_mod, encode_key, noise_ratio)
+        bites_mod = add_noise(bites_mod, 256, encode_key, noise_ratio)
 
     algorithm = F8_MULT_BASED(bites_mod, d_mod_range)
     encoded = algorithm.encode()
@@ -41,16 +39,12 @@ def encode_bites_f8_mult_based_publickey(
 
 def decode_bites_f8_mult_based_publickey(
     bites: np.ndarray,
-    seed: int,
     public_key: np.ndarray,
     noise_ratio: float = 0.00,
 ):
     algorithm = F8_MULT_BASED(bites, public_key)
     decoded_bites = algorithm.decode(precomputed_inverses=public_key)
 
-    decoded_bites = reverse_change_first_symbol_based_on_random_vector(
-        decoded_bites, seed
-    )
     if noise_ratio > 0.0:
         decoded_bites = remove_noise(decoded_bites, noise_ratio)
 

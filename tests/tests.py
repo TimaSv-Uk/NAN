@@ -8,12 +8,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+from cryptall_2.encode_decode_key import (
+    encode_bites_f8_mult_based_publickey,
+    get_public_key,
+    decode_bites_f8_mult_based_publickey,
+)
+
 from cryptall_2.precompute_multiplication import (
     precompute_sudo512_mod,
     load_sudo512_mod,
     load_gf256_explicit_poly,
-    load_gf256
-
+    load_gf256,
 )
 
 from cryptall_2.core.base import BaseEncodeDecodeAlgorithm
@@ -38,13 +43,13 @@ from cryptall_2.encode_decode import (
     encode_bites_f8_addition_based,
     decode_bites_f8_addition_based,
     encode_bites_f8_mult_based,
-    decode_bites_f8_mult_based
+    decode_bites_f8_mult_based,
 )
 from cryptall_2.helpers import (
     bites_sameness_percentage,
     load_file_to_bites,
     sudo_random_array,
-    randomize_d_mod
+    randomize_d_mod,
 )
 
 
@@ -79,10 +84,8 @@ class BaseEncodeDecodeTest:
         file_bites = load_file_to_bites(
             f"{self.test_file_dir}/{self.file_names['txt']}"
         )
-        encoded = self.encode_func(
-            file_bites, self.char_mod, self.d_mod, self.seed)
-        decoded = self.decode_func(
-            encoded, self.char_mod, self.d_mod, self.seed)
+        encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
+        decoded = self.decode_func(encoded, self.char_mod, self.d_mod, self.seed)
         print(file_bites)
         print(encoded)
         print(decoded)
@@ -111,8 +114,7 @@ class BaseEncodeDecodeTest:
 
             # Measure Encoding
             start = time.perf_counter()
-            encoded = self.encode_func(
-                file_bites, self.char_mod, self.d_mod, self.seed)
+            encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
             self._record_perf(
                 file_name, bite_len, time.perf_counter() - start, "Encode"
             )
@@ -146,16 +148,14 @@ class BaseEncodeDecodeTest:
                 ci=None,
                 markers="o",
                 scatter_kws={"s": 150, "alpha": 0.7},
-                line_kws={"linewidth": 2, "color": "red" if op ==
-                          "Encode" else "blue"},
+                line_kws={"linewidth": 2, "color": "red" if op == "Encode" else "blue"},
             )
 
             plt.title(f"{self.alg_name.upper()} - {op} Complexity Analysis")
             plt.xlabel("File Size (MB)")
             plt.ylabel("Time (seconds)")
 
-            save_path = self.test_results_dir / \
-                f"{self.alg_name}_{op}_complexity.pdf"
+            save_path = self.test_results_dir / f"{self.alg_name}_{op}_complexity.pdf"
             plt.savefig(save_path, format="pdf", bbox_inches="tight")
             plt.close()
 
@@ -190,13 +190,11 @@ class BaseEncodeDecodeTest:
         encoded_base = encode_func(file_bites, self.char_mod, self.d_mod, seed)
 
         # Deterministic check
-        encoded_base2 = encode_func(
-            file_bites, self.char_mod, self.d_mod, seed)
+        encoded_base2 = encode_func(file_bites, self.char_mod, self.d_mod, seed)
         self.assertTrue(np.array_equal(encoded_base, encoded_base2))
 
         length = len(file_bites)
-        quarter_indices = [length // 4, length //
-                           2, 3 * length // 4, length - 1]
+        quarter_indices = [length // 4, length // 2, 3 * length // 4, length - 1]
 
         with open(save_path, "w", encoding="utf-8") as f:
             for i, idx in enumerate(quarter_indices, 1):
@@ -215,14 +213,12 @@ class BaseEncodeDecodeTest:
                         self.d_mod,
                         seed + 1 if "rand" in encode_func.__name__ else seed,
                     )
-                    percent = bites_sameness_percentage(
-                        encoded_base, encoded_modified)
+                    percent = bites_sameness_percentage(encoded_base, encoded_modified)
 
                     # Save results to file
                     f.write(f"Quarter {i} change at index {idx}\n")
                     f.write(
-                        f"Original byte: {
-                            original_val}, Modified byte: {new_val}\n"
+                        f"Original byte: {original_val}, Modified byte: {new_val}\n"
                     )
                     f.write(f"Sameness %: {percent}%\n")
                     f.write("-" * 50 + "\n")
@@ -244,21 +240,18 @@ class BaseEncodeDecodeTest:
     def test_execution_time(self):
         """Dynamically tests execution time for the injected algorithm."""
         for file_name in self.file_names.values():
-            file_bites = load_file_to_bites(
-                f"{self.test_file_dir}/{file_name}")
+            file_bites = load_file_to_bites(f"{self.test_file_dir}/{file_name}")
             print(f"\n--- Testing Algorithm: {self.alg_name.upper()} ---")
             print(f"File name: {file_name}")
             print(f"Generated array of size: {file_bites.shape} bytes")
 
             start_time = time.perf_counter()
-            encoded = self.encode_func(
-                file_bites, self.char_mod, self.d_mod, self.seed)
+            encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
             execution_time = time.perf_counter() - start_time
             print(f"Encoded execution_time: {execution_time:.4f}s")
 
             start_time = time.perf_counter()
-            decoded = self.decode_func(
-                encoded, self.char_mod, self.d_mod, self.seed)
+            decoded = self.decode_func(encoded, self.char_mod, self.d_mod, self.seed)
             execution_time = time.perf_counter() - start_time
             print(f"Decoded execution_time: {execution_time:.4f}s")
 
@@ -282,8 +275,7 @@ class BaseEncodeDecodeTest:
         self.assertFalse(np.array_equal(encode_no_noise, encode_with_noise))
 
         digests_no_noise = np.array_split(encode_no_noise, number_of_digests)
-        digests_with_noise = np.array_split(
-            encode_with_noise, number_of_digests)
+        digests_with_noise = np.array_split(encode_with_noise, number_of_digests)
         comparison_lines = []
         for i, (d1, d2) in enumerate(zip(digests_no_noise, digests_with_noise)):
             equal = np.array_equal(d1, d2)
@@ -326,8 +318,7 @@ class BaseEncodeDecodeTest:
 
             # Measure Encoding
             start = time.perf_counter()
-            encoded = self.encode_func(
-                file_bites, self.char_mod, self.d_mod, self.seed)
+            encoded = self.encode_func(file_bites, self.char_mod, self.d_mod, self.seed)
             self._record_perf(
                 file_name, bite_len, time.perf_counter() - start, "Encode"
             )
@@ -361,8 +352,7 @@ class BaseEncodeDecodeTest:
                 ci=None,
                 markers="o",
                 scatter_kws={"s": 150, "alpha": 0.7},
-                line_kws={"linewidth": 2, "color": "red" if op ==
-                          "Encode" else "blue"},
+                line_kws={"linewidth": 2, "color": "red" if op == "Encode" else "blue"},
             )
 
             plt.title(f"{self.alg_name.upper()} - {op} Complexity Analysis")
@@ -370,8 +360,7 @@ class BaseEncodeDecodeTest:
             plt.ylabel("Time (seconds)")
 
             save_path = (
-                Path(self.test_results_dir) /
-                f"{self.alg_name}_{op}_complexity.pdf"
+                Path(self.test_results_dir) / f"{self.alg_name}_{op}_complexity.pdf"
             )
 
             plt.savefig(save_path, format="pdf", bbox_inches="tight")
@@ -402,6 +391,7 @@ class TestF8Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod"
 
+
 class Test_F8MULT_BASED_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -412,6 +402,7 @@ class Test_F8MULT_BASED_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod_mult_based"
 
+
 class Test_F8_ADDITION_BASED_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -421,6 +412,7 @@ class Test_F8_ADDITION_BASED_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         self.test_results_dir = "./tests/test_results_f8_addition_based/"
         Path(self.test_results_dir).mkdir(parents=True, exist_ok=True)
         self.alg_name = "f8_mod_addition_based"
+
 
 class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
     def setUp(self):
@@ -437,7 +429,6 @@ class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
             "img": "img.jpg",
             "vid": "vid_27mb.mp4",
         }
-
 
     @unittest.skip("This specific test is not applicable for SUDO512MOD")
     def test_encode_decode_dmod0():
@@ -456,6 +447,8 @@ class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
         precompute_sudo512_mod()
         mul_sudo512_mod = load_sudo512_mod("multiplication_table/mod_256_sudo512.npy")
         print(mul_sudo512_mod)
+
+
 #
 # class TestRingAlgorithm(BaseEncodeDecodeTest, unittest.TestCase):
 #     def setUp(self):
@@ -468,6 +461,48 @@ class TestSUDO512MOD_Algorithm(BaseEncodeDecodeTest, unittest.TestCase):
 #         self.alg_name = "ring"
 
 
+class TestPublicKey(unittest.TestCase):
+    def setUp(self):
+        self.d_mod = 128
+        self.encode_key = 50
+        self.test_file_dir = Path("./tests/test_files/")
+        self.test_results_dir = Path("./tests/test_results/")
+        self.file_names = {
+            "txt": "data2.txt",
+            "img": "img.jpg",
+            "vid": "vid_27mb.mp4",
+            "csv": "csv_100mb.csv",
+        }
+
+    def test_encode_decode_consistency(self):
+        """Test that encoding followed by decoding restores the original bites."""
+        file_bites = load_file_to_bites(
+            f"{self.test_file_dir}/{self.file_names['txt']}"
+        )
+        encoded, public_key = encode_bites_f8_mult_based_publickey(
+            file_bites, self.d_mod, self.encode_key
+        )
+        decoded = decode_bites_f8_mult_based_publickey(
+            encoded, public_key 
+        )
+        self.assertTrue(np.array_equal(file_bites, decoded))
+
+    def test_encode_decode_consistency_MODIFIFIED_KEY(self):
+        """Test that encoding followed by decoding restores the original bites."""
+        file_bites = load_file_to_bites(
+            f"{self.test_file_dir}/{self.file_names['txt']}"
+        )
+        encoded, public_key = encode_bites_f8_mult_based_publickey(
+            file_bites, self.d_mod, self.encode_key
+        )
+        if public_key[0] != 0:
+            public_key[0] = 0
+        decoded = decode_bites_f8_mult_based_publickey(
+            encoded, public_key 
+        )
+        self.assertFalse(np.array_equal(file_bites, decoded))
+
+
 # NOTE: HELPER / MATH TESTS (Completely separated from encoding tests)
 
 
@@ -475,7 +510,6 @@ class TestHelpers(unittest.TestCase):
     def setUp(self):
         self.d_mod = 128
         self.seed = 50
-
 
     def test_randomized_d_mod_changes_order(self):
         """Check that randomize_d_mod changes the default sequence."""
@@ -485,22 +519,19 @@ class TestHelpers(unittest.TestCase):
 
     def test_insert_rand_array(self):
         random_array_length = 3
-        random_array = sudo_random_array(
-            random_array_length, 256, self.seed, np.uint8)
+        random_array = sudo_random_array(random_array_length, 256, self.seed, np.uint8)
         original_arr = [1, 2, 4]
         new_arr = np.append(random_array, original_arr)
 
         self.assertEqual(len(new_arr) - 3, random_array_length)
-        self.assertTrue(np.array_equal(
-            original_arr, new_arr[random_array_length:]))
-
+        self.assertTrue(np.array_equal(original_arr, new_arr[random_array_length:]))
 
     def test_compera_precompute_functions_gf256(self):
         gf256_explicit_poly = load_gf256_explicit_poly()
         gf256 = load_gf256()
         print(gf256_explicit_poly)
         print(gf256)
-        self.assertTrue(np.array_equal(load_gf256_explicit_poly(),load_gf256()))
+        self.assertTrue(np.array_equal(load_gf256_explicit_poly(), load_gf256()))
 
 
 if __name__ == "__main__":

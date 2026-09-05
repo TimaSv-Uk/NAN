@@ -21,7 +21,8 @@ This is a symmetric-key scheme — same secret unlocks both directions, structur
 
 
 # TODO TODAY:
-- in polinomial out formula that allows only to encode, (public key concept)
+**NOW TEST**
++ in polinomial out formula that allows only to encode, (public key concept)
     1. key(seed) to encode and decode must be difirent
         IDEA: encode operatin shoul return encoded bites with decode key,
         that person that shares encoded content will give to decoder
@@ -47,4 +48,7 @@ or
 
 ### Reson why 
 This means decode's correctness depends on decode() walking through the same d_mod_range sequence that encode() used (just in reverse, computing inverses as it goes) — it's inverting each a value, not inverting "the key." So if you call randomize_d_mod(d_mod, decode_key) with a different key than encode used, you get a completely different d_mod_range sequence, whose element-wise inverses have no relationship to encode's actual a values. It won't decode correctly — not because the key math is wrong, but because the algorithm was never designed to take "a different but related sequence" as input; it expects the same sequence.
+
+
+
 
